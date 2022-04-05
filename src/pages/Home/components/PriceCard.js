@@ -6,10 +6,11 @@ const useStyles = makeStyles((theme) => ({
   card: {
     height: 130,
     width: 250,
-    border: "1px solid #212121",
+    border: "1px solid #eeeeee",
     padding: 10,
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
+    // filter: "drop-shadow(0 0 0.75rem rgba(0, 0, 0, 0.13))",
     borderRadius: 10,
   },
   cardTitle: {
@@ -46,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function PriceCard() {
+export default function PriceCard({ data }) {
   const classes = useStyles();
 
   return (
@@ -54,25 +55,37 @@ export default function PriceCard() {
       <Box>
         <Box display="flex" justifyContent="flex-start">
           <Box>
-            <img
-              src="https://polkawar.com/assets/logo.png"
-              height="30px"
-              style={{ paddingRight: 5 }}
-            />
+            <div
+              style={{
+                backgroundColor: data.backgroundColor,
+                borderRadius: "50%",
+                height: "44px",
+                width: "44px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <img src={data.logo} height="30px" />
+            </div>
           </Box>
 
-          <Box>
+          <Box pl={2}>
             <Typography variant="title" className={classes.cardTitle}>
-              PolkaWar
+              {data.name}
             </Typography>
-            <Typography variant="subtitle2" className={classes.subtitle}>
-              PWAR/INR
+            <Typography
+              variant="subtitle2"
+              className={classes.subtitle}
+              style={{ color: data.color }}
+            >
+              {data.token}/INR
             </Typography>
           </Box>
         </Box>
-        <Box mt={2}>
+        <Box mt={2} pl={2}>
           <Typography variant="subtitle2" className={classes.price}>
-            44,236 INR
+            {data.price} INR
           </Typography>
           <Typography variant="subtitle2" className={classes.text}>
             Available Market Price
