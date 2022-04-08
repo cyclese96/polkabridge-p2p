@@ -9,6 +9,7 @@ import { Web3Provider } from "@ethersproject/providers";
 import { Web3ReactProvider } from "@web3-react/core";
 import Appbar from "./common/Appbar";
 import { Container } from "@mui/material";
+import Profile from "./pages/Profile/Profile";
 
 function getLibrary(provider) {
   const library = new Web3Provider(provider);
@@ -26,6 +27,7 @@ function App() {
             <Router>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
               </Routes>
             </Router>
           </Container>

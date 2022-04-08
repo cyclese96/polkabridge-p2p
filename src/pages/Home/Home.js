@@ -1,7 +1,7 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
 import PriceCard from "./components/PriceCard";
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   filterCard: {
@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Home() {
   const classes = useStyles();
+  const theme = useTheme();
 
   let tokenData = [
     {
