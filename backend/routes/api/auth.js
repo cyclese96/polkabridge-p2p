@@ -17,40 +17,50 @@ const { getToken } = require("../../_helpers/password-service");
 // @access PUBLIC
 router.get("/__test", (req, res) => res.send("auth routes working :)"));
 
-app.get("/auth/:MetaAddress", metaAuth, (req, res) => {
+router.get("/auth/:MetaAddress", metaAuth, (req, res) => {
   // Request a challenge from the server
+  console.log("requesting auth challenge ", {
+    mauth: req.metaAuth,
+    account: req.params.MetaAddress,
+  });
   if (req.metaAuth && req.metaAuth.challenge) {
     res.send(req.metaAuth.challenge);
   }
 });
 
-app.get("/auth/:MetaMessage/:MetaSignature", metaAuth, async (req, res) => {
-  if (req.metaAuth && req.metaAuth.recovered) {
-    // Signature matches the cache address/challenge
-    // Authentication is valid, assign JWT, etc.
-    const userAddress = req.metaAuth.recovered?.toLowerCase();
-    let user = await User.findOne({ wallet_address: userAddress });
+router.get("/auth/:MetaMessage/:MetaSignature", metaAuth, async (req, res) => {
+  console.log("requesting verify user", { mauth: req.metaAuth });
+  try {
+    if (req.metaAuth && req.metaAuth.recovered) {
+      // Signature matches the cache address/challenge
+      // Authentication is valid, assign JWT, etc.
+      const userAddress = req.metaAuth.recovered?.toLowerCase();
+      let user = await User.findOne({ wallet_address: userAddress });
 
-    if (!user) {
-      user = new User({
-        wallet_address: userAddress,
-      });
+      if (!user) {
+        user = new User({
+          wallet_address: userAddress,
+        });
 
-      await user.save();
+        await user.save();
+      }
+
+      const jwtPayload = {
+        user: {
+          id: user.id,
+          address: user.wallet_address,
+        },
+      };
+      const jwtToken = await getToken(jwtPayload);
+
+      res.send({ recovered: req.metaAuth.recovered, token: jwtToken });
+    } else {
+      // Sig did not match, invalid authentication
+      res.status(401).send();
     }
-
-    const jwtPayload = {
-      user: {
-        id: user.id,
-        address: user.wallet_address,
-      },
-    };
-    const jwtToken = await getToken(jwtPayload);
-
-    res.send({ recovered: req.metaAuth.recovered, token: jwtToken });
-  } else {
-    // Sig did not match, invalid authentication
-    res.status(400).send();
+  } catch (error) {
+    console.log("route error ", error);
+    res.status(401).send(error);
   }
 });
 

@@ -1,7 +1,14 @@
-import React from "react";
 import { Box, Container, Button, Typography, Avatar } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Link } from "react-router-dom";
+import React, { useCallback, useEffect } from "react";
+import { makeStyles } from "@mui/styles";
+import { border } from "@mui/system";
+import useActiveWeb3React from "../hooks/useActiveWeb3React";
+import connectors from "../connections/connectors";
+import { connect } from "react-redux";
+import { requestChalleng } from "../actions/userActions";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -45,10 +52,52 @@ const useStyles = makeStyles((theme) => ({
       width: 150,
     },
   },
+  numbers: {
+    color: "#f9f9f9",
+    fontSize: 14,
+  },
 }));
 
-const Appbar = () => {
+const Appbar = ({ requestChalleng }) => {
   const classes = useStyles();
+
+  const { active, deactivate, activate, account, library } =
+    useActiveWeb3React();
+
+  const handleWallet = useCallback(() => {
+    console.log("wallet clickeed");
+    activate(connectors.injected);
+  }, [activate]);
+  useEffect(() => {
+    if (!account) {
+      return;
+    }
+
+    async function signAndVerify() {
+      let challengeRes = await axios.get(
+        `http://localhost:5000/auth/${account?.toLowerCase()}`
+      );
+      challengeRes = challengeRes.data;
+      const challenge = challengeRes?.[1]?.value;
+      let signedMessage;
+      try {
+        signedMessage = await library.getSigner(0).signMessage(challenge);
+      } catch (error) {
+        console.log("signed message error ", error);
+      }
+
+      if (!signedMessage) {
+        return;
+      }
+
+      const verify = await axios.get(
+        `http://localhost:5000/auth/${challenge}/${signedMessage}`
+      );
+
+      console.log("user verified ", { signedMessage, challenge, verify });
+    }
+    signAndVerify();
+  }, [account]);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>
@@ -156,4 +205,8 @@ const Appbar = () => {
   );
 };
 
-export default Appbar;
+const mapStateToProps = (state) => ({
+  user: state.user,
+});
+
+export default connect(mapStateToProps, { requestChalleng })(Appbar);
