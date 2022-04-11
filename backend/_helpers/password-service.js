@@ -16,7 +16,7 @@ const verifyPasswordHash = async (password, passwordHash) => {
 
 const getToken = async (payload) => {
   const token = await jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "5 days",
+    expiresIn: "1 days",
   });
 
   return token;
