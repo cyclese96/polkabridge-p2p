@@ -8,16 +8,16 @@ import "./ReentrancyGuard.sol";
 
 contract P2PExchange is Ownable, ReentrancyGuard {
 
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     struct UserInfo {
         uint256 amount;
         uint256 depositedTime;
     }
 
-    mapping(address => mapping(address => UserInfo)) users; // user address => token address => amount
+    mapping(address => mapping(address => UserInfo)) public users; // user address => token address => amount
     address public WETH;
-    address[] tokenList;
+    address[] public  tokenList;
     uint256 public fee;
 
     event Deposit(address indexed _from, address indexed _token, uint256 _amount);
@@ -33,28 +33,28 @@ contract P2PExchange is Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    function existTokenInPool(address _token) internal view returns(bool) {
+    function existTokenInPool(address _token) public view returns(bool) {
         bool exist = IERC20(_token).balanceOf(address(this)) > 0 ? true : false;
         return exist;
     }
 
-    function deposit(address _token, uint256 _amount) external {
+    function depositToken(address _token, uint256 _amount) external {
         require(_token != address(0) && _amount > 0, "invalid token or amount");
-        IERC20(_token).transfer(address(this), _amount);
-        UserInfo storage user = users[msg.sender][_token];
-        user.amount = _amount.mul((100-fee)/100);
-        user.depositedTime = block.timestamp;
+        IERC20(_token).transferFrom(msg.sender, address(this), _amount);
+        // UserInfo storage user = users[msg.sender][_token];
+        users[msg.sender][_token].amount = _amount.mul(100-fee).div(100);
+        users[msg.sender][_token].depositedTime = block.timestamp;
         if (!existTokenInPool(_token))
             tokenList.push(_token);
 
         emit Deposit(msg.sender, _token, _amount);
     }
 
-    function transfer(address _dst, address _token, uint256 _amount) external {
-        UserInfo storage user = users[msg.sender][_token];
-        require(user.amount >= _amount && _amount > 0, "no permission");
-        IERC20(_token).transferFrom(address(this), _dst, _amount);
-        user.amount -= _amount;
+    function transferToken(address _dst, address _token, uint256 _amount) external {
+        // UserInfo storage user = users[msg.sender][_token];
+        require(users[msg.sender][_token].amount >= _amount && _amount > 0, "no permission");
+        IERC20(_token).transfer(_dst, _amount);
+        users[msg.sender][_token].amount -= _amount;
 
         emit Transfer(address(this), _dst, _token, _amount);
     }
@@ -85,6 +85,13 @@ contract P2PExchange is Ownable, ReentrancyGuard {
         uint256 balance = IERC20(_token).balanceOf(address(this));
         require(balance > 0, "not enough amount");
         IERC20(_token).transfer(msg.sender, balance);
+    }
+
+    // withdraw ETH
+    function withdrawETH() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "not enough amount");
+        payable(msg.sender).transfer(balance);
     }
 
     // withdraw all
