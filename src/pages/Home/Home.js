@@ -1,7 +1,7 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
 import PriceCard from "./components/PriceCard";
-import { Box, useTheme } from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
   filterCard: {
@@ -10,7 +10,8 @@ const useStyles = makeStyles((theme) => ({
     height: 200,
     width: "100%",
     border: "1px solid #eeeeee",
-    padding: 10,
+    padding: 20,
+    paddingTop: 30,
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
@@ -42,6 +43,17 @@ const useStyles = makeStyles((theme) => ({
   otherText: {
     fontSize: 14,
     fontWeight: 400,
+  },
+  orderTab: {
+    backgroundColor: "#EEEEEE",
+    padding: "5px 15px 5px 15px",
+    fontWeight: 600,
+  },
+  orderTabSelected: {
+    backgroundColor: "#DF097C",
+    padding: "5px 15px 5px 15px",
+    color: "white",
+    fontWeight: 600,
   },
 }));
 
@@ -96,7 +108,57 @@ export default function Home() {
         })}
       </div>
       <Box p={2}>
-        <div className={classes.filterCard}>Buy and Sell card</div>
+        <div className={classes.filterCard}>
+          {" "}
+          <Box display="flex" justifyContent="center" alignItems="center">
+            <div className={classes.orderTab}>Pending</div>
+            <div className={classes.orderTabSelected}>Completed</div>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            mt={3}
+          >
+            <Box px={2}>
+              <select class="form-select" aria-label="Default select example">
+                <option selected>All Tokens</option>
+                <option value="1">BTC</option>
+                <option value="2">ETH</option>
+                <option value="3">PBR</option>
+              </select>
+            </Box>
+            <Box px={2}>
+              <select class="form-select" aria-label="Default select example">
+                <option selected>All Type</option>
+                <option value="1">Buy</option>
+                <option value="2">Sell</option>
+              </select>
+            </Box>
+            <Box px={2}>
+              <select class="form-select" aria-label="Default select example">
+                <option selected>All Payments</option>
+                <option value="1">UPI</option>
+                <option value="2">Online</option>
+                <option value="3">Cash</option>
+              </select>
+            </Box>
+
+            <div className="px-2">
+              <Button
+                style={{
+                  borderRadius: 10,
+                  backgroundColor: "#E0077D",
+                  padding: "5px 20px 5px 20px",
+
+                  color: "white",
+                }}
+              >
+                Find Orders
+              </Button>
+            </div>
+          </Box>
+        </div>
       </Box>
 
       <h5 style={{ paddingLeft: 10 }}>Market Orders</h5>

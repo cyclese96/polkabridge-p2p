@@ -118,7 +118,6 @@ function ProfileInfo() {
         </div>
         <div class="text-center mt-3">
           <Button
-            variant="contained"
             style={{
               borderRadius: 10,
               backgroundColor: "#E0077D",

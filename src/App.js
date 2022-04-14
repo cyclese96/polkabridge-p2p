@@ -11,6 +11,8 @@ import Appbar from "./common/Appbar";
 import { Container } from "@mui/material";
 import Profile from "./pages/Profile/Profile";
 import MyOrders from "./pages/MyOrders/MyOrders";
+import CreateOrder from "./pages/Orders/CreateOrder";
+import OrderPlaced from "./pages/Orders/OrderPlaced";
 
 function getLibrary(provider) {
   const library = new Web3Provider(provider);
@@ -29,6 +31,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/create-order" element={<CreateOrder />} />
+                <Route path="/order-placed" element={<OrderPlaced />} />
                 <Route path="/my-orders" element={<MyOrders />} />
               </Routes>
             </Router>
