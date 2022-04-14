@@ -17,13 +17,7 @@ console.log("env ", { url: process.env.DB_URL, db: process.env.DB });
 
 // routes
 
-const MetaAuth = require("meta-auth");
-
 // middleware
-
-const metaAuth = new MetaAuth({
-  banner: "Polkabridge P2P",
-});
 
 //models
 const User = require("./models/User");

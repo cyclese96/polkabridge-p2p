@@ -9,6 +9,7 @@ import connectors from "../connections/connectors";
 import { connect } from "react-redux";
 import { requestChalleng } from "../actions/userActions";
 import axios from "axios";
+import Web3 from "web3";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -74,27 +75,27 @@ const Appbar = ({ requestChalleng }) => {
     }
 
     async function signAndVerify() {
-      let challengeRes = await axios.get(
-        `http://localhost:5000/auth/${account?.toLowerCase()}`
-      );
-      challengeRes = challengeRes.data;
-      const challenge = challengeRes?.[1]?.value;
-      let signedMessage;
+      const web3 = new Web3(window.ethereum);
+      let messageHash, signature;
       try {
-        signedMessage = await library.getSigner(0).signMessage(challenge);
+        messageHash = web3.utils.sha3("Hello ethereum");
+
+        signature = await web3.eth.sign(messageHash, account);
       } catch (error) {
         console.log("signed message error ", error);
       }
 
-      if (!signedMessage) {
+      if (!signature) {
         return;
       }
 
       const verify = await axios.get(
-        `http://localhost:5000/auth/${challenge}/${signedMessage}`
+        `http://localhost:5002/api/auth/v1/signatureVerify/${messageHash}/${signature}/${account?.toLowerCase()}`
       );
 
-      console.log("user verified ", { signedMessage, challenge, verify });
+      console.log("user verified ", {
+        verify: verify.data,
+      });
     }
     signAndVerify();
   }, [account]);
