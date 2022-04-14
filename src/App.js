@@ -10,6 +10,7 @@ import { Web3ReactProvider } from "@web3-react/core";
 import Appbar from "./common/Appbar";
 import { Container } from "@mui/material";
 import Profile from "./pages/Profile/Profile";
+import MyOrders from "./pages/MyOrders/MyOrders";
 
 function getLibrary(provider) {
   const library = new Web3Provider(provider);
@@ -23,11 +24,12 @@ function App() {
       <ThemeProvider theme={theme}>
         <Fragment>
           <Container>
-            <Appbar />
             <Router>
+              <Appbar />
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/my-orders" element={<MyOrders />} />
               </Routes>
             </Router>
           </Container>

@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Container, Button, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { border } from "@mui/system";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -79,36 +80,44 @@ const Appbar = () => {
                 >
                   Home
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  className={classes.linkItems}
-                  style={{
-                    color: "black",
-                  }}
-                >
-                  Create Order
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  className={classes.linkItems}
-                  style={{
-                    color: "black",
-                  }}
-                >
-                  My Orders
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  className={classes.linkItems}
-                  style={{
-                    color: "black",
-                  }}
-                >
-                  Profile
-                </Typography>
+                <Link to="/create" style={{ textDecoration: "none" }}>
+                  {" "}
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    className={classes.linkItems}
+                    style={{
+                      color: "black",
+                    }}
+                  >
+                    Create Order
+                  </Typography>
+                </Link>
+                <Link to="/my-orders" style={{ textDecoration: "none" }}>
+                  {" "}
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    className={classes.linkItems}
+                    style={{
+                      color: "black",
+                    }}
+                  >
+                    My Orders
+                  </Typography>
+                </Link>
+                <Link to="/profile" style={{ textDecoration: "none" }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    className={classes.linkItems}
+                    style={{
+                      color: "black",
+                    }}
+                  >
+                    Profile
+                  </Typography>
+                </Link>
                 <div>
                   <Button
                     onClick={null}
