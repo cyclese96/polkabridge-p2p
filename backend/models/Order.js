@@ -14,21 +14,27 @@ const OrderSchema = new Schema({
     type: Number,
     required: true,
   },
+  token_deposited: {
+    type: Number,
+  },
   pending_amount: {
     type: Number,
-    required: true,
   },
-  from_token: {
+  token: {
     type: Schema.Types.ObjectId,
     ref: "tokens",
   },
-  to_fiat: {
+  fiat: {
     type: Schema.Types.ObjectId,
     ref: "fiat_currencies",
   },
   order_unit_price: {
     type: Number,
     required: true,
+  },
+  order_status: {
+    type: String,
+    default: "submitted", // submitted/ active/ completed / cancelled
   },
   created_at: {
     type: Date,

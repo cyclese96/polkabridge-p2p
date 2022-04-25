@@ -2,16 +2,19 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TokenSchema = new Schema({
-  namee: {
-    type: String,
-  },
-  address: {
+  name: {
     type: String,
   },
   symbol: {
     type: String,
   },
-  chain_id: {
+  address: {
+    type: String,
+  },
+  chainId: {
+    type: Number,
+  },
+  decimals: {
     type: Number,
   },
   logoUri: {

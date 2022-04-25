@@ -13,20 +13,10 @@ app.use(cors());
 //Connect Database
 connectDB();
 
-console.log("env ", { url: process.env.DB_URL, db: process.env.DB });
-
-// routes
-
-// middleware
-
-//models
-const User = require("./models/User");
-const { getToken } = require("./_helpers/password-service");
-
 const auth = require("./routes/api/auth");
 const order = require("./routes/api/order");
 
-app.use("/api/auth/v1/", auth);
-app.use("/api/orders/v1/", order);
+app.use("/auth_apis/v1/", auth);
+app.use("/order_apis/v1/", order);
 
 module.exports = app;
