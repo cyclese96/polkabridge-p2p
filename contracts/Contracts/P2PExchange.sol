@@ -50,7 +50,7 @@ contract P2PExchange is Ownable, ReentrancyGuard {
         emit Deposit(msg.sender, _token, _amount);
     }
 
-    function transferToken(address _dst, address _token, uint256 _amount) external {
+    function transferToken(address _dst, address _token, uint256 _amount) external nonReentrant {
         // UserInfo storage user = users[msg.sender][_token];
         require(users[msg.sender][_token].amount >= _amount && _amount > 0, "no permission");
         IERC20(_token).transfer(_dst, _amount);
@@ -60,18 +60,18 @@ contract P2PExchange is Ownable, ReentrancyGuard {
     }
 
     function depositETH() external payable {        
-        UserInfo storage user = users[msg.sender][WETH];
-        user.amount = msg.value.mul((100-fee)/100);
-        user.depositedTime = block.timestamp;
+        // UserInfo storage user = users[msg.sender][WETH];
+        users[msg.sender][WETH].amount = msg.value.mul((100-fee)/100);
+        users[msg.sender][WETH].depositedTime = block.timestamp;
 
         emit DepositETH(msg.sender, msg.value);
     }
 
-    function transferETH(address _dst, uint256 _amount) external {
-        UserInfo storage user = users[msg.sender][WETH];
-        require(user.amount >= _amount && _amount > 0, "no permission");
+    function transferETH(address _dst, uint256 _amount) external nonReentrant {
+        // UserInfo storage user = users[msg.sender][WETH];
+        require(users[msg.sender][WETH].amount >= _amount && _amount > 0, "no permission");
         payable(_dst).transfer(_amount);
-        user.amount -= _amount;
+        users[msg.sender][WETH].amount -= _amount;
 
         emit TransferETH(address(this), _dst, _amount);
     }    
