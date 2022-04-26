@@ -7,83 +7,57 @@ let themes = createTheme({
       disabledBackground: "rgba(209, 255, 26, 0.3)",
     },
     primary: {
-      // light: '#000000',
-      main: "#D1FF1A",
-      // dark: '#cccccc',
-      contrastText: "#000000",
-    },
-    secondary: {
-      // light: '#ffffff',
-      main: "#000000",
-      // dark: '#ffffff',
-      contrastText: "#ffffff",
+      main: "#6A55EA",
+      hover: "rgba(70, 56, 160,1)",
     },
     text: {
-      primary: "#000000",
-      secondary: "#ffffff",
+      primary: "#212121",
+      secondary: "#414141",
     },
     background: {
-      default: "#F4F4F4",
-      footerGrey: "#D7D7D7",
-    },
-    pink: {
-      main: "#FF43CA",
-      light: "#FFEAF9",
-    },
-    lightGreen: {
-      main: "#E7FFDC",
-    },
-
-    columbiaBlue: {
-      main: "#B0FFFA",
-    },
-    cyan: {
-      main: "#2BFFF2",
-    },
-    onahauBlue: {
-      main: "#C3FFFB",
+      main: "#6A55EA",
     },
   },
   typography: {
-    fontFamily: "Work Sans, Roboto, sans-serif",
+    fontFamily: "Poppins, Roboto, sans-serif",
     h1: {
-      fontFamily: "Work Sans",
-      fontSize: "2.813rem",
+      fontFamily: "Poppins",
+      fontSize: "3rem",
     },
     h2: {
-      fontFamily: "Work Sans",
-      fontSize: "2.1875rem",
+      fontFamily: "Poppins",
+      fontSize: "2.4rem",
     },
     h3: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.75rem",
     },
     h4: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.75rem",
       fontWeight: "bold",
     },
     h5: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.5rem",
       fontWeight: "bold",
     },
     h6: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.375rem",
       fontWeight: "normal",
     },
     subtitle1: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.25rem",
       fontWeight: "bold",
     },
     body1: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1.125rem",
     },
     body2: {
-      fontFamily: "Work Sans",
+      fontFamily: "Poppins",
       fontSize: "1rem",
     },
   },

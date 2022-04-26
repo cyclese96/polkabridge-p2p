@@ -25,18 +25,16 @@ function App() {
     <Web3ReactProvider getLibrary={getLibrary}>
       <ThemeProvider theme={theme}>
         <Fragment>
-          <Container>
-            <Router>
-              <Appbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/create-order" element={<CreateOrder />} />
-                <Route path="/order-placed" element={<OrderPlaced />} />
-                <Route path="/my-orders" element={<MyOrders />} />
-              </Routes>
-            </Router>
-          </Container>
+          <Router>
+            <Appbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/create-order" element={<CreateOrder />} />
+              <Route path="/order-placed" element={<OrderPlaced />} />
+              <Route path="/my-orders" element={<MyOrders />} />
+            </Routes>
+          </Router>
         </Fragment>
       </ThemeProvider>
     </Web3ReactProvider>

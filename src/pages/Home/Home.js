@@ -1,59 +1,86 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@mui/styles";
-import PriceCard from "./components/PriceCard";
-import { Box, Button, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import OrderTable from "./components/OrderTable";
+import HowItWorks from "../../common/HowItWorks";
+import Footer from "../../common/Footer";
 
 const useStyles = makeStyles((theme) => ({
+  background: {
+    backgroundImage: 'url("images/network.png")',
+    backgroundPosition: "center center",
+    backgroundSize: "cover",
+    height: "100%",
+    width: "100%",
+    paddingTop: "10%",
+  },
+  mainHeading: {
+    fontWeight: 600,
+    fontSize: 48,
+    letterSpacing: "0.02em",
+    color: "#212121",
+    textAlign: "center",
+    [theme.breakpoints.down("md")]: {
+      color: "#212121",
+    },
+  },
+  para: {
+    fontWeight: 400,
+    fontSize: 16,
+    letterSpacing: "0.02em",
+    color: "#414141",
+    textAlign: "center",
+  },
+
+  buttonWrapper: {
+    display: "flex",
+    justifyContent: "center",
+  },
+  buttonFirst: {
+    width: "fit-content",
+    color: "#212121",
+    backgroundColor: "#eeeeee",
+    padding: "12px 50px 12px 50px",
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+  },
+  buttonSecond: {
+    width: "fit-content",
+    color: "white",
+    backgroundColor: "#6A55EA",
+    padding: "12px 50px 12px 50px",
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+  },
   filterCard: {
     marginTop: 20,
     marginBottom: 20,
-    height: 200,
-    width: "100%",
-    border: "1px solid #eeeeee",
-    padding: 20,
-    paddingTop: 30,
-    backgroundColor: "#FFFFFF",
-    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
-    borderRadius: 10,
-  },
-  tableCard: {
-    width: "100%",
     height: "100%",
-    width: "100%",
+    width: "80%",
     border: "1px solid #eeeeee",
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 15,
-    paddingRight: 15,
+
+    paddingTop: 30,
+    paddingBottom: 30,
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
   },
-  table: {
-    width: "100%",
-  },
-  tr: {
-    width: "100%",
-  },
-  userText: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: "#345AE7",
-  },
-  otherText: {
-    fontSize: 14,
+  cardTitle: {
     fontWeight: 400,
-  },
-  orderTab: {
-    backgroundColor: "#EEEEEE",
-    padding: "5px 15px 5px 15px",
-    fontWeight: 600,
-  },
-  orderTabSelected: {
-    backgroundColor: "#DF097C",
-    padding: "5px 15px 5px 15px",
-    color: "white",
-    fontWeight: 600,
+    fontSize: 16,
+    letterSpacing: "0.02em",
+    color: "#414141",
+    textAlign: "left",
   },
 }));
 
@@ -61,169 +88,141 @@ export default function Home() {
   const classes = useStyles();
   const theme = useTheme();
 
-  let tokenData = [
-    {
-      name: "Bitcoin",
-      price: "36,34,345",
-      token: "BTC",
-      backgroundColor: "#F7931A",
-      color: "#F7931A",
-      logo: "https://s2.coinmarketcap.com/static/img/coins/200x200/1.png",
-    },
-    {
-      name: "Ethereum",
-      price: "6,34,345",
-      token: "ETH",
-      backgroundColor: "#627EEA",
-      color: "#627EEA",
-      logo: "https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Ethereum-ETH-icon.png",
-    },
-    {
-      name: "PolkaBridge",
-      price: "54",
-      token: "PBR",
-      backgroundColor: "#e5e5e5",
-      color: "#E0077D",
-      logo: "https://polkabridge.org/images/symbol.png",
-    },
-    {
-      name: "PolkaWar",
-      price: "07",
-      token: "PWAR",
-      backgroundColor: "#e5e5e5",
-      color: "#7D0445",
-      logo: "https://polkawar.com/assets/logo.png",
-    },
-  ];
+  const [fiat, setFiat] = useState("INR");
+  const [token, setToken] = useState("BTC");
+  const [payment, setPayment] = useState("Google Pay");
+
   return (
-    <Box p={2} pt={4}>
-      <h5 style={{ paddingLeft: 10 }}>Top Pools</h5>
-      <div className="d-flex justify-content-start">
-        {tokenData.map((singleData) => {
-          return (
-            <Box p={2}>
-              <PriceCard data={singleData} />
-            </Box>
-          );
-        })}
-      </div>
-      <Box p={2}>
-        <div className={classes.filterCard}>
-          {" "}
-          <Box display="flex" justifyContent="center" alignItems="center">
-            <div className={classes.orderTab}>Pending</div>
-            <div className={classes.orderTabSelected}>Completed</div>
+    <Box>
+      <Box className={classes.background}>
+        <h1 variant="h1" className={classes.mainHeading}>
+          Trade Tokens <br />
+          With Decentralized P2P
+        </h1>
+        <Typography variant="body2" className={classes.para}>
+          Experience first decentralized P2P trading with PolkaBridge
+        </Typography>
+
+        <Container style={{ marginTop: 100 }}>
+          <Box className={classes.buttonWrapper}>
+            <Box className={classes.buttonFirst}>Buy</Box>
+            <Box className={classes.buttonSecond}>Sell</Box>
           </Box>
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            mt={3}
-          >
-            <Box px={2}>
-              <select class="form-select" aria-label="Default select example">
-                <option selected>All Tokens</option>
-                <option value="1">BTC</option>
-                <option value="2">ETH</option>
-                <option value="3">PBR</option>
-              </select>
-            </Box>
-            <Box px={2}>
-              <select class="form-select" aria-label="Default select example">
-                <option selected>All Type</option>
-                <option value="1">Buy</option>
-                <option value="2">Sell</option>
-              </select>
-            </Box>
-            <Box px={2}>
-              <select class="form-select" aria-label="Default select example">
-                <option selected>All Payments</option>
-                <option value="1">UPI</option>
-                <option value="2">Online</option>
-                <option value="3">Cash</option>
-              </select>
-            </Box>
-
-            <div className="px-2">
-              <Button
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: "#E0077D",
-                  padding: "5px 20px 5px 20px",
-
-                  color: "white",
-                }}
+          <div className="d-flex justify-content-center">
+            <div className={classes.filterCard}>
+              <Box
+                display="flex"
+                justifyContent="space-around"
+                alignItems="center"
+                mt={3}
               >
-                Find Orders
-              </Button>
-            </div>
-          </Box>
-        </div>
-      </Box>
+                <Box px={2}>
+                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id="demo-simple-select-standard-label">
+                      Fiat
+                    </InputLabel>
 
-      <h5 style={{ paddingLeft: 10 }}>Market Orders</h5>
-      <Box p={2}>
-        <Box className={classes.tableCard}>
-          <table className={classes.table}>
-            <tr className={classes.tr}>
-              <th>User</th>
-              <th>Amount</th>
-              <th>Price</th>
-              <th>Payment Method</th>
-              <th>Publish Date</th>
-              <th>Actions</th>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>Paytm</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-          </table>
-        </Box>
+                    <Select
+                      variant="standard"
+                      disableUnderline={true}
+                      value={fiat}
+                      label="Age"
+                      style={{
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        color: "#212121",
+                      }}
+                      onChange={(e) => setFiat(e.target.value)}
+                    >
+                      <MenuItem value={"INR"}>INR</MenuItem>
+                      <MenuItem value={"USD"}>USD</MenuItem>
+                      <MenuItem value={"SGP"}>SGP</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+                <div
+                  style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                ></div>
+                <Box px={2}>
+                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id="demo-simple-select-standard-label">
+                      Token
+                    </InputLabel>
+
+                    <Select
+                      variant="standard"
+                      disableUnderline={true}
+                      value={token}
+                      label="Age"
+                      style={{
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        color: "#212121",
+                      }}
+                      onChange={(e) => setToken(e.target.value)}
+                    >
+                      <MenuItem value={"BTC"}>BTC</MenuItem>
+                      <MenuItem value={"ETH"}>ETH</MenuItem>
+                      <MenuItem value={"PBR"}>PBR</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+                <div
+                  style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                ></div>
+                <Box px={2}>
+                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id="demo-simple-select-standard-label">
+                      Payment Mode
+                    </InputLabel>
+
+                    <Select
+                      variant="standard"
+                      disableUnderline={true}
+                      value={payment}
+                      label="Age"
+                      style={{
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        color: "#212121",
+                      }}
+                      onChange={(e) => setPayment(e.target.value)}
+                    >
+                      <MenuItem value={"Google Pay"}>Google Pay</MenuItem>
+                      <MenuItem value={"Net Banking"}>Net Banking</MenuItem>
+                      <MenuItem value={"UPI"}>UPI</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+                <div
+                  style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                ></div>
+                <Box px={2}>
+                  <Button
+                    style={{
+                      borderRadius: 10,
+                      background: "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: "white",
+                    }}
+                  >
+                    Find Orders
+                  </Button>
+                </Box>
+              </Box>
+            </div>
+          </div>
+        </Container>
       </Box>
+      <Container>
+        <OrderTable />
+      </Container>
+      <Container>
+        <HowItWorks />
+      </Container>
+      <Container>
+        <Footer />
+      </Container>
     </Box>
   );
 }

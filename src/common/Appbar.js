@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Container, Button, Typography } from "@mui/material";
+import { Box, Container, Button, Typography, Avatar } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { border } from "@mui/system";
 import { Link } from "react-router-dom";
@@ -8,6 +8,9 @@ const useStyles = makeStyles((theme) => ({
   linkItems: {
     paddingRight: 20,
     paddingTop: 7,
+    fontWeight: 600,
+    paddingLeft: 15,
+    fontSize: 15,
   },
   logo: {
     height: 55,
@@ -25,18 +28,16 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
   },
   navbarButton: {
-    background: "linear-gradient(to right, #E0077D,#E0077D)",
+    background: theme.palette.primary.main,
     color: "white",
-    padding: 8,
-    paddingLeft: 15,
-    paddingRight: 15,
-    borderRadius: 50,
-    fontWeight: 500,
+    padding: "9px 20px 9px 20px",
+    borderRadius: 15,
+    fontWeight: 400,
     letterSpacing: 0.4,
     textTransform: "none",
 
     "&:hover": {
-      background: "#C80C81",
+      background: theme.palette.primary.hover,
     },
     [theme.breakpoints.down("sm")]: {
       marginRight: 0,
@@ -58,30 +59,19 @@ const Appbar = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <a
-              href="https://p2p.polkabridge.org"
-              style={{ display: "flex", marginRight: "2rem" }}
-            >
-              <img
-                src="/polkabridge.png"
-                alt="PolkaBridge Logo"
-                className={classes.logo}
-              />
-            </a>
-            <Box>
-              <Box display="flex">
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  className={classes.linkItems}
-                  style={{
-                    color: "black",
-                  }}
-                >
-                  Home
-                </Typography>
-                <Link to="/create-order" style={{ textDecoration: "none" }}>
-                  {" "}
+            <Box display="flex" justifyContent="flex-start" alignItems="center">
+              <a
+                href="https://p2p.polkabridge.org"
+                style={{ display: "flex", marginRight: "2rem" }}
+              >
+                <img
+                  src="/polkabridge.png"
+                  alt="PolkaBridge Logo"
+                  className={classes.logo}
+                />
+              </a>
+              <Box>
+                <Box display="flex" justifyContent="flex-start">
                   <Typography
                     variant="body2"
                     color="textSecondary"
@@ -90,71 +80,71 @@ const Appbar = () => {
                       color: "black",
                     }}
                   >
-                    Create Order
+                    Home
                   </Typography>
-                </Link>
-                <Link to="/my-orders" style={{ textDecoration: "none" }}>
-                  {" "}
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    className={classes.linkItems}
-                    style={{
-                      color: "black",
-                    }}
-                  >
-                    My Orders
-                  </Typography>
-                </Link>
-                <Link to="/profile" style={{ textDecoration: "none" }}>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    className={classes.linkItems}
-                    style={{
-                      color: "black",
-                    }}
-                  >
-                    Profile
-                  </Typography>
-                </Link>
-                <div>
-                  <Button
-                    onClick={null}
-                    // className={classes.navbarButton}
-                    style={{
-                      borderRadius: 10,
-                      backgroundColor: "#E0077D",
-                      padding: "5px 15px 5px 15px",
-                      marginRight: 7,
-                      color: "white",
-                    }}
-                  >
-                    {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    onClick={null}
-                    // className={classes.navbarButton}
-                    style={{
-                      borderRadius: 10,
-                      border: "1px solid #E0077D",
-                      backgroundColor: "transparent",
-                      padding: "5px 15px 5px 15px",
-                      marginRight: 7,
-                      color: "black",
-                    }}
-                  >
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/1200px-Flag_of_India.svg.png"
-                      height="10px"
-                      style={{ paddingRight: 5 }}
-                    />{" "}
-                    India
-                  </Button>
-                </div>
+                  <Link to="/create-order" style={{ textDecoration: "none" }}>
+                    {" "}
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className={classes.linkItems}
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      Create Order
+                    </Typography>
+                  </Link>
+                  <Link to="/create-order" style={{ textDecoration: "none" }}>
+                    {" "}
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className={classes.linkItems}
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      Charts
+                    </Typography>
+                  </Link>
+                  <Link to="/my-orders" style={{ textDecoration: "none" }}>
+                    {" "}
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className={classes.linkItems}
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      My Orders
+                    </Typography>
+                  </Link>
+                  <Link to="/profile" style={{ textDecoration: "none" }}>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className={classes.linkItems}
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      Profile
+                    </Typography>
+                  </Link>
+                </Box>
               </Box>
+            </Box>
+            <Box display="flex" justifyContent="flex-end" alignItems="center">
+              <div style={{ padding: 3, paddingRight: 10 }}>
+                <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
+              </div>
+              <div>
+                <Button onClick={null} className={classes.navbarButton}>
+                  {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
+                </Button>
+              </div>
             </Box>
           </Box>
         </Container>
