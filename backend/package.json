@@ -28,7 +28,8 @@
     "express-validator": "^6.3.1",
     "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.8.9",
-    "web3": "^1.5.1"
+    "web3": "^1.5.1",
+    "bignumber.js": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^7.22.0",

@@ -6,19 +6,28 @@ const OrderSchema = new Schema({
     type: String,
     required: true,
   },
-  user_id: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: "users",
   },
   order_amount: {
-    type: Number,
+    type: String,
     required: true,
   },
+  deflationary_deduction: {
+    type: String,
+  },
+  fee_deduction: {
+    type: String,
+  },
+  final_order_amount: {
+    type: String,
+  },
   token_deposited: {
-    type: Number,
+    type: String,
   },
   pending_amount: {
-    type: Number,
+    type: String,
   },
   token: {
     type: Schema.Types.ObjectId,
@@ -26,7 +35,7 @@ const OrderSchema = new Schema({
   },
   fiat: {
     type: Schema.Types.ObjectId,
-    ref: "fiat_currencies",
+    ref: "fiats",
   },
   order_unit_price: {
     type: Number,

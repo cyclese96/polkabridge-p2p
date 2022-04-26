@@ -20,4 +20,4 @@ const FiatSchema = new Schema({
   },
 });
 
-module.exports = Fiat = mongoose.model("fiat_currencies", FiatSchema);
+module.exports = Fiat = mongoose.model("fiats", FiatSchema);

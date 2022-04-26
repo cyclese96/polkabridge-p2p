@@ -23,7 +23,7 @@ const PaymentOptionSchema = new Schema({
   },
   fiat_currency: {
     type: Schema.Types.ObjectId,
-    ref: "fiat_currencies",
+    ref: "fiats",
   },
   added_at: {
     type: Date,

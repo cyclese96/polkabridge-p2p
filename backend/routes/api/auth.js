@@ -8,11 +8,14 @@ const User = require("../../models/User");
 const { getToken } = require("../../_helpers/password-service");
 const { recoverSignature } = require("../../_helpers/utils");
 
-// @route GET /api/auth/v1/__test
+// @route GET /api/auth_apis/v1/__test
 // @desc Test route
 // @access PUBLIC
 router.get("/__test", (req, res) => res.send("auth routes working :)"));
 
+// @route GET /api/auth_apis/v1/signatureVerify/:messageHash/:signature/:account
+// @desc Verify User wallet
+// @access PUBLIC
 router.get(
   "/signatureVerify/:messageHash/:signature/:account",
   async (req, res) => {
@@ -22,7 +25,6 @@ router.get(
         req.params.signature &&
         req.params.account
       ) {
-        // Signature matches the cache address/challenge
         // Authentication is valid, assign JWT, etc.
 
         const userAddress = await recoverSignature(
@@ -68,5 +70,27 @@ router.get(
     }
   }
 );
+
+// @route GET /api/auth_apis/v1/user/"user_id"
+// @desc Get user buy id
+// @access PUBLIC
+router.get("/user/:user_id", async (req, res) => {
+  try {
+    if (!req.params.user_id) {
+      return res.status(401).send({ message: "Invalid user id" });
+    }
+
+    let user = await User.findById(req.params.user_id);
+
+    if (!user) {
+      return res.status(200).send({ message: "User not found" });
+    }
+
+    return res.status(200).send(user);
+  } catch (error) {
+    console.log("user route error ", error);
+    res.status(401).send(error);
+  }
+});
 
 module.exports = router;
