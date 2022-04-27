@@ -17,9 +17,10 @@ import Footer from "../../common/Footer";
 
 const useStyles = makeStyles((theme) => ({
   background: {
-    backgroundImage: 'url("images/network.png")',
-    backgroundPosition: "center center",
-    backgroundSize: "cover",
+    backgroundImage: 'url("images/network.png"), url(images/tokens.png)',
+    backgroundPosition: "center center,center center",
+    backgroundRepeat: "no-repeat,no-repeat",
+    backgroundSize: "cover,contain",
     height: "100%",
     width: "100%",
     paddingTop: "10%",

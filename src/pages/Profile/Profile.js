@@ -1,4 +1,4 @@
-import { Box, Grid, Hidden } from "@mui/material";
+import { Box, Container, Grid, Hidden, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
 import React, { useState } from "react";
@@ -7,6 +7,23 @@ import ProfileInfo from "./ProfileComponents/ProfileInfo";
 import ProfileSidebar from "./ProfileComponents/ProfileSidebar";
 
 const useStyles = makeStyles((theme) => ({
+  background: {
+    height: "100%",
+    width: "100%",
+    paddingTop: "5%",
+    paddingBottom: "5%",
+  },
+  title: {
+    color: "#212121",
+    fontWeight: 600,
+    fontSize: 28,
+    letterSpacing: "0.02em",
+  },
+  subtitle: {
+    color: "#414141",
+    fontWeight: 400,
+    fontSize: 16,
+  },
   sidebarCard: {
     marginTop: 20,
     marginBottom: 20,
@@ -26,18 +43,36 @@ function Profile() {
   const [tab, setTab] = useState(0);
 
   return (
-    <Box>
-      <Grid container>
-        <Hidden mdDown>
-          <Grid item sm={3}>
-            <ProfileSidebar setTab={setTab} tab={tab} />
+    <Box className={classes.background}>
+      <Container>
+        <Box>
+          <Typography
+            variant="h3"
+            color="textSecondary"
+            className={classes.title}
+          >
+            My Profile
+          </Typography>
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            className={classes.subtitle}
+          >
+            Update your proference for smooth trading experience.
+          </Typography>
+        </Box>
+        <Grid container>
+          <Hidden mdDown>
+            <Grid item sm={3}>
+              <ProfileSidebar setTab={setTab} tab={tab} />
+            </Grid>
+          </Hidden>
+          <Grid item sm={9}>
+            {tab === 0 && <ProfileInfo />}
+            {tab === 1 && <ProfileCurrency />}
           </Grid>
-        </Hidden>
-        <Grid item sm={9}>
-          {tab === 0 && <ProfileInfo />}
-          {tab === 1 && <ProfileCurrency />}
-        </Grid>
-      </Grid>{" "}
+        </Grid>{" "}
+      </Container>
     </Box>
   );
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Container, Button, Typography, Avatar } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { border } from "@mui/system";
 import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -76,7 +75,7 @@ const Appbar = () => {
                   <Link to="/" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
-                      variant="body2"
+                      variant="h6"
                       color="textSecondary"
                       className={classes.linkItems}
                       style={{
@@ -89,7 +88,7 @@ const Appbar = () => {
                   <Link to="/create-order" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
-                      variant="body2"
+                      variant="h6"
                       color="textSecondary"
                       className={classes.linkItems}
                       style={{
@@ -102,7 +101,7 @@ const Appbar = () => {
                   <Link to="/charts" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
-                      variant="body2"
+                      variant="h6"
                       color="textSecondary"
                       className={classes.linkItems}
                       style={{
@@ -115,7 +114,7 @@ const Appbar = () => {
                   <Link to="/my-orders" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
-                      variant="body2"
+                      variant="h6"
                       color="textSecondary"
                       className={classes.linkItems}
                       style={{
@@ -127,7 +126,7 @@ const Appbar = () => {
                   </Link>
                   <Link to="/profile" style={{ textDecoration: "none" }}>
                     <Typography
-                      variant="body2"
+                      variant="h6"
                       color="textSecondary"
                       className={classes.linkItems}
                       style={{

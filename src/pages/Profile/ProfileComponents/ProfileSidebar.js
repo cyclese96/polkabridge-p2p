@@ -8,17 +8,17 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 20,
     height: "100%",
     width: "98%",
-    border: "1px solid #eeeeee",
+    border: "1px solid #EAECEE",
     padding: 10,
     backgroundColor: "#FFFFFF",
-    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
+
     borderRadius: 10,
   },
   singleTab: {
     paddingRight: 20,
     paddingLeft: 15,
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: 12,
+    paddingBottom: 12,
     borderBottom: "1px solid rgba(145, 145, 145, 0.2)",
     color: "#333333",
     fontWeight: 600,
@@ -38,7 +38,8 @@ function ProfileSidebar({ tab, setTab }) {
         color="textSecondary"
         className={classes.singleTab}
         style={{
-          color: tab === 0 ? "#E0077D" : "#333333",
+          color: tab === 0 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 0 ? 600 : 400,
         }}
         onClick={() => setTab(0)}
       >
@@ -50,7 +51,8 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(1)}
         style={{
-          color: tab === 1 ? "#E0077D" : "#333333",
+          color: tab === 1 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 1 ? 600 : 400,
         }}
       >
         Currency Preferences
@@ -61,7 +63,8 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(2)}
         style={{
-          color: tab === 2 ? "#E0077D" : "#333333",
+          color: tab === 2 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 2 ? 600 : 400,
         }}
       >
         Payment Options
@@ -72,7 +75,8 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(3)}
         style={{
-          color: tab === 3 ? "#E0077D" : "#333333",
+          color: tab === 3 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 3 ? 600 : 400,
         }}
       >
         Security
@@ -83,7 +87,8 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(4)}
         style={{
-          color: tab === 4 ? "#E0077D" : "#333333",
+          color: tab === 4 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 4 ? 600 : 400,
         }}
       >
         Settings
@@ -94,7 +99,8 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(5)}
         style={{
-          color: tab === 5 ? "#E0077D" : "#333333",
+          color: tab === 5 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 5 ? 600 : 400,
         }}
       >
         Referral
@@ -105,7 +111,9 @@ function ProfileSidebar({ tab, setTab }) {
         className={classes.singleTab}
         onClick={() => setTab(6)}
         style={{
-          color: tab === 6 ? "#E0077D" : "#333333",
+          color: tab === 6 ? theme.palette.primary.main : "#333333",
+          fontWeight: tab === 6 ? 600 : 400,
+          fontWeight: tab === 6 ? 600 : 400,
         }}
       >
         Logout

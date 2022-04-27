@@ -15,6 +15,8 @@ import CreateOrder from "./pages/Orders/CreateOrder";
 import OrderPlaced from "./pages/Orders/OrderPlaced";
 import Footer from "./common/Footer";
 import OrderReview from "./pages/Orders/OrderReview";
+import { Provider } from "react-redux";
+import store from "./store";
 
 function getLibrary(provider) {
   const library = new Web3Provider(provider);
@@ -24,26 +26,28 @@ function getLibrary(provider) {
 
 function App() {
   return (
-    <Web3ReactProvider getLibrary={getLibrary}>
-      <ThemeProvider theme={theme}>
-        <Fragment>
-          <Router>
-            <Appbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/create-order" element={<CreateOrder />} />
-              <Route path="/order-placed" element={<OrderPlaced />} />
-              <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/order-review" element={<OrderReview />} />
-            </Routes>
-            <Container>
-              <Footer />
-            </Container>
-          </Router>
-        </Fragment>
-      </ThemeProvider>
-    </Web3ReactProvider>
+    <Provider store={store}>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <ThemeProvider theme={theme}>
+          <Fragment>
+            <Router>
+              <Appbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/create-order" element={<CreateOrder />} />
+                <Route path="/order-placed" element={<OrderPlaced />} />
+                <Route path="/my-orders" element={<MyOrders />} />
+                <Route path="/order-review" element={<OrderReview />} />
+              </Routes>
+              <Container>
+                <Footer />
+              </Container>
+            </Router>
+          </Fragment>
+        </ThemeProvider>
+      </Web3ReactProvider>
+    </Provider>
   );
 }
 

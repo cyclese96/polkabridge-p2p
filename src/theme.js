@@ -47,8 +47,8 @@ let themes = createTheme({
     },
     h6: {
       fontFamily: "Poppins",
-      fontSize: "1.375rem",
-      fontWeight: "normal",
+      fontSize: "0.75",
+      fontWeight: 600,
     },
     subtitle1: {
       fontFamily: "Poppins",

@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 8,
     borderBottom: "1px solid rgba(145, 145, 145, 0.2)",
     color: "#333333",
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: 16,
     cursor: "pointer",
   },
@@ -54,9 +54,10 @@ function ProfileCurrency() {
   return (
     <div className={classes.infoCard}>
       <Typography
-        variant="body2"
+        variant="h6"
         color="textSecondary"
         className={classes.heading}
+        style={{ fontWeight: 600 }}
       >
         Select your preferred currency
       </Typography>
@@ -98,7 +99,7 @@ function ProfileCurrency() {
                 width: 17,
                 borderRadius: "50%",
                 border: "1px solid #919191",
-                backgroundColor: "green",
+                backgroundColor: "#81c784",
               }}
             ></div>
           </Box>

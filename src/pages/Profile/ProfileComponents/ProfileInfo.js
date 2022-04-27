@@ -31,9 +31,11 @@ const useStyles = makeStyles((theme) => ({
   },
   submitButton: {
     borderRadius: 10,
-    backgroundColor: "#E0077D",
-    padding: "5px 15px 5px 15px",
+    backgroundColor: theme.palette.primary.main,
+    padding: "7px 15px 7px 15px",
+    marginRight: 7,
     color: "white",
+    border: "none",
   },
 }));
 
@@ -46,8 +48,8 @@ function ProfileInfo() {
       <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
         <Box>
           <img
-            src="https://cdn-icons-png.flaticon.com/512/147/147140.png"
-            style={{ height: "65px" }}
+            src="https://mui.com/static/images/avatar/2.jpg"
+            style={{ height: "65px", borderRadius: 50 }}
           />
         </Box>
         <Box pl={2}>
@@ -116,18 +118,8 @@ function ProfileInfo() {
             />
           </div>
         </div>
-        <div class="text-center mt-3">
-          <Button
-            style={{
-              borderRadius: 10,
-              backgroundColor: "#E0077D",
-              padding: "5px 15px 5px 15px",
-              marginRight: 7,
-              color: "white",
-            }}
-          >
-            Update profile
-          </Button>
+        <div class="text-center mt-4">
+          <button className={classes.submitButton}>Update profile</button>
         </div>
       </Box>
     </div>
