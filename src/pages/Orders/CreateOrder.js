@@ -1,30 +1,62 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import React from "react";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Input,
+  MenuItem,
+  Select,
+  TextareaAutosize,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link } from "react-router-dom";
+import {
+  AccountBalanceWallet,
+  AccountBalanceWalletOutlined,
+  AttachMoney,
+  CreditCard,
+  History,
+  List,
+  ListOutlined,
+  Money,
+  MoneyOutlined,
+  PriceChange,
+} from "@mui/icons-material";
+import HowItWorks from "../../common/HowItWorks";
 
 const useStyles = makeStyles((theme) => ({
+  background: {
+    height: "100%",
+    width: "100%",
+    paddingTop: "5%",
+  },
   infoCard: {
     marginTop: 20,
     marginBottom: 20,
     height: "100%",
     width: "100%",
-    border: "1px solid #eeeeee",
-    padding: 30,
+    border: "1px solid #EAECEE",
+    paddingTop: 30,
+    padding: 20,
+    borderRadius: 10,
     backgroundColor: "#FFFFFF",
-
-    boxShadow: "0px 12px 24px rgba(245, 0, 162, 0.08)",
-    borderRadius: "30px",
   },
   title: {
-    color: "#333333",
+    color: "#212121",
     fontWeight: 600,
     fontSize: 28,
+    letterSpacing: "0.02em",
   },
   subtitle: {
-    color: "#333333",
+    color: "#414141",
     fontWeight: 400,
     fontSize: 16,
+  },
+  cardTitle: {
+    textAlign: "center",
   },
 
   submitButton: {
@@ -130,228 +162,291 @@ function CreateOrder() {
   const classes = useStyles();
   const theme = useTheme();
 
-  return (
-    <Box mt={4} p={2}>
-      <Box>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          className={classes.title}
-        >
-          Create New Order
-        </Typography>
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          className={classes.subtitle}
-        >
-          Create a buy order for smooth P2P trading.
-        </Typography>
-      </Box>
-      <div className={classes.infoCard}>
-        <div className="row align-items-center">
-          <div className="col-md-7">
-            <div className={classes.orderBox}>
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <div className={classes.orderTab}>BUY</div>
-                <div className={classes.orderTabSelected}>SELL</div>
-              </Box>
-              <Box pt={3}>
-                <div class="row mt-3">
-                  <div class="col-md-6">
-                    <label for="inputEmail4" className={classes.label}>
-                      Price
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="inputEmail4"
-                      placeholder="First Name"
-                    />
-                  </div>
-                  <div class="col-md-6">
-                    <label for="inputPassword4" className={classes.label}>
-                      Amount
-                    </label>
-                    <input
-                      type="password"
-                      class="form-control"
-                      id="inputPassword4"
-                      placeholder="Last Name"
-                    />
-                  </div>
-                </div>
-                <div class="row mt-4">
-                  <div class="col-md-6">
-                    <label for="inputEmail4" className={classes.label}>
-                      Total
-                    </label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      id="inputEmail4"
-                      placeholder="Email"
-                    />
-                  </div>
-                  <div class="col-md-6">
-                    <label for="inputPassword4" className={classes.label}>
-                      Payment Window
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="inputPassword4"
-                      placeholder="Mobile"
-                    />
-                  </div>
-                </div>
-                <div class="text-center mt-4">
-                  <Link to="/order-placed" style={{ textDecoration: "none" }}>
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: "#E0077D",
-                        padding: "5px 15px 5px 15px",
-                        marginRight: 7,
-                        color: "white",
-                      }}
-                    >
-                      Create Buy Order
-                    </Button>
-                  </Link>
-                  <div className={classes.para}>
-                    Your order will be posted in buy order list
-                  </div>
-                </div>
-              </Box>
-            </div>
-          </div>
-          <div className="col-md-5 justify-content-center" align="center">
-            <img src="/create.png" style={{ width: "300px" }} />
-          </div>
-        </div>
-      </div>
+  //States
+  const [fiat, setFiat] = useState("INR");
+  const [token, setToken] = useState("BTC");
+  const [payment, setPayment] = useState("Google Pay");
 
-      <Box>
-        <Box mt={5}>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            className={classes.howTitle}
-          >
-            How P2P Buy Order Works
-          </Typography>
-          <div className="d-flex justify-content-center">
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.howSubtitle}
-            >
-              PolkaBridge P2P helps you convert your money to crypto instantly
-              where PolkaBridge acts as an escrow for safekeeping of the
-              transaction.
-            </Typography>
-          </div>
-        </Box>
-        <Box display="flex" justifyContent={"space-around"} my={5}>
+  return (
+    <Box className={classes.background}>
+      <Container>
+        <Box>
           <Box>
-            <div className="text-center">
-              <img src="create-icon.png" className={classes.icon} />
-            </div>
-            <div className="text-center mt-3">
-              <Button
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: "#E0077D",
-                  padding: "5px 15px 5px 15px",
-                  marginRight: 7,
-                  color: "white",
-                }}
-              >
-                Step 1
-              </Button>
-            </div>
             <Typography
-              variant="body2"
+              variant="h3"
               color="textSecondary"
-              className={classes.iconTitle}
+              className={classes.title}
             >
               Create Order
             </Typography>
             <Typography
-              variant="body2"
+              variant="body1"
               color="textSecondary"
-              className={classes.iconSubtitle}
+              className={classes.subtitle}
             >
-              You’ll be auto connected with a seller instantly
+              Create your order and get users in minutes
             </Typography>
           </Box>
-          <Box>
-            <div className="text-center">
-              <img src="create-icon.png" className={classes.icon} />
-            </div>
-            <div className="text-center mt-3">
-              <Button
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: "#E0077D",
-                  padding: "5px 15px 5px 15px",
-                  marginRight: 7,
-                  color: "white",
-                }}
-              >
-                Step 2
-              </Button>
-            </div>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.iconTitle}
-            >
-              Transfer Fiat to Seller
+          <div className={classes.infoCard}>
+            <Typography variant="h4" classes={classes.cardTitle} align="center">
+              Place new order into market
             </Typography>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.iconSubtitle}
-            >
-              The seller will confirm your payment
-            </Typography>
-          </Box>
-          <Box>
-            <div className="text-center">
-              <img src="create-icon.png" className={classes.icon} />
+            <div className="row align-items-center mt-5">
+              <div className="col-md-6">
+                <Box>
+                  <Grid container>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <ListOutlined
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Order Type:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      Selection
+                    </Grid>
+                  </Grid>
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <AttachMoney
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Price:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "fit-content",
+                        }}
+                      >
+                        <Input
+                          type="number"
+                          value={8}
+                          disableUnderline={true}
+                        />
+                        <Select
+                          variant="standard"
+                          disableUnderline={true}
+                          value={fiat}
+                          label="Age"
+                          style={{
+                            fontWeight: 600,
+                            letterSpacing: 1,
+                            color: "#212121",
+                          }}
+                          onChange={(e) => setFiat(e.target.value)}
+                        >
+                          <MenuItem value={"INR"}>INR</MenuItem>
+                          <MenuItem value={"USD"}>USD</MenuItem>
+                          <MenuItem value={"SGP"}>SGP</MenuItem>
+                        </Select>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <MoneyOutlined
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Amount:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "fit-content",
+                        }}
+                      >
+                        <Input
+                          type="number"
+                          value={3000}
+                          disableUnderline={true}
+                        />
+                        <Select
+                          variant="standard"
+                          disableUnderline={true}
+                          value={token}
+                          label="Age"
+                          style={{
+                            fontWeight: 600,
+                            letterSpacing: 1,
+                            color: "#212121",
+                          }}
+                          onChange={(e) => setToken(e.target.value)}
+                        >
+                          <MenuItem value={"BTC"}>BTC</MenuItem>
+                          <MenuItem value={"ETH"}>ETH</MenuItem>
+                          <MenuItem value={"PBR"}>PBR</MenuItem>
+                        </Select>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <CreditCard
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Total:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "fit-content",
+                        }}
+                      >
+                        <Input
+                          type="number"
+                          value={3000}
+                          disableUnderline={true}
+                        />
+                        INR
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <AccountBalanceWalletOutlined
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Payment:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          width: "fit-content",
+                        }}
+                      >
+                        <Box
+                          style={{
+                            backgroundColor: "#E1DCFF",
+                            width: "fit-content",
+                            padding: "5px 14px 5px 14px",
+
+                            borderRadius: 7,
+                            marginRight: 5,
+                            fontSize: 14,
+                          }}
+                        >
+                          UPI
+                        </Box>
+                        <Box
+                          style={{
+                            backgroundColor: "#E1DCFF",
+                            width: "fit-content",
+                            padding: "5px 14px 5px 14px",
+                            borderRadius: 7,
+                            marginRight: 5,
+                            fontSize: 14,
+                          }}
+                        >
+                          Google Pay
+                        </Box>
+                        <Box
+                          style={{
+                            backgroundColor: "#E1DCFF",
+                            width: "fit-content",
+                            padding: "5px 14px 5px 14px",
+
+                            borderRadius: 7,
+                            marginRight: 5,
+                            fontSize: 14,
+                          }}
+                        >
+                          Net Banking
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <History
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Activity Time:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={5}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "100%",
+                        }}
+                      >
+                        12 PM - 6 PM
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </div>
+              <div className="col-md-6">
+                <Box
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    align="left"
+                    style={{ marginBottom: 10 }}
+                  >
+                    Remark:
+                  </Typography>
+                  <TextareaAutosize
+                    type="text"
+                    placeholder="Enter your message for seller"
+                    style={{
+                      width: "80%",
+                      height: 240,
+                      border: "1px solid #EAECEE",
+                      boxSizing: "border-box",
+                      borderRadius: 15,
+                      outline: "none",
+                      padding: 10,
+                    }}
+                  />
+                </Box>
+              </div>
             </div>
-            <div className="text-center mt-3">
-              <Button
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: "#E0077D",
-                  padding: "5px 15px 5px 15px",
-                  marginRight: 7,
-                  color: "white",
-                }}
-              >
-                Step 3
-              </Button>
+            <div className="text-center mt-4">
+              <Link to="/order-review">
+                <Button
+                  style={{
+                    borderRadius: 10,
+                    background: "#6A55EA",
+                    padding: "9px 35px 9px 35px",
+                    color: "white",
+                  }}
+                >
+                  Submit Order
+                </Button>
+              </Link>
             </div>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.iconTitle}
-            >
-              Escrow Amount Released
-            </Typography>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.iconSubtitle}
-            >
-              Escrow amount will be released and order will be completed.
-            </Typography>
-          </Box>
+          </div>
+          <HowItWorks />
         </Box>
-      </Box>
+      </Container>
     </Box>
   );
 }

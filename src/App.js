@@ -13,6 +13,8 @@ import Profile from "./pages/Profile/Profile";
 import MyOrders from "./pages/MyOrders/MyOrders";
 import CreateOrder from "./pages/Orders/CreateOrder";
 import OrderPlaced from "./pages/Orders/OrderPlaced";
+import Footer from "./common/Footer";
+import OrderReview from "./pages/Orders/OrderReview";
 
 function getLibrary(provider) {
   const library = new Web3Provider(provider);
@@ -33,7 +35,11 @@ function App() {
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/order-review" element={<OrderReview />} />
             </Routes>
+            <Container>
+              <Footer />
+            </Container>
           </Router>
         </Fragment>
       </ThemeProvider>

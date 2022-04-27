@@ -11,6 +11,7 @@ let themes = createTheme({
       hover: "rgba(70, 56, 160,1)",
     },
     text: {
+      main: "#212121",
       primary: "#212121",
       secondary: "#414141",
     },
@@ -31,16 +32,18 @@ let themes = createTheme({
     h3: {
       fontFamily: "Poppins",
       fontSize: "1.75rem",
+      fontWeight: 600,
     },
     h4: {
       fontFamily: "Poppins",
-      fontSize: "1.75rem",
-      fontWeight: "bold",
+      fontSize: "1.5rem",
+      fontWeight: 600,
+      letterSpacing: "0.02em",
     },
     h5: {
       fontFamily: "Poppins",
-      fontSize: "1.5rem",
-      fontWeight: "bold",
+      fontSize: "1.0rem",
+      fontWeight: 500,
     },
     h6: {
       fontFamily: "Poppins",
@@ -55,6 +58,9 @@ let themes = createTheme({
     body1: {
       fontFamily: "Poppins",
       fontSize: "1.125rem",
+      fontWeight: 400,
+      fontSize: 16,
+      letterSpacing: "0.02em",
     },
     body2: {
       fontFamily: "Poppins",

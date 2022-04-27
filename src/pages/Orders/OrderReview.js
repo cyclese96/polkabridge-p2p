@@ -158,7 +158,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function OrderPlaced() {
+function OrderReview() {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -189,11 +189,8 @@ function OrderPlaced() {
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Order Submitted Successfully
+              Verify details and confirm your order
             </Typography>
-            <Box className="text-center">
-              <img src="images/success_icon.png" height="200px" />
-            </Box>
             <div className="row align-items-center mt-5">
               <div className="col-md-6">
                 <Box>
@@ -395,7 +392,7 @@ function OrderPlaced() {
               </div>
             </div>
             <div className="text-center mt-4">
-              <Link to="/my-orders">
+              <Link to="/order-placed">
                 <Button
                   style={{
                     borderRadius: 10,
@@ -404,7 +401,7 @@ function OrderPlaced() {
                     color: "white",
                   }}
                 >
-                  Check your order
+                  Confirm Order
                 </Button>
               </Link>
             </div>
@@ -416,4 +413,4 @@ function OrderPlaced() {
   );
 }
 
-export default OrderPlaced;
+export default OrderReview;

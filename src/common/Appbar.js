@@ -28,14 +28,15 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
   },
   navbarButton: {
-    background: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.main,
     color: "white",
-    padding: "9px 20px 9px 20px",
-    borderRadius: 15,
+    padding: "7px 18px 7px 18px",
+    border: "none",
+    borderRadius: 10,
     fontWeight: 400,
     letterSpacing: 0.4,
     textTransform: "none",
-
+    fontSize: 15,
     "&:hover": {
       background: theme.palette.primary.hover,
     },
@@ -72,16 +73,19 @@ const Appbar = () => {
               </a>
               <Box>
                 <Box display="flex" justifyContent="flex-start">
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    className={classes.linkItems}
-                    style={{
-                      color: "black",
-                    }}
-                  >
-                    Home
-                  </Typography>
+                  <Link to="/" style={{ textDecoration: "none" }}>
+                    {" "}
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      className={classes.linkItems}
+                      style={{
+                        color: "black",
+                      }}
+                    >
+                      Home
+                    </Typography>
+                  </Link>
                   <Link to="/create-order" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
@@ -95,7 +99,7 @@ const Appbar = () => {
                       Create Order
                     </Typography>
                   </Link>
-                  <Link to="/create-order" style={{ textDecoration: "none" }}>
+                  <Link to="/charts" style={{ textDecoration: "none" }}>
                     {" "}
                     <Typography
                       variant="body2"
@@ -141,9 +145,9 @@ const Appbar = () => {
                 <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
               </div>
               <div>
-                <Button onClick={null} className={classes.navbarButton}>
+                <button className={classes.navbarButton}>
                   {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
-                </Button>
+                </button>
               </div>
             </Box>
           </Box>

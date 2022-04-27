@@ -220,9 +220,6 @@ export default function Home() {
       <Container>
         <HowItWorks />
       </Container>
-      <Container>
-        <Footer />
-      </Container>
     </Box>
   );
 }
