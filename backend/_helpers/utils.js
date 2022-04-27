@@ -10,6 +10,36 @@ const validatorAbi = require("../_helpers/validatorAbi.json");
 const p2pAbi = require("../_helpers/p2pAbi.json");
 const BigNumber = require("bignumber.js");
 
+const fromWei = (tokens, decimals = 18) => {
+  try {
+    if (!tokens) {
+      return new BigNumber(0).toString();
+    }
+
+    return new BigNumber(tokens)
+      .div(new BigNumber(10).exponentiatedBy(decimals))
+      .toString();
+  } catch (error) {
+    console.log("exeption in fromWei ", error);
+    return null;
+  }
+};
+
+const toWei = (tokens, decimals = 18) => {
+  try {
+    if (!tokens) {
+      return new BigNumber(0).toString();
+    }
+    return new BigNumber(tokens)
+      .multipliedBy(new BigNumber(10).exponentiatedBy(decimals))
+      .toFixed(0)
+      .toString();
+  } catch (error) {
+    console.log("exeption in toWei , ", error);
+    return null;
+  }
+};
+
 async function recoverSignature(messageHash, signature) {
   try {
     const web3 = new Web3(
@@ -101,4 +131,6 @@ module.exports = {
   deflationaryDeduction,
   feeDeduction,
   isDeflationary,
+  fromWei,
+  toWei,
 };

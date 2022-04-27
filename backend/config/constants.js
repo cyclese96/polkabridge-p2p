@@ -17,9 +17,17 @@ const TOKEN_ADDRESS = {
 
 const CURRENT_CHAIN = 4; // change this to 1 for mainnet deployment
 
+const MINUMUN_SELL_ORDER_AMOUNT = {
+  ETH: 0.01,
+  PBR: 10,
+  USDT: 1,
+  PWAR: 1,
+};
+
 module.exports = {
   VALIDATOR_ADDRESS,
   P2P_ADDRESS,
   TOKEN_ADDRESS,
   CURRENT_CHAIN,
+  MINUMUN_SELL_ORDER_AMOUNT,
 };
