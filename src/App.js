@@ -19,26 +19,24 @@ import store from "./store";
 function App() {
   return (
     <Provider store={store}>
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <ThemeProvider theme={theme}>
-          <Fragment>
-            <Router>
-              <Appbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/create-order" element={<CreateOrder />} />
-                <Route path="/order-placed" element={<OrderPlaced />} />
-                <Route path="/my-orders" element={<MyOrders />} />
-                <Route path="/order-review" element={<OrderReview />} />
-              </Routes>
-              <Container>
-                <Footer />
-              </Container>
-            </Router>
-          </Fragment>
-        </ThemeProvider>
-      </Web3ReactProvider>
+      <ThemeProvider theme={theme}>
+        <Fragment>
+          <Router>
+            <Appbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/create-order" element={<CreateOrder />} />
+              <Route path="/order-placed" element={<OrderPlaced />} />
+              <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/order-review" element={<OrderReview />} />
+            </Routes>
+            <Container>
+              <Footer />
+            </Container>
+          </Router>
+        </Fragment>
+      </ThemeProvider>
     </Provider>
   );
 }

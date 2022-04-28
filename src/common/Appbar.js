@@ -1,5 +1,4 @@
 import { Box, Container, Button, Typography, Avatar } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 import { Link } from "react-router-dom";
 import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
@@ -194,7 +193,7 @@ const Appbar = ({ requestChalleng }) => {
                 <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
               </div>
               <div>
-                <button className={classes.navbarButton}>
+                <button className={classes.navbarButton} onClick={handleWallet}>
                   {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
                 </button>
               </div>
