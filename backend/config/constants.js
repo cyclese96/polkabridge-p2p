@@ -1,0 +1,33 @@
+const VALIDATOR_ADDRESS = {
+  1: "",
+  4: "0xd9EFA391cebC19769dDB173618c61AAb563f8a9c",
+};
+
+const P2P_ADDRESS = {
+  1: "",
+  4: "0xE000b28584b970278B6c6113F992E3c5E7525d7b",
+};
+
+const TOKEN_ADDRESS = {
+  PBR: {
+    1: "0x298d492e8c1d909D3F63Bc4A36C66c64ACB3d695",
+    4: "0xf6c9FF0543f932178262DF8C81A12A3132129b51",
+  },
+};
+
+const CURRENT_CHAIN = 4; // change this to 1 for mainnet deployment
+
+const MINUMUN_SELL_ORDER_AMOUNT = {
+  ETH: 0.01,
+  PBR: 10,
+  USDT: 1,
+  PWAR: 1,
+};
+
+module.exports = {
+  VALIDATOR_ADDRESS,
+  P2P_ADDRESS,
+  TOKEN_ADDRESS,
+  CURRENT_CHAIN,
+  MINUMUN_SELL_ORDER_AMOUNT,
+};
