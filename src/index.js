@@ -8,6 +8,8 @@ import { NetworkContextName } from "./constants/index";
 import store from "./store";
 import { createWeb3ReactRoot, Web3ReactProvider } from "web3-react-core";
 import { Provider } from "react-redux";
+import MulticallUpdater from "./state/multicall/updater";
+import { BlockUpdater } from "./hooks/useBlockNumber";
 
 const Web3ProviderNetwork = createWeb3ReactRoot(NetworkContextName);
 
@@ -16,6 +18,8 @@ ReactDOM.render(
     <Provider store={store}>
       <Web3ReactProvider getLibrary={getLibrary}>
         <Web3ProviderNetwork getLibrary={getLibrary}>
+          <MulticallUpdater />
+          <BlockUpdater />
           <App />
         </Web3ProviderNetwork>
       </Web3ReactProvider>
