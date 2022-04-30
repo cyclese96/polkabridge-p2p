@@ -1,14 +1,13 @@
-import { Box, Container, Button, Typography, Avatar } from "@mui/material";
+import { Box, Container, Typography, Avatar } from "@mui/material";
 import { Link } from "react-router-dom";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { makeStyles } from "@mui/styles";
-import { border } from "@mui/system";
-import useActiveWeb3React from "../hooks/useActiveWeb3React";
-import connectors from "../connections/connectors";
+
 import { connect } from "react-redux";
 import { requestChalleng } from "../actions/userActions";
-import axios from "axios";
-import Web3 from "web3";
+
+import { useUserAuthentication } from "../hooks/useUserAuthentication";
+import { CONNECTOR_TYPE } from "../constants";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -61,43 +60,11 @@ const useStyles = makeStyles((theme) => ({
 const Appbar = ({ requestChalleng }) => {
   const classes = useStyles();
 
-  const { active, deactivate, activate, account, library } =
-    useActiveWeb3React();
+  const [authStatus, connectWallet] = useUserAuthentication();
 
   const handleWallet = useCallback(() => {
-    console.log("wallet clickeed");
-    activate(connectors.injected);
-  }, [activate]);
-  useEffect(() => {
-    if (!account) {
-      return;
-    }
-
-    async function signAndVerify() {
-      const web3 = new Web3(window.ethereum);
-      let messageHash, signature;
-      try {
-        messageHash = web3.utils.sha3("Hello ethereum");
-
-        signature = await web3.eth.sign(messageHash, account);
-      } catch (error) {
-        console.log("signed message error ", error);
-      }
-
-      if (!signature) {
-        return;
-      }
-
-      const verify = await axios.get(
-        `http://localhost:5002/api/auth/v1/signatureVerify/${messageHash}/${signature}/${account?.toLowerCase()}`
-      );
-
-      console.log("user verified ", {
-        verify: verify.data,
-      });
-    }
-    signAndVerify();
-  }, [account]);
+    connectWallet(CONNECTOR_TYPE.injected);
+  }, [connectWallet]);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>
@@ -193,9 +160,16 @@ const Appbar = ({ requestChalleng }) => {
                 <Avatar src="https://mui.com/static/images/avatar/2.jpg" />{" "}
               </div>
               <div>
-                <button className={classes.navbarButton} onClick={handleWallet}>
-                  {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
-                </button>
+                {authStatus?.authenticated ? (
+                  <div>hello user</div>
+                ) : (
+                  <button
+                    className={classes.navbarButton}
+                    onClick={handleWallet}
+                  >
+                    {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
+                  </button>
+                )}
               </div>
             </Box>
           </Box>
