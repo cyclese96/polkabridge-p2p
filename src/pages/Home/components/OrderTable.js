@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Typography } from "@mui/material";
-import HowItWorks from "../../../common/HowItWorks";
+import { getLatestOrders } from "./../../../actions/orderActions";
+import { useSelector, useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -66,9 +67,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function OrderTable() {
+export default function OrderTable({ filterParams }) {
+  const store = useSelector((state) => state);
   const classes = useStyles();
+  const dispatch = useDispatch();
 
+  const { orders } = store.order;
+  const [filteredOrder, setFilteredOrder] = useState([]);
+
+  useEffect(() => {
+    async function asyncFn() {
+      let res = await dispatch(getLatestOrders());
+      console.log(res);
+    }
+    asyncFn();
+  }, []);
+
+  useEffect(() => {
+    let data = orders.filter(
+      (singleOrder) => singleOrder.order_type === filterParams.orderType
+    );
+    setFilteredOrder([...data]);
+  }, [filterParams]);
   return (
     <Box mt={5}>
       <h5 className={classes.title}>Market Open Orders</h5>
@@ -76,7 +96,6 @@ export default function OrderTable() {
         <Box className={classes.tableCard}>
           <table className={classes.table}>
             <thead>
-              <th className={classes.tableHeading}>Order Id</th>
               <th className={classes.tableHeading}>User</th>
               <th className={classes.tableHeading}>Price</th>
               <th className={classes.tableHeading}>Amount</th>
@@ -84,138 +103,43 @@ export default function OrderTable() {
               <th className={classes.tableHeading}>Payment Mode</th>
               <th className={classes.tableHeading}>Actions</th>
             </thead>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.tr}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
-            <tr className={classes.trHighlight}>
-              <td className={classes.orderText} style={{ paddingLeft: 10 }}>
-                5423
-              </td>
-              <td className={classes.userText}>0x98...3234</td>
-              <td className={classes.otherText}>0.13</td>
-              <td className={classes.otherText}>35,34,400</td>
-              <td className={classes.otherText}>UPI, Bank Transfer</td>
-              <td className={classes.otherText}>04, April 2022</td>
-              <td className={classes.otherText}>Buy Now</td>
-            </tr>
+            {filteredOrder.map((order, index) => {
+              return (
+                <>
+                  (index % 2 === 1 ? (
+                  <tr className={classes.tr}>
+                    <td
+                      className={classes.userText}
+                      style={{ paddingLeft: 10 }}
+                    >
+                      ----
+                    </td>
+                    <td className={classes.otherText}>{order.order_amount}</td>
+                    <td className={classes.otherText}>
+                      {order.order_unit_price}
+                    </td>
+                    <td className={classes.otherText}>UPI, Bank Transfer</td>
+                    <td className={classes.otherText}>04, May 2022</td>
+                    <td className={classes.otherText}>Buy Now</td>
+                  </tr>
+                  ) : (
+                  <tr className={classes.trHighlight}>
+                    <td
+                      className={classes.userText}
+                      style={{ paddingLeft: 10 }}
+                    >
+                      0x98...3234
+                    </td>
+                    <td className={classes.otherText}>0.13</td>
+                    <td className={classes.otherText}>35,34,400</td>
+                    <td className={classes.otherText}>UPI, Bank Transfer</td>
+                    <td className={classes.otherText}>07, May 2022</td>
+                    <td className={classes.otherText}>Buy Now</td>
+                  </tr>
+                  ))
+                </>
+              );
+            })}
           </table>
         </Box>
       </Box>{" "}

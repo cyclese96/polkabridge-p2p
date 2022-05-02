@@ -1,6 +1,8 @@
 import axios from "axios";
 import { LOAD_USER } from "./types";
+import constants from "../utils/constants";
 
+let backend_url = constants.backend_url;
 export const loadUser = (user, chainId) => async (dispatch) => {
   try {
     dispatch({
@@ -15,7 +17,7 @@ export const loadUser = (user, chainId) => async (dispatch) => {
 export const requestChalleng = (address, chainId) => async (dispatch) => {
   try {
     const challenge = await axios.get(
-      `http://localhost:5000/api/auth/v1/authChallenge/${address}`
+      `${backend_url}/api/auth/v1/authChallenge/${address}`
     );
     console.log(challenge.data);
   } catch (error) {

@@ -17,6 +17,7 @@ let themes = createTheme({
     },
     background: {
       main: "#6A55EA",
+      light: "rgba(106, 85, 234,0.6)",
     },
   },
   typography: {

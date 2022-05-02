@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "12px 50px 12px 50px",
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+    cursor: "pointer",
   },
   buttonSecond: {
     width: "fit-content",
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "12px 50px 12px 50px",
     borderTopRightRadius: 10,
     borderBottomRightRadius: 10,
+    cursor: "pointer",
   },
   filterCard: {
     marginTop: 20,
@@ -89,10 +91,27 @@ export default function Home() {
   const classes = useStyles();
   const theme = useTheme();
 
+  const [orderType, setOrderType] = useState("BUY");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const [payment, setPayment] = useState("UPI");
 
+  const [filterParams, setFilterParams] = useState({
+    orderType: "BUY",
+    fiat: "INR",
+    token: "PBR",
+    payment: "UPI",
+  });
+
+  const updateFilters = () => {
+    let tempObj = {
+      orderType: orderType,
+      fiat: fiat,
+      token: token,
+      payment: payment,
+    };
+    setFilterParams(tempObj);
+  };
   return (
     <Box>
       <Box className={classes.background}>
@@ -106,8 +125,26 @@ export default function Home() {
 
         <Container style={{ marginTop: 100 }}>
           <Box className={classes.buttonWrapper}>
-            <Box className={classes.buttonFirst}>Buy</Box>
-            <Box className={classes.buttonSecond}>Sell</Box>
+            <Box
+              className={classes.buttonFirst}
+              style={{
+                backgroundColor: orderType === "BUY" ? "#6A55EA" : "#eeeeee",
+                color: orderType === "BUY" ? "white" : "#212121",
+              }}
+              onClick={() => setOrderType("BUY")}
+            >
+              Buy
+            </Box>
+            <Box
+              className={classes.buttonSecond}
+              style={{
+                backgroundColor: orderType === "SELL" ? "#6A55EA" : "#eeeeee",
+                color: orderType === "SELL" ? "white" : "#212121",
+              }}
+              onClick={() => setOrderType("SELL")}
+            >
+              Sell
+            </Box>
           </Box>
           <div className="d-flex justify-content-center">
             <div className={classes.filterCard}>
@@ -165,6 +202,11 @@ export default function Home() {
                       <MenuItem value={"BTC"}>BTC</MenuItem>
                       <MenuItem value={"ETH"}>ETH</MenuItem>
                       <MenuItem value={"PBR"}>PBR</MenuItem>
+                      <MenuItem value={"PBR"}>PWAR</MenuItem>
+                      <MenuItem value={"PBR"}>DOT</MenuItem>
+                      <MenuItem value={"PBR"}>LINK</MenuItem>
+                      <MenuItem value={"PBR"}>SOL</MenuItem>
+                      <MenuItem value={"PBR"}>USDT</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
@@ -189,9 +231,9 @@ export default function Home() {
                       }}
                       onChange={(e) => setPayment(e.target.value)}
                     >
-                      <MenuItem value={"Google Pay"}>Google Pay</MenuItem>
-                      <MenuItem value={"Net Banking"}>Net Banking</MenuItem>
                       <MenuItem value={"UPI"}>UPI</MenuItem>
+                      <MenuItem value={"Net Banking"}>Paytm</MenuItem>
+                      <MenuItem value={"Net Banking"}>Bank Transfer</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
@@ -200,6 +242,7 @@ export default function Home() {
                 ></div>
                 <Box px={2}>
                   <Button
+                    onClick={updateFilters}
                     style={{
                       borderRadius: 10,
                       background: "#6A55EA",
@@ -216,7 +259,7 @@ export default function Home() {
         </Container>
       </Box>
       <Container>
-        <OrderTable />
+        <OrderTable filterParams={filterParams} />
       </Container>
       <Container>
         <HowItWorks />

@@ -51,6 +51,41 @@ const useStyles = makeStyles((theme) => ({
       width: 150,
     },
   },
+  connectedButton: {
+    color: "white",
+    padding: "7px 5px 7px 10px",
+    border: "none",
+    borderRadius: 10,
+    fontWeight: 400,
+    letterSpacing: 0.4,
+    textTransform: "none",
+    fontSize: 15,
+    "&:hover": {
+      background: theme.palette.primary.hover,
+    },
+    [theme.breakpoints.down("sm")]: {
+      marginRight: 0,
+      marginLeft: 15,
+      width: 150,
+    },
+  },
+  connectedAddress: {
+    backgroundColor: theme.palette.primary.light,
+    color: "white",
+    padding: "4px 18px 4px 18px",
+    border: "none",
+    borderRadius: 10,
+    fontWeight: 400,
+    letterSpacing: 0.4,
+    textTransform: "none",
+    fontSize: 15,
+
+    [theme.breakpoints.down("sm")]: {
+      marginRight: 0,
+      marginLeft: 15,
+      width: 150,
+    },
+  },
   numbers: {
     color: "#f9f9f9",
     fontSize: 14,
@@ -62,7 +97,7 @@ const Appbar = ({ requestChalleng }) => {
 
   const [authStatus, connectWallet] = useUserAuthentication();
 
-  const handleWallet = useCallback(() => {
+  const handleConnectWallet = useCallback(() => {
     connectWallet(CONNECTOR_TYPE.injected);
   }, [connectWallet]);
 
@@ -161,11 +196,30 @@ const Appbar = ({ requestChalleng }) => {
               </div>
               <div>
                 {authStatus?.authenticated ? (
-                  <div>hello user</div>
+                  <button onClick={null} className={classes.connectedButton}>
+                    <span
+                      style={{
+                        color: "#212121",
+                        height: "100%",
+                        fontWeight: 600,
+
+                        fontSize: 16,
+                        letterSpacing: "-0.02em",
+                        color: "#414141",
+                        textAlign: "center",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      3.65 MATIC
+                    </span>{" "}
+                    <span className={classes.connectedAddress}>
+                      0x98..32342
+                    </span>
+                  </button>
                 ) : (
                   <button
                     className={classes.navbarButton}
-                    onClick={handleWallet}
+                    onClick={handleConnectWallet}
                   >
                     {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
                   </button>

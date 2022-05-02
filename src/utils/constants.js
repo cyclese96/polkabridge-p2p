@@ -5,7 +5,7 @@ let constants;
 constants = {
   net: network_type,
 
-  backend_url: "https://product.onerare.io/api",
+  backend_url: "http://localhost:5002",
 };
 
 export default constants;
