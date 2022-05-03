@@ -26,6 +26,9 @@ contract P2PExchange is Ownable, ReentrancyGuard {
     event DepositETH(address indexed _from, uint256 _amount);
     event TransferETH(address indexed _from, address indexed _to, uint256 _amount);
 
+    event Revoke(address indexed _token, uint256 _user);
+    event RevokeETH(uint256 _user);
+
     constructor(address _WETH, uint256 _fee) {
         WETH = _WETH;
         fee = _fee;
