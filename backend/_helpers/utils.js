@@ -124,6 +124,18 @@ async function verifyTokenDeposit(final_order_amount, tokenAddress, account) {
   }
 }
 
+// checks if array 1 includes all the values of array2
+function isArrayIncludes(array1, array2) {
+  let flag = true;
+  array2.forEach((item) => {
+    if (!array1.includes(item)) {
+      flag = false;
+    }
+  });
+
+  return flag;
+}
+
 module.exports = {
   recoverSignature,
   verifyTokenDeposit,
@@ -133,4 +145,5 @@ module.exports = {
   isDeflationary,
   fromWei,
   toWei,
+  isArrayIncludes,
 };

@@ -6,11 +6,16 @@ const PaymentOptionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  payment_type: {
+  payment_mode: {
+    // upi(All UPI apps )  / neft (Bank Transfer) / imps (Bank Transfer)
+    type: String,
+  },
+  upi_provider: {
+    // Phone Pay / Paytm / etc
     type: String,
   },
   upi_id: {
-    type: String,
+    type: String, // validated upi id
   },
   account_number: {
     type: String,
