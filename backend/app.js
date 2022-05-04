@@ -16,7 +16,7 @@ connectDB();
 const auth = require("./routes/api/auth");
 const order = require("./routes/api/order");
 
-app.use("/auth_apis/v1/", auth);
-app.use("/order_apis/v1/", order);
+app.use("/auth-apis/v1/", auth);
+app.use("/order-apis/v1/", order);
 
 module.exports = app;

@@ -1,9 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+// custom id
+//
 const OrderSchema = new Schema({
   order_type: {
     type: String,
+    required: true, // buy/sell
+  },
+  order_id: {
+    // custom order id
+    type: Number,
     required: true,
   },
   user: {
@@ -11,8 +17,13 @@ const OrderSchema = new Schema({
     ref: "users",
   },
   order_amount: {
+    // amount of currrent buy or sell orders
+    type: String, // token amounts in wei
+    required: true, // fiat amounts in normal decimals
+  },
+  pending_amount: {
+    // remaining order amount to be sold or bought
     type: String,
-    required: true,
   },
   deflationary_deduction: {
     type: String,
@@ -23,11 +34,9 @@ const OrderSchema = new Schema({
   final_order_amount: {
     type: String,
   },
-  token_deposited: {
-    type: String,
-  },
-  pending_amount: {
-    type: String,
+  deposit_verified: {
+    type: Boolean,
+    default: false,
   },
   token: {
     type: Schema.Types.ObjectId,
@@ -44,6 +53,11 @@ const OrderSchema = new Schema({
   order_status: {
     type: String,
     default: "submitted", // submitted/ active/ completed / cancelled
+  },
+  payment_options: {
+    // payment for buy/sell orders
+    type: [String], //options:  upi / neft / imps
+    required: true,
   },
   created_at: {
     type: Date,
