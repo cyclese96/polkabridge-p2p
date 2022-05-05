@@ -91,16 +91,17 @@ export default function Home() {
   const classes = useStyles();
   const theme = useTheme();
 
-  const [orderType, setOrderType] = useState("BUY");
+  const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("BTC");
   const [payment, setPayment] = useState("UPI");
 
   const [filterParams, setFilterParams] = useState({
-    orderType: "BUY",
+    orderType: "buy",
     fiat: "INR",
     token: "PBR",
     payment: "UPI",
+    orderDir: "desc",
   });
 
   const updateFilters = () => {
@@ -128,20 +129,20 @@ export default function Home() {
             <Box
               className={classes.buttonFirst}
               style={{
-                backgroundColor: orderType === "BUY" ? "#6A55EA" : "#eeeeee",
-                color: orderType === "BUY" ? "white" : "#212121",
+                backgroundColor: orderType === "buy" ? "#6A55EA" : "#eeeeee",
+                color: orderType === "buy" ? "white" : "#212121",
               }}
-              onClick={() => setOrderType("BUY")}
+              onClick={() => setOrderType("buy")}
             >
               Buy
             </Box>
             <Box
               className={classes.buttonSecond}
               style={{
-                backgroundColor: orderType === "SELL" ? "#6A55EA" : "#eeeeee",
-                color: orderType === "SELL" ? "white" : "#212121",
+                backgroundColor: orderType === "sell" ? "#6A55EA" : "#eeeeee",
+                color: orderType === "sell" ? "white" : "#212121",
               }}
-              onClick={() => setOrderType("SELL")}
+              onClick={() => setOrderType("sell")}
             >
               Sell
             </Box>

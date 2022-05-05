@@ -6,9 +6,11 @@ let baseUrl = constants.backend_url;
 
 // GET
 // Latest orders in the market
-export const getLatestOrders = () => async (dispatch) => {
+export const getLatestOrders = (orderType, orderDir) => async (dispatch) => {
+  // let url = `${baseUrl}/order-apis/v1/orders/1`;
+  let url = `${baseUrl}/order-apis/v1/orders/1?order_type=${orderType}&order_direction=${orderDir}`;
   let response = axios
-    .get(`${baseUrl}/order_apis/v1/orders/1`)
+    .get(url)
     .then((res) => {
       dispatch({
         type: GET_ORDERS,

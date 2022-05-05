@@ -15,6 +15,7 @@ import Footer from "./common/Footer";
 import OrderReview from "./pages/Orders/OrderReview";
 import { Provider } from "react-redux";
 import store from "./store";
+import OrderSummary from "./pages/Orders/OrderSummary";
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/order/:order_id" element={<OrderSummary />} />
+
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />

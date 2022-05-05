@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { getLatestOrders } from "./../../../actions/orderActions";
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -65,6 +66,11 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 13,
     fontWeight: 600,
   },
+  buttonAction: {
+    backgroundColor: "green",
+    border: `1px solid #6A55EA`,
+    borderRadius: 14,
+  },
 }));
 
 export default function OrderTable({ filterParams }) {
@@ -77,18 +83,24 @@ export default function OrderTable({ filterParams }) {
 
   useEffect(() => {
     async function asyncFn() {
-      let res = await dispatch(getLatestOrders());
+      let res = await dispatch(
+        getLatestOrders(filterParams.orderType, filterParams.orderDir)
+      );
       console.log(res);
     }
     asyncFn();
   }, []);
 
   useEffect(() => {
-    let data = orders.filter(
-      (singleOrder) => singleOrder.order_type === filterParams.orderType
-    );
-    setFilteredOrder([...data]);
-  }, [filterParams]);
+    if (orders.length > 0) {
+      let data = orders.filter(
+        (singleOrder) => singleOrder.order_type === filterParams.orderType
+      );
+      console.log(data);
+      console.log(orders);
+      setFilteredOrder([...data]);
+    }
+  }, [filterParams, orders]);
   return (
     <Box mt={5}>
       <h5 className={classes.title}>Market Open Orders</h5>
@@ -97,46 +109,102 @@ export default function OrderTable({ filterParams }) {
           <table className={classes.table}>
             <thead>
               <th className={classes.tableHeading}>User</th>
-              <th className={classes.tableHeading}>Price</th>
-              <th className={classes.tableHeading}>Amount</th>
-              <th className={classes.tableHeading}>Date</th>
+              <th className={classes.tableHeading}>
+                Price ({filterParams.token}/{filterParams.fiat})
+              </th>
+              <th className={classes.tableHeading}>Quantity</th>
               <th className={classes.tableHeading}>Payment Mode</th>
+              <th className={classes.tableHeading}>Date</th>
+
               <th className={classes.tableHeading}>Actions</th>
             </thead>
             {filteredOrder.map((order, index) => {
               return (
                 <>
-                  (index % 2 === 1 ? (
-                  <tr className={classes.tr}>
-                    <td
-                      className={classes.userText}
-                      style={{ paddingLeft: 10 }}
-                    >
-                      ----
-                    </td>
-                    <td className={classes.otherText}>{order.order_amount}</td>
-                    <td className={classes.otherText}>
-                      {order.order_unit_price}
-                    </td>
-                    <td className={classes.otherText}>UPI, Bank Transfer</td>
-                    <td className={classes.otherText}>04, May 2022</td>
-                    <td className={classes.otherText}>Buy Now</td>
-                  </tr>
+                  {index % 2 === 1 ? (
+                    <tr className={classes.tr}>
+                      <td
+                        className={classes.userText}
+                        style={{ paddingLeft: 10 }}
+                      >
+                        {order.user.wallet_address.slice(0, 6)}...
+                      </td>
+                      <td className={classes.otherText}>
+                        {order.order_unit_price}
+                      </td>
+                      <td className={classes.otherText}>
+                        {order.order_amount}
+                      </td>
+
+                      <td className={classes.otherText}>
+                        {" "}
+                        {order.payment_options.join(", ").toUpperCase()}
+                      </td>
+                      <td className={classes.otherText}>04, May 2022</td>
+                      <td className={classes.otherText}>
+                        {order.order_type === "buy" ? (
+                          <Link
+                            to={`/order/${order.id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              BUY
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link
+                            to={`/order/${order.id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              SELL
+                            </Button>
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
                   ) : (
-                  <tr className={classes.trHighlight}>
-                    <td
-                      className={classes.userText}
-                      style={{ paddingLeft: 10 }}
-                    >
-                      0x98...3234
-                    </td>
-                    <td className={classes.otherText}>0.13</td>
-                    <td className={classes.otherText}>35,34,400</td>
-                    <td className={classes.otherText}>UPI, Bank Transfer</td>
-                    <td className={classes.otherText}>07, May 2022</td>
-                    <td className={classes.otherText}>Buy Now</td>
-                  </tr>
-                  ))
+                    <tr className={classes.trHighlight}>
+                      <td
+                        className={classes.userText}
+                        style={{ paddingLeft: 10 }}
+                      >
+                        0x98...3234
+                      </td>
+                      <td className={classes.otherText}>
+                        {order.order_unit_price}
+                      </td>
+                      <td className={classes.otherText}>
+                        {order.order_amount}
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        {order.payment_options.join(", ").toUpperCase()}
+                      </td>
+                      <td className={classes.otherText}>07, May 2022</td>
+                      <td className={classes.otherText}>
+                        {order.order_type === "buy" ? (
+                          <Link
+                            to={`/order/${order.id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              BUY
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link
+                            to={`/order/${order.id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              SELL
+                            </Button>
+                          </Link>
+                        )}
+                      </td>
+                    </tr>
+                  )}
                 </>
               );
             })}
