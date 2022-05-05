@@ -531,7 +531,10 @@ router.get("/order/:order_id", async (req, res) => {
       return res.status(400).json({ message: "Invalid order id" });
     }
 
-    const order = await Order.findById(req.params.order_id);
+    const order = await Order.findById(req.params.order_id)
+      .populate("user")
+      .populate("token")
+      .populate("fiat");
 
     if (!order) {
       return res.status(400).json({ message: "Order not found" });
