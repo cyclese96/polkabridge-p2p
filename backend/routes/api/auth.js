@@ -1,19 +1,21 @@
 const express = require("express");
+const { check, validationResult } = require("express-validator");
 const router = express.Router();
+const { getToken } = require("../../_helpers/password-service");
+const {
+  recoverSignature,
+  isValidUpiId,
+  isValidAccountNumber,
+} = require("../../_helpers/utils");
 
 // middleware
+const auth = require("../../middleware/auth");
 
 //models
 const User = require("../../models/User");
-const { getToken } = require("../../_helpers/password-service");
-const { recoverSignature } = require("../../_helpers/utils");
+const PaymentOption = require("../../models/PaymentOption");
 
-// @route GET /api/auth_apis/v1/__test
-// @desc Test route
-// @access PUBLIC
-router.get("/__test", (req, res) => res.send("auth routes working :)"));
-
-// @route GET /api/auth_apis/v1/signatureVerify/:messageHash/:signature/:account
+// @route GET /api/auth-apis/v1/signatureVerify/:messageHash/:signature/:account
 // @desc Verify User wallet
 // @access PUBLIC
 router.get(
@@ -53,7 +55,7 @@ router.get(
         const jwtPayload = {
           user: {
             id: user.id,
-            address: req.params.address,
+            address: req.params.account,
             name: user.name,
           },
         };
@@ -71,19 +73,15 @@ router.get(
   }
 );
 
-// @route GET /api/auth_apis/v1/user/"user_id"
-// @desc Get user buy id
+// @route GET /api/auth-apis/v1/user"
+// @desc Get user auth token
 // @access PUBLIC
-router.get("/user/:user_id", async (req, res) => {
+router.get("/user", auth, async (req, res) => {
   try {
-    if (!req.params.user_id) {
-      return res.status(401).send({ message: "Invalid user id" });
-    }
-
-    let user = await User.findById(req.params.user_id);
+    let user = await User.findById(req.user.id);
 
     if (!user) {
-      return res.status(200).send({ message: "User not found" });
+      return res.status(400).send({ message: "User not found" });
     }
 
     return res.status(200).send(user);
@@ -92,5 +90,101 @@ router.get("/user/:user_id", async (req, res) => {
     res.status(401).send(error);
   }
 });
+
+// @route PUT /api/auth-apis/v1/user"
+// @desc UPDATE user phone and email
+// @access AUTHORIZED
+router.put(
+  "/user",
+  [check("email", "Please enter valid email address").isEmail()],
+  [check("phone", "Please enter valid phone number").isMobilePhone()],
+  [check("fiat", "Please select user default currency").isMongoId()],
+  auth,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      const userId = req.user.id;
+
+      const updateObject = req.body;
+
+      await User.findByIdAndUpdate(userId, {
+        $set: updateObject,
+      });
+
+      const user = await User.findById(userId)
+        .populate("fiat")
+        .populate("payment_options");
+
+      return res.status(201).send(user);
+    } catch (error) {
+      console.log("user route error ", error);
+      res.status(401).send(error);
+    }
+  }
+);
+
+// @route PUT /api/auth-apis/v1/user"
+// @desc UPDATE user payment options
+// @access AUTHORIZED
+router.put(
+  "/user/payment-option",
+  [check("payment_mode", "Please enter valid payment option").not().isEmpty()],
+  auth,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      // check if upi id is valid with regex
+      if (req.body.upi_id) {
+        if (!isValidUpiId(req.body.upi_id)) {
+          return res.status(400).json({
+            errors: [{ msg: "Please enter valid upi id", params: "upi_id" }],
+          });
+        }
+      }
+
+      if (req.body.account_number) {
+        if (!isValidAccountNumber(req.body.account_number)) {
+          return res.status(400).json({
+            errors: [
+              {
+                msg: "Please enter valid account number ",
+                params: "account_number",
+              },
+            ],
+          });
+        }
+      }
+
+      const userId = req.user.id;
+
+      const paymentOptionObject = req.body;
+      paymentOptionObject.user_id = req.user.id;
+
+      const optionDoc = await new PaymentOption(paymentOptionObject).save();
+
+      await User.findByIdAndUpdate(userId, {
+        $push: { payment_options: optionDoc._id },
+      });
+
+      const user = await User.findById(userId)
+        .populate("payment_options")
+        .populate("fiats");
+
+      return res.status(201).send(user);
+    } catch (error) {
+      console.log("user route error ", error);
+      res.status(401).send({ errors: [{ msg: "Server error" }] });
+    }
+  }
+);
 
 module.exports = router;

@@ -58,7 +58,7 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
         }
 
         const verify = await axios.get(
-          `http://localhost:5002/auth_apis/v1/signatureVerify/${messageHash}/${signature}/${account?.toLowerCase()}`
+          `http://localhost:5002/auth-apis/v1/signatureVerify/${messageHash}/${signature}/${account?.toLowerCase()}`
         );
 
         console.log("verification resposne ", verify);
@@ -72,22 +72,24 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
       }
     }
 
-    // check user already have valid token
-    async function checkAuthStatus() {
-      if (localStorage.user) {
-        // temp solution to avoind reassign token on refresh
-        if (!account) {
-          connectWallet(localStorage.connector);
-        } else {
-          console.log("auth status aready validated ", localStorage.user);
-          setAuthenticated(true);
-        }
-      } else {
-        signAndVerify();
-      }
-    }
+    // // check user already have valid token
+    // async function checkAuthStatus() {
+    //   if (localStorage.user) {
+    //     // temp solution to avoind reassign token on refresh
+    //     if (!account) {
+    //       connectWallet(localStorage.connector);
+    //     } else {
+    //       console.log("auth status aready validated ", localStorage.user);
+    //       setAuthenticated(true);
+    //     }
+    //   } else {
+    //     signAndVerify();
+    //   }
+    // }
 
-    checkAuthStatus();
+    // checkAuthStatus();
+
+    signAndVerify();
   }, [account]);
 
   const authStatus = useMemo(() => {
