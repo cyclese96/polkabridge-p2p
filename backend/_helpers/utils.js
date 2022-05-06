@@ -136,6 +136,34 @@ function isArrayIncludes(array1, array2) {
   return flag;
 }
 
+function isValidUpiId(upiId) {
+  if (!upiId) {
+    return false;
+  }
+
+  const upiExp = /\d*@\w*/;
+  const match = upiId?.match(upiExp);
+
+  console.log("matched ", match);
+  if (!match) {
+    return false;
+  }
+  return match?.[0] === upiId;
+}
+
+function isValidAccountNumber(accountNumber) {
+  if (!accountNumber) {
+    return false;
+  }
+
+  const accountNumberExp = /\d*/;
+  const match = accountNumber?.match(accountNumberExp);
+  if (!match) {
+    return false;
+  }
+  return match?.[0] === accountNumber;
+}
+
 module.exports = {
   recoverSignature,
   verifyTokenDeposit,
@@ -146,4 +174,6 @@ module.exports = {
   fromWei,
   toWei,
   isArrayIncludes,
+  isValidUpiId,
+  isValidAccountNumber,
 };

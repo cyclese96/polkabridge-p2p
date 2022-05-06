@@ -6,28 +6,32 @@ const UserSchema = new Schema({
     type: String,
   },
   wallet_address: {
-    type: String
+    type: String,
   },
   email: {
     type: String,
   },
   email_verified: {
     type: Boolean,
-    default: false
+    default: false,
   },
   phone: {
     type: String,
   },
   phone_verified: {
     type: Boolean,
-    default: false
+    default: false,
   },
   avatar: {
     type: String,
   },
+  fiat: {
+    type: mongoose.Types.ObjectId,
+    ref: "fiats",
+  },
   payment_options: {
     type: [Schema.Types.ObjectId],
-    ref: 'payment_options'
+    ref: "payment_options",
   },
   registered_at: {
     type: Date,
