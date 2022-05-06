@@ -438,7 +438,7 @@ router.put(
 // @desc verify sell order token deposit
 // @access Authenticated
 // Todo: check user access when auth added: only user who created the order can verify deposit status
-router.put("/verify-deposit/:order_id", async (req, res) => {
+router.patch("/verify-deposit/:order_id", async (req, res) => {
   try {
     const order_id = req.params.order_id;
 
@@ -472,6 +472,45 @@ router.put("/verify-deposit/:order_id", async (req, res) => {
         $set: { deposit_verified: true, order_status: "active" },
       });
     }
+
+    const finalOrderStatus = await Order.findById(order_id);
+
+    return res.status(200).json(finalOrderStatus);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ success: false, message: error });
+  }
+});
+
+// @route patch /api/order-apis/v1/cancel-order"
+// @desc cancel an order
+// @access Authenticated
+// Todo: check user access when auth added: only user who created the order can verify deposit status
+router.patch("/cancel-order/:order_id", auth, async (req, res) => {
+  try {
+    const order_id = req.params.order_id;
+
+    if (!mongoose.isValidObjectId(order_id)) {
+      return res
+        .status(400)
+        .json({ errors: [{ message: "Invalid order id" }] });
+    }
+
+    const order = await Order.findById(order_id);
+
+    if (!order) {
+      return res.status(400).json({ errors: [{ message: "Order not found" }] });
+    }
+
+    if (order.user?.toString() !== req.user.id) {
+      return res
+        .status(400)
+        .json({ errors: [{ message: "Unauthorized access of order" }] });
+    }
+
+    await Order.findByIdAndUpdate(order_id, {
+      $set: { order_status: "cancelled" },
+    });
 
     const finalOrderStatus = await Order.findById(order_id);
 
