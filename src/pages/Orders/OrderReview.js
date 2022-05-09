@@ -362,7 +362,7 @@ function OrderReview() {
                         align="left"
                         style={{ fontWeight: 600 }}
                       >
-                        12 PM - 6 PM
+                        4 Hours
                       </Typography>
                     </Box>
                   </Grid>

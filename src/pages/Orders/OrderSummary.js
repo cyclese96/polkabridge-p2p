@@ -191,364 +191,146 @@ function OrderSummary() {
             <Typography variant="h4" classes={classes.cardTitle} align="center">
               Proceed Buy Order
             </Typography>
-            <div className="row align-items-center mt-5">
-              <div className="col-md-6">
-                <Box>
-                  <Grid container>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <ListOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Order Type:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      Selection
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AttachMoney
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Price:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={8}
-                          disableUnderline={true}
-                        />
-                        <Select
-                          variant="standard"
-                          disableUnderline={true}
-                          value={fiat}
-                          label="Age"
-                          style={{
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            color: "#212121",
-                          }}
-                          onChange={(e) => setFiat(e.target.value)}
-                        >
-                          <MenuItem value={"INR"}>INR</MenuItem>
-                          <MenuItem value={"USD"}>USD</MenuItem>
-                          <MenuItem value={"SGP"}>SGP</MenuItem>
-                        </Select>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={3000}
-                          disableUnderline={true}
-                        />
-                        <Select
-                          variant="standard"
-                          disableUnderline={true}
-                          value={token}
-                          label="Age"
-                          style={{
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            color: "#212121",
-                          }}
-                          onChange={(e) => setToken(e.target.value)}
-                        >
-                          <MenuItem value={"BTC"}>BTC</MenuItem>
-                          <MenuItem value={"ETH"}>ETH</MenuItem>
-                          <MenuItem value={"PBR"}>PBR</MenuItem>
-                        </Select>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={3000}
-                          disableUnderline={true}
-                        />
-                        INR
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AccountBalanceWalletOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Payment:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
 
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          UPI
-                        </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          Google Pay
-                        </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
+            <div className="d-flex justify-content-around mt-5">
+              <Box mt={2}>
+                <Typography
+                  display="flex"
+                  alignItems={"center"}
+                  variant="body2"
+                >
+                  Purchase Amount
+                </Typography>
+                <Typography
+                  variant="body1"
+                  align="left"
+                  style={{ fontWeight: 600 }}
+                >
+                  0.089
+                </Typography>
+              </Box>
+              <Box mt={2}>
+                <Typography
+                  display="flex"
+                  alignItems={"center"}
+                  variant="body2"
+                >
+                  Offer Price
+                </Typography>
+                <Typography
+                  variant="body1"
+                  align="left"
+                  style={{ fontWeight: 600 }}
+                >
+                  37,25,123
+                </Typography>
+              </Box>
+              <Box mt={2}>
+                <Typography
+                  display="flex"
+                  alignItems={"center"}
+                  variant="body2"
+                >
+                  Payment Type
+                </Typography>
+                <Typography
+                  variant="body1"
+                  align="left"
+                  style={{ fontWeight: 600 }}
+                >
+                  Google pay, IMPS
+                </Typography>
+              </Box>
+              <Box mt={2}>
+                <Typography
+                  display="flex"
+                  alignItems={"center"}
+                  variant="body2"
+                >
+                  Activity Time
+                </Typography>
+                <Typography
+                  variant="body1"
+                  align="left"
+                  style={{ fontWeight: 600 }}
+                >
+                  13:30-19:30 IST
+                </Typography>
+              </Box>
+            </div>
 
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          Net Banking
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <History
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Activity Time:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={5}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "100%",
-                        }}
-                      >
-                        12 PM - 6 PM
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </div>
-              <div className="col-md-6">
-                <Box>
-                  <Grid container>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <ListOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Order Type:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Typography
-                        variant="body1"
-                        align="left"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Sell Order
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AttachMoney
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Price:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          8
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          3000 PBR
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          24000 INR
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AccountBalanceWalletOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Payment:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          UPI
-                        </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          Google Pay
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </div>
+            <div className="d-flex justify-content-center align-items-center mt-5">
+              <Grid
+                container
+                mt={2}
+                display="flex"
+                justifyContent={"center"}
+                style={{ width: "70%" }}
+              >
+                <Grid item md={3} display="flex">
+                  <Typography display="flex" alignItems={"center"}>
+                    <MoneyOutlined
+                      style={{ marginRight: 12, color: "#616161" }}
+                    />{" "}
+                    Amount:
+                  </Typography>
+                </Grid>
+                <Grid item md={7}>
+                  <Box
+                    display="flex"
+                    alignItems={"center"}
+                    style={{
+                      borderBottom: "1px solid #212121",
+                      width: "fit-content",
+                    }}
+                  >
+                    <Input type="number" value={0.1} disableUnderline={true} />
+                    <Select
+                      variant="standard"
+                      disableUnderline={true}
+                      value={token}
+                      label="Age"
+                      style={{
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        color: "#212121",
+                      }}
+                      onChange={(e) => setToken(e.target.value)}
+                    >
+                      <MenuItem value={"BTC"}>BTC</MenuItem>
+                      <MenuItem value={"ETH"}>ETH</MenuItem>
+                      <MenuItem value={"PBR"}>PBR</MenuItem>
+                    </Select>
+                  </Box>
+                </Grid>
+              </Grid>
+              <Grid
+                container
+                mt={2}
+                display="flex"
+                justifyContent={"center"}
+                style={{ width: "70%" }}
+              >
+                <Grid item md={3} display="flex">
+                  <Typography display="flex" alignItems={"center"}>
+                    <CreditCard style={{ marginRight: 12, color: "#616161" }} />{" "}
+                    Total:
+                  </Typography>
+                </Grid>
+                <Grid item md={7}>
+                  <Box
+                    display="flex"
+                    alignItems={"center"}
+                    style={{
+                      borderBottom: "1px solid #212121",
+                      width: "fit-content",
+                    }}
+                  >
+                    <Input type="number" value={3000} disableUnderline={true} />
+                    INR
+                  </Box>
+                </Grid>
+              </Grid>
             </div>
             <div className="text-center mt-4">
               <Link to="/order-review">
@@ -560,7 +342,7 @@ function OrderSummary() {
                     color: "white",
                   }}
                 >
-                  Submit Order
+                  Confirm Buy
                 </Button>
               </Link>
             </div>

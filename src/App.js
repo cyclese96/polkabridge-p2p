@@ -30,7 +30,7 @@ function App() {
               <Route path="/order/:order_id" element={<OrderSummary />} />
 
               <Route path="/create-order" element={<CreateOrder />} />
-              <Route path="/order-placed" element={<OrderPlaced />} />
+              <Route path="/order-placed/:order_id" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/order-review" element={<OrderReview />} />
             </Routes>

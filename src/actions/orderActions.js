@@ -1,6 +1,6 @@
 import axios from "axios";
 import constants from "../utils/constants";
-import { GET_ORDERS, GET_ORDER, GET_ERRORS } from "./types";
+import { GET_ORDERS, GET_ORDER, CREATE_NEW_ORDER, GET_ERRORS } from "./types";
 
 let baseUrl = constants.backend_url;
 
@@ -68,16 +68,21 @@ export const createSellOrder = () => (dispatch) => {
 
 // POST
 // CREATE BUY ORDER
-export const createBuyOrder = () => (dispatch) => {
+export const createBuyOrder = (orderObject) => (dispatch) => {
+  console.log("hello");
+
   let response = axios
-    .get(`${baseUrl}/order_apis/v1/create_buy_order`)
+    .post(`${baseUrl}/order-apis/v1/buy-order`, orderObject)
     .then((res) => {
+      console.log("hello");
       dispatch({
-        type: GET_ORDERS,
+        type: CREATE_NEW_ORDER,
         payload: res.data,
       });
     })
     .catch((err) => {
+      console.log(err);
+
       dispatch({
         type: GET_ERRORS,
         payload: err,
@@ -110,7 +115,7 @@ export const verifyTokenDeposit = () => (dispatch) => {
 // Single order detail
 export const getOrderDetailsById = (id) => (dispatch) => {
   let response = axios
-    .get(`${baseUrl}/order_apis/v1/orders/${id}`)
+    .get(`${baseUrl}/order-apis/v1/order/${id}`)
     .then((res) => {
       dispatch({
         type: GET_ORDER,

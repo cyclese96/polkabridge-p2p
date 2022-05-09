@@ -26,6 +26,10 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
+import constants from "../../utils/constants";
+import { createBuyOrder } from "../../actions/orderActions";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -160,222 +164,619 @@ const useStyles = makeStyles((theme) => ({
 
 function CreateOrder() {
   const classes = useStyles();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const theme = useTheme();
 
   //States
-  const [fiat, setFiat] = useState("INR");
-  const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const [step, setStep] = useState(0);
 
+  const [orderType, setOrderType] = useState("buy");
+  const [fiat, setFiat] = useState("INR");
+  const [price, setPrice] = useState(0);
+  const [token, setToken] = useState("PBR");
+  const [tokenAmount, setTokenAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [error, setError] = useState("");
+
+  // const updateTotalAmount = (inputValue) => {};
+  const updatePaymentMethods = (selectedValue) => {
+    console.log(selectedValue);
+    if (paymentMethods.includes(selectedValue)) {
+      const index = paymentMethods.indexOf(selectedValue);
+      let tempArray = paymentMethods;
+      tempArray.splice(index, 1);
+      setPaymentMethods([...tempArray]);
+    } else {
+      let tempArray = paymentMethods;
+      tempArray.push(selectedValue);
+      setPaymentMethods([...tempArray]);
+    }
+  };
+
+  const reviewOrderFn = () => {
+    if (price && token && tokenAmount && paymentMethods.length > 0) {
+      setError("");
+      setStep(1);
+    } else {
+      setError("Please fill all the fields.");
+    }
+  };
+  const submitOrder = async () => {
+    let buyOrderObject = {
+      user: "625860aa1ed2eb5da6dd76c1",
+      order_amount: parseFloat(tokenAmount),
+      token: "6263a44638fd8c30a7c4d8e2",
+      fiat: "6263a5c254f64766e549a622",
+      order_unit_price: parseFloat(price),
+      payment_options: paymentMethods,
+    };
+    console.log(buyOrderObject);
+
+    let response = await dispatch(createBuyOrder(buyOrderObject));
+    console.log(response);
+    navigate(`/order-placed/${response._id}`);
+  };
   return (
     <Box className={classes.background}>
-      <Container>
-        <Box>
+      {step === 0 && (
+        <Container>
           <Box>
-            <Typography
-              variant="h3"
-              color="textSecondary"
-              className={classes.title}
-            >
-              Create Order
-            </Typography>
-            <Typography
-              variant="body1"
-              color="textSecondary"
-              className={classes.subtitle}
-            >
-              Create your order and get users in minutes
-            </Typography>
+            <Box>
+              <Typography
+                variant="h3"
+                color="textSecondary"
+                className={classes.title}
+              >
+                Create Order
+              </Typography>
+              <Typography
+                variant="body1"
+                color="textSecondary"
+                className={classes.subtitle}
+              >
+                Create your order and get matches in minutes
+              </Typography>
+            </Box>
+            <div className={classes.infoCard}>
+              <Typography
+                variant="h4"
+                classes={classes.cardTitle}
+                align="center"
+              >
+                Place new order into market
+              </Typography>
+              <div className="row align-items-center mt-5">
+                <div className="col-md-6">
+                  <Box>
+                    <Grid container>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <ListOutlined
+                            style={{
+                              marginRight: 12,
+                              color: "#616161",
+                              fontSize: 20,
+                            }}
+                          />{" "}
+                          Order Type:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          <Box
+                            onClick={() => setOrderType("buy")}
+                            style={{
+                              backgroundColor:
+                                orderType === "buy" ? "#E1DCFF" : "transparent",
+                              border: "2px solid #E1DCFF",
+                              width: "fit-content",
+                              padding: "5px 20px 5px 20px",
+                              cursor: "pointer",
+                              borderRadius: 7,
+                              marginRight: 5,
+                              fontSize: 14,
+                              fontWeight: 500,
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            {orderType === "buy" ? (
+                              <Box
+                                style={{
+                                  height: 10,
+                                  width: 10,
+                                  borderRadius: "50%",
+                                  border: "1px solid #919191",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginRight: 5,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: 8,
+                                    width: 8,
+                                    borderRadius: "50%",
+                                    border: "1px solid #919191",
+                                    backgroundColor: "#81c784",
+                                  }}
+                                ></div>
+                              </Box>
+                            ) : (
+                              <div
+                                style={{
+                                  height: 10,
+                                  width: 10,
+                                  borderRadius: "50%",
+                                  border: "1px solid #454545",
+                                  marginRight: 5,
+                                }}
+                              ></div>
+                            )}
+                            Buy
+                          </Box>
+                          <Box
+                            onClick={() => setOrderType("sell")}
+                            style={{
+                              border: "2px solid #E1DCFF",
+                              cursor: "pointer",
+                              backgroundColor:
+                                orderType === "sell"
+                                  ? "#E1DCFF"
+                                  : "transparent",
+                              width: "fit-content",
+                              padding: "5px 20px 5px 20px",
+                              borderRadius: 7,
+                              marginRight: 5,
+                              fontSize: 14,
+                              fontWeight: 500,
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            {orderType === "sell" ? (
+                              <Box
+                                style={{
+                                  height: 10,
+                                  width: 10,
+                                  borderRadius: "50%",
+                                  border: "1px solid #919191",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginRight: 5,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: 8,
+                                    width: 8,
+                                    borderRadius: "50%",
+                                    border: "1px solid #919191",
+                                    backgroundColor: "#81c784",
+                                  }}
+                                ></div>
+                              </Box>
+                            ) : (
+                              <div
+                                style={{
+                                  height: 10,
+                                  width: 10,
+                                  borderRadius: "50%",
+                                  border: "1px solid #454545",
+                                  marginRight: 5,
+                                }}
+                              ></div>
+                            )}
+                            Sell
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AttachMoney
+                            style={{
+                              marginRight: 12,
+                              color: "#616161",
+                              fontSize: 20,
+                            }}
+                          />{" "}
+                          Price:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            borderBottom: "1px solid #212121",
+                            width: "fit-content",
+                          }}
+                        >
+                          <Input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            disableUnderline={true}
+                          />
+                          <Select
+                            variant="standard"
+                            disableUnderline={true}
+                            value={fiat}
+                            label="Age"
+                            style={{
+                              fontWeight: 600,
+                              letterSpacing: 1,
+                              color: "#212121",
+                            }}
+                            onChange={(e) => setFiat(e.target.value)}
+                          >
+                            <MenuItem value={"INR"}>INR</MenuItem>
+                            <MenuItem value={"USD"}>USD</MenuItem>
+                            <MenuItem value={"SGP"}>SGP</MenuItem>
+                          </Select>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <MoneyOutlined
+                            style={{
+                              marginRight: 12,
+                              color: "#616161",
+                              fontSize: 20,
+                            }}
+                          />{" "}
+                          Amount:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            borderBottom: "1px solid #212121",
+                            width: "fit-content",
+                          }}
+                        >
+                          <Input
+                            type="number"
+                            value={tokenAmount}
+                            onChange={(e) => setTokenAmount(e.target.value)}
+                            disableUnderline={true}
+                          />
+                          <Select
+                            variant="standard"
+                            disableUnderline={true}
+                            value={token}
+                            label="Age"
+                            style={{
+                              fontWeight: 600,
+                              letterSpacing: 1,
+                              color: "#212121",
+                            }}
+                            onChange={(e) => setToken(e.target.value)}
+                          >
+                            <MenuItem value={"PBR"}>PBR</MenuItem>
+                            <MenuItem value={"ETH"}>ETH</MenuItem>
+                            <MenuItem value={"ETH"}>LINK</MenuItem>
+                          </Select>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <CreditCard
+                            style={{
+                              marginRight: 12,
+                              color: "#616161",
+                              fontSize: 20,
+                            }}
+                          />{" "}
+                          Total (INR):
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <div style={{ marginRight: 10, fontWeight: 600 }}>
+                            {tokenAmount * price}
+                          </div>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AccountBalanceWalletOutlined
+                            style={{
+                              marginRight: 12,
+                              color: "#616161",
+                              fontSize: 20,
+                            }}
+                          />{" "}
+                          Payment:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          {constants.SUPPORTED_PAYMENT_METHODS.map((value) => {
+                            return (
+                              <Box
+                                onClick={() => updatePaymentMethods(value)}
+                                style={{
+                                  backgroundColor: paymentMethods.includes(
+                                    value
+                                  )
+                                    ? "#E1DCFF"
+                                    : "transparent",
+                                  width: "fit-content",
+                                  padding: "5px 14px 5px 14px",
+                                  borderRadius: 7,
+                                  marginRight: 5,
+                                  fontSize: 14,
+                                  cursor: "pointer",
+                                  border: "1px solid #E1DCFF",
+                                }}
+                              >
+                                {value}
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </div>
+                <div className="col-md-6">
+                  <Box
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      align="left"
+                      style={{ marginBottom: 10 }}
+                    >
+                      Remark:
+                    </Typography>
+                    <TextareaAutosize
+                      type="text"
+                      placeholder="Enter your message for seller"
+                      style={{
+                        width: "80%",
+                        height: 240,
+                        border: "1px solid #EAECEE",
+                        boxSizing: "border-box",
+                        borderRadius: 15,
+                        outline: "none",
+                        padding: 10,
+                      }}
+                    />
+                  </Box>
+                </div>
+              </div>
+              <div className="text-center mt-4 mb-2">
+                <Button
+                  onClick={reviewOrderFn}
+                  style={{
+                    borderRadius: 10,
+                    background: "#6A55EA",
+                    padding: "9px 35px 9px 35px",
+                    color: "white",
+                  }}
+                >
+                  Submit Order
+                </Button>
+              </div>
+              <div style={{ color: "red", textAlign: "center" }}>{error}</div>
+            </div>
+            <HowItWorks />
           </Box>
-          <div className={classes.infoCard}>
-            <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Place new order into market
-            </Typography>
-            <div className="row align-items-center mt-5">
-              <div className="col-md-6">
-                <Box>
-                  <Grid container>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <ListOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Order Type:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      Selection
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AttachMoney
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Price:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={8}
-                          disableUnderline={true}
-                        />
-                        <Select
-                          variant="standard"
-                          disableUnderline={true}
-                          value={fiat}
-                          label="Age"
-                          style={{
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            color: "#212121",
-                          }}
-                          onChange={(e) => setFiat(e.target.value)}
+        </Container>
+      )}
+      {step === 1 && (
+        <Container>
+          <Box>
+            <Box>
+              <Typography
+                variant="h3"
+                color="textSecondary"
+                className={classes.title}
+              >
+                Create Order
+              </Typography>
+              <Typography
+                variant="body1"
+                color="textSecondary"
+                className={classes.subtitle}
+              >
+                Create your order and get users in minutes
+              </Typography>
+            </Box>
+            <div className={classes.infoCard}>
+              <Typography
+                variant="h4"
+                classes={classes.cardTitle}
+                align="center"
+              >
+                Verify details and confirm your order
+              </Typography>
+              <div className="row align-items-center mt-5">
+                <div className="col-md-6">
+                  <Box>
+                    <Grid container>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <ListOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Order Type:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Typography
+                          variant="body1"
+                          align="left"
+                          style={{ fontWeight: 600 }}
                         >
-                          <MenuItem value={"INR"}>INR</MenuItem>
-                          <MenuItem value={"USD"}>USD</MenuItem>
-                          <MenuItem value={"SGP"}>SGP</MenuItem>
-                        </Select>
-                      </Box>
+                          {orderType} Order
+                        </Typography>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={3000}
-                          disableUnderline={true}
-                        />
-                        <Select
-                          variant="standard"
-                          disableUnderline={true}
-                          value={token}
-                          label="Age"
-                          style={{
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            color: "#212121",
-                          }}
-                          onChange={(e) => setToken(e.target.value)}
-                        >
-                          <MenuItem value={"BTC"}>BTC</MenuItem>
-                          <MenuItem value={"ETH"}>ETH</MenuItem>
-                          <MenuItem value={"PBR"}>PBR</MenuItem>
-                        </Select>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
-                      >
-                        <Input
-                          type="number"
-                          value={3000}
-                          disableUnderline={true}
-                        />
-                        INR
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AccountBalanceWalletOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Payment:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AttachMoney
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Price:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
                         <Box
+                          display="flex"
+                          alignItems={"center"}
                           style={{
-                            backgroundColor: "#E1DCFF",
                             width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
                           }}
                         >
-                          UPI
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {price}
+                          </Typography>
                         </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          Google Pay
-                        </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          Net Banking
-                        </Box>
-                      </Box>
+                      </Grid>
                     </Grid>
-                  </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <MoneyOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Amount:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {tokenAmount} {token}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <CreditCard
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Total (INR):
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {price * tokenAmount}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AccountBalanceWalletOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Payment:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          {paymentMethods.map((value) => {
+                            return (
+                              <Box
+                                style={{
+                                  backgroundColor: paymentMethods.includes(
+                                    value
+                                  )
+                                    ? "#E1DCFF"
+                                    : "transparent",
+                                  width: "fit-content",
+                                  padding: "5px 14px 5px 14px",
+                                  borderRadius: 7,
+                                  marginRight: 5,
+                                  fontSize: 14,
+                                  cursor: "pointer",
+                                  border: "1px solid #E1DCFF",
+                                }}
+                              >
+                                {value}
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </div>
+                <div className="col-md-6">
                   <Grid container mt={2}>
                     <Grid item md={5} display="flex">
                       <Typography display="flex" alignItems={"center"}>
@@ -390,48 +791,46 @@ function CreateOrder() {
                         display="flex"
                         alignItems={"center"}
                         style={{
-                          borderBottom: "1px solid #212121",
                           width: "100%",
                         }}
                       >
-                        12 PM - 6 PM
+                        <Typography
+                          variant="body1"
+                          align="left"
+                          style={{ fontWeight: 600 }}
+                        >
+                          4 Hours
+                        </Typography>
                       </Box>
                     </Grid>
                   </Grid>
-                </Box>
-              </div>
-              <div className="col-md-6">
-                <Box
-                  style={{
-                    width: "100%",
-                  }}
-                >
-                  <Typography
-                    variant="h5"
-                    align="left"
-                    style={{ marginBottom: 10 }}
-                  >
-                    Remark:
-                  </Typography>
-                  <TextareaAutosize
-                    type="text"
-                    placeholder="Enter your message for seller"
+                  <Box
                     style={{
                       width: "80%",
-                      height: 240,
-                      border: "1px solid #EAECEE",
-                      boxSizing: "border-box",
-                      borderRadius: 15,
-                      outline: "none",
-                      padding: 10,
+                      marginTop: 30,
                     }}
-                  />
-                </Box>
+                  >
+                    <Typography
+                      variant="h5"
+                      align="left"
+                      style={{ marginBottom: 10 }}
+                    >
+                      Remark:
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      align="left"
+                      style={{ marginBottom: 10, color: "#616161" }}
+                    >
+                      Please only put this order at the given time otherwise I
+                      might be out and this order stuck.
+                    </Typography>
+                  </Box>
+                </div>
               </div>
-            </div>
-            <div className="text-center mt-4">
-              <Link to="/order-review">
+              <div className="text-center mt-4">
                 <Button
+                  onClick={submitOrder}
                   style={{
                     borderRadius: 10,
                     background: "#6A55EA",
@@ -439,14 +838,14 @@ function CreateOrder() {
                     color: "white",
                   }}
                 >
-                  Submit Order
+                  Confirm Place Order
                 </Button>
-              </Link>
+              </div>
             </div>
-          </div>
-          <HowItWorks />
-        </Box>
-      </Container>
+            <HowItWorks />
+          </Box>
+        </Container>
+      )}
     </Box>
   );
 }

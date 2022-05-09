@@ -1,4 +1,4 @@
-import { GET_ORDERS, GET_ORDER } from "../actions/types";
+import { GET_ORDERS, GET_ORDER, CREATE_NEW_ORDER } from "../actions/types";
 
 const initalState = {
   order: null,
@@ -13,6 +13,11 @@ export default function Orders(state = initalState, action) {
         orders: action.payload,
       };
     case GET_ORDER:
+      return {
+        ...state,
+        order: action.payload,
+      };
+    case CREATE_NEW_ORDER:
       return {
         ...state,
         order: action.payload,

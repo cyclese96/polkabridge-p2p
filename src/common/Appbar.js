@@ -60,9 +60,7 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: 0.4,
     textTransform: "none",
     fontSize: 15,
-    "&:hover": {
-      background: theme.palette.primary.hover,
-    },
+
     [theme.breakpoints.down("sm")]: {
       marginRight: 0,
       marginLeft: 15,

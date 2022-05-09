@@ -10,9 +10,9 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   AccountBalanceWallet,
   AccountBalanceWalletOutlined,
@@ -26,6 +26,8 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
+import { getOrderDetailsById } from "../../actions/orderActions";
+import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -162,10 +164,15 @@ function OrderPlaced() {
   const classes = useStyles();
   const theme = useTheme();
 
-  //States
-  const [fiat, setFiat] = useState("INR");
-  const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const store = useSelector((state) => state);
+  const dispatch = useDispatch();
+  const { order_id } = useParams();
+  const { order } = store.order;
+
+  useEffect(async () => {
+    let response = await dispatch(getOrderDetailsById(order_id));
+    console.log(response);
+  }, []);
 
   return (
     <Box className={classes.background}>
@@ -184,7 +191,7 @@ function OrderPlaced() {
               color="textSecondary"
               className={classes.subtitle}
             >
-              Create your order and get users in minutes
+              Create your order and get matches in minutes
             </Typography>
           </Box>
           <div className={classes.infoCard}>
@@ -192,208 +199,203 @@ function OrderPlaced() {
               Order Submitted Successfully
             </Typography>
             <Box className="text-center">
-              <img src="images/success_icon.png" height="200px" />
+              <img src="/images/success_icon.png" height="200px" />
             </Box>
-            <div className="row align-items-center mt-5">
-              <div className="col-md-6">
-                <Box>
-                  <Grid container>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <ListOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Order Type:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Typography
-                        variant="body1"
-                        align="left"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Sell Order
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AttachMoney
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Price:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
+            {order && (
+              <div className="row align-items-center mt-5">
+                <div className="col-md-6">
+                  <Box>
+                    <Grid container>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <ListOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Order Type:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
                         <Typography
                           variant="body1"
                           align="left"
                           style={{ fontWeight: 600 }}
                         >
-                          8
+                          {order.order_type}
                         </Typography>
-                      </Box>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          3000 PBR
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AttachMoney
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Price ({order.fiat.fiat}):
                         </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          24000 INR
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <AccountBalanceWalletOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Payment:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "fit-content",
-                        }}
-                      >
+                      </Grid>
+                      <Grid item md={7}>
                         <Box
+                          display="flex"
+                          alignItems={"center"}
                           style={{
-                            backgroundColor: "#E1DCFF",
                             width: "fit-content",
-                            padding: "5px 14px 5px 14px",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {order.order_unit_price}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <MoneyOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Amount ({order.token.symbol}):
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {order.order_amount} {order.token.symbol}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <CreditCard
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Total ({order.fiat.fiat}):
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {order.order_unit_price * order.order_unit_price}{" "}
+                            {order.fiat.fiat}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={5} display="flex">
+                        <Typography display="flex" alignItems={"center"}>
+                          <AccountBalanceWalletOutlined
+                            style={{ marginRight: 12, color: "#616161" }}
+                          />{" "}
+                          Payment:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Box
+                          display="flex"
+                          alignItems={"center"}
+                          style={{
+                            width: "fit-content",
+                          }}
+                        >
+                          {order.payment_options.map((value) => (
+                            <Box
+                              style={{
+                                backgroundColor: "#E1DCFF",
+                                width: "fit-content",
+                                padding: "5px 14px 5px 14px",
 
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
-                        >
-                          UPI
+                                borderRadius: 7,
+                                marginRight: 5,
+                                fontSize: 14,
+                              }}
+                            >
+                              {value.toUpperCase()}
+                            </Box>
+                          ))}
                         </Box>
-                        <Box
-                          style={{
-                            backgroundColor: "#E1DCFF",
-                            width: "fit-content",
-                            padding: "5px 14px 5px 14px",
-                            borderRadius: 7,
-                            marginRight: 5,
-                            fontSize: 14,
-                          }}
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </div>
+                <div className="col-md-6">
+                  <Grid container mt={2}>
+                    <Grid item md={5} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <History
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Activity Time:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={5}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          width: "100%",
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          align="left"
+                          style={{ fontWeight: 600 }}
                         >
-                          Google Pay
-                        </Box>
+                          4 Hours
+                        </Typography>
                       </Box>
                     </Grid>
                   </Grid>
-                </Box>
-              </div>
-              <div className="col-md-6">
-                <Grid container mt={2}>
-                  <Grid item md={5} display="flex">
-                    <Typography display="flex" alignItems={"center"}>
-                      <History style={{ marginRight: 12, color: "#616161" }} />{" "}
-                      Activity Time:
-                    </Typography>
-                  </Grid>
-                  <Grid item md={5}>
-                    <Box
-                      display="flex"
-                      alignItems={"center"}
-                      style={{
-                        width: "100%",
-                      }}
+                  <Box
+                    style={{
+                      width: "80%",
+                      marginTop: 30,
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      align="left"
+                      style={{ marginBottom: 10 }}
                     >
-                      <Typography
-                        variant="body1"
-                        align="left"
-                        style={{ fontWeight: 600 }}
-                      >
-                        12 PM - 6 PM
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-                <Box
-                  style={{
-                    width: "80%",
-                    marginTop: 30,
-                  }}
-                >
-                  <Typography
-                    variant="h5"
-                    align="left"
-                    style={{ marginBottom: 10 }}
-                  >
-                    Remark:
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    align="left"
-                    style={{ marginBottom: 10, color: "#616161" }}
-                  >
-                    Please only put this order at the given time otherwise I
-                    might be out and this order stuck.
-                  </Typography>
-                </Box>
+                      Remark:
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      align="left"
+                      style={{ marginBottom: 10, color: "#616161" }}
+                    >
+                      Please only put this order at the given time otherwise I
+                      might be out and this order stuck.
+                    </Typography>
+                  </Box>
+                </div>
               </div>
-            </div>
+            )}
             <div className="text-center mt-4">
               <Link to="/my-orders">
                 <Button
