@@ -26,8 +26,8 @@ contract P2PExchange is Ownable, ReentrancyGuard {
     event DepositETH(address indexed _from, uint256 _amount);
     event TransferETH(address indexed _from, address indexed _to, uint256 _amount);
 
-    event Revoke(address indexed _token, uint256 _user);
-    event RevokeETH(uint256 _user);
+    event Revoke(address indexed _token, address indexed _user);
+    event RevokeETH(address indexed _user);
 
     constructor(address _WETH, uint256 _fee) {
         WETH = _WETH;
@@ -77,6 +77,8 @@ contract P2PExchange is Ownable, ReentrancyGuard {
         uint256 toTransfer = amount.mul(100-fee).div(100);
         users[msg.sender][_token].amount -= toTransfer;
         IERC20(_token).transfer(msg.sender, toTransfer);        
+
+        emit Revoke(_token, msg.sender);
     }
 
     // user cancel transaction after deposit coin, he 'll get 99%
@@ -84,7 +86,9 @@ contract P2PExchange is Ownable, ReentrancyGuard {
         uint256 amount = users[msg.sender][WETH].amount;
         uint256 toTransfer = amount.mul(100-fee).div(100);
         users[msg.sender][WETH].amount -= toTransfer;
-        payable(msg.sender).transfer(toTransfer);        
+        payable(msg.sender).transfer(toTransfer);
+
+        emit RevokeETH(msg.sender);
     }
 
     // transfer coin into polkabridge vault
