@@ -6,9 +6,7 @@ const {
   MINUMUN_SELL_ORDER_AMOUNT,
   MAX_ACTIVE_BUY_ORDERS,
 } = require("../../config/constants");
-
-// middleware
-const auth = require("../../middleware/auth");
+const { default: BigNumber } = require("bignumber.js");
 
 // helper functions
 const {
@@ -17,41 +15,18 @@ const {
   feeDeduction,
   isDeflationary,
   deflationaryDeduction,
-  fromWei,
   toWei,
   isArrayIncludes,
 } = require("../../_helpers/utils");
+
+// middleware
+const auth = require("../../middleware/auth");
 
 // models
 const Order = require("../../models/Order");
 const Token = require("../../models/Token");
 const Fiat = require("../../models/FiatCurrency");
-const { default: BigNumber } = require("bignumber.js");
-const { update } = require("../../models/Order");
-
-// // test route
-// router.post("/addTokens", async (req, res) => {
-//   try {
-//     console.log("req.body", req.body);
-//     // const tokens = req.body;
-//     // for (let i = 0; i < tokens?.length; i++) {
-//     //   let token = await Token.findOne({
-//     //     symbol: tokens?.[i]?.symbol,
-//     //     chainId: tokens?.[i]?.chainId,
-//     //   });
-//     //   if (!token) {
-//     //     token = await new Token(tokens?.[i]).save();
-//     //     console.log("token saved ", token);
-//     //   } else {
-//     //     console.log("token already saved");
-//     //   }
-//     // }
-//     res.status(200).json("all tokens saved");
-//   } catch (error) {
-//     console.log("token save error ", error);
-//     res.status(401).json({ success: false, message: error });
-//   }
-// });
+const User = require("../../models/User");
 
 // @route Post /api/order_apis/v1/buy-order"
 // @desc Create buy order
@@ -62,6 +37,11 @@ router.post(
   [check("order_unit_price", "Order unit price required").not().isEmpty()],
   [check("token", "Please specify token to sell").not().isEmpty()],
   [check("fiat", "Please specify payment currency").not().isEmpty()],
+  [
+    check("description", "Please add description for your order")
+      .not()
+      .isEmpty(),
+  ],
   [
     check(
       "payment_options",
@@ -78,6 +58,7 @@ router.post(
         fiat,
         order_unit_price,
         payment_options,
+        description,
       } = req.body;
 
       const errors = validationResult(req);
@@ -93,7 +74,6 @@ router.post(
         user: user,
       }).countDocuments();
 
-      console.log("buy orders ", userActiveOrders);
       if (userActiveOrders && userActiveOrders >= MAX_ACTIVE_BUY_ORDERS) {
         return res.status(400).json({
           errors: [{ msg: "You have already created 5 active buy orders" }],
@@ -109,13 +89,18 @@ router.post(
         fiat: mongoose.Types.ObjectId(fiat),
         order_unit_price: order_unit_price,
         order_status: "active",
-        payment_options,
+        payment_options: payment_options,
+        description: description,
       }).save();
 
-      res.status(201).json(orderObject);
+      const order = await Order.findById(orderObject.id)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+      return res.status(201).json(order);
     } catch (error) {
       console.log("create_order", error);
-      res.status(400).json({ error });
+      res.status(400).json({ errors: [{ msg: "Server error" }] });
     }
   }
 );
@@ -126,6 +111,7 @@ const ORDER_UPDATE_FIELDS = [
   "fiat",
   "order_unit_price",
   "payment_options",
+  "remarks",
 ];
 
 // @route put /api/order_apis/v1/buy-order/:order_id"
@@ -140,14 +126,13 @@ router.put(
       const order_id = req.params.order_id;
 
       if (!mongoose.isValidObjectId(order_id)) {
-        return res.status(400).json({ message: "Invalid order id" });
+        return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
       }
 
       const updateObject = req.body;
 
       const fieldsToUpdate = Object.keys(updateObject);
 
-      console.log("fields to update ", fieldsToUpdate);
       if (!isArrayIncludes(ORDER_UPDATE_FIELDS, fieldsToUpdate)) {
         return res
           .status(400)
@@ -163,7 +148,7 @@ router.put(
       const order = await Order.findById(order_id);
       if (!order) {
         if (!mongoose.isValidObjectId(order_id)) {
-          return res.status(400).json({ message: "Order not found" });
+          return res.status(400).json({ errors: [{ msg: "Order not found" }] });
         }
       }
 
@@ -175,8 +160,7 @@ router.put(
 
       res.status(201).json(updatedOrder);
     } catch (error) {
-      console.log("create_order", error);
-      res.status(400).json({ error });
+      res.status(400).json({ errors: [{ msg: "Server error" }] });
     }
   }
 );
@@ -184,12 +168,18 @@ router.put(
 // @route Post /api/order-apis/v1/sell-order"
 // @desc Create sell order
 // @access Authenticated
+// :todo add authentication and email and phone verification checks to create order
 router.post(
   "/sell-order",
   [check("order_amount", "Order amount required").not().isEmpty()], // order amount should be minimum 100 USD or 0.01 ETH equivalent
   [check("order_unit_price", "Order unit price required").isNumeric()],
   [check("token", "Please specify token to sell").not().isEmpty()],
   [check("fiat", "Please specify payment currency").not().isEmpty()],
+  [
+    check("description", "Please add description for your order")
+      .not()
+      .isEmpty(),
+  ],
   [
     check(
       "payment_options",
@@ -208,6 +198,7 @@ router.post(
         fiat,
         order_unit_price,
         payment_options,
+        description,
       } = req.body;
 
       const errors = validationResult(req);
@@ -223,15 +214,29 @@ router.post(
         return res.status(400).json({ message: "Invalid token to sell" });
       }
 
+      // check if user has updated his payment methods to sell tokens
+      const userObject = await User.findById(user);
+
+      if (userObject?.payment_options?.length === 0) {
+        return res.status(400).json({
+          message: "Please add atleast one payment method to sell your tokens",
+        });
+      }
+
       if (
         new BigNumber(order_amount).lt(
           toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
         )
       ) {
         return res.status(400).json({
-          message: `Please enter correct order amount! Minimum required order amount ${
-            MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol]
-          } ${orderToken.symbol}.`,
+          errors: [
+            {
+              msg: `Please enter correct order amount! Minimum required order amount ${
+                MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol]
+              } ${orderToken.symbol}.`,
+              location: "order_amount",
+            },
+          ],
         });
       }
 
@@ -242,9 +247,9 @@ router.post(
         user: user,
       }).countDocuments();
       if (userActiveOrders >= 5) {
-        return res
-          .status(400)
-          .json({ message: "You have already created 5 active sell orders" });
+        return res.status(400).json({
+          errors: [{ msg: "You have already created 5 active sell orders" }],
+        });
       }
 
       // order amount fee deduction computations start
@@ -287,6 +292,7 @@ router.post(
               order_id: new Date().getTime(),
               user: mongoose.Types.ObjectId(user),
               order_amount: order_amount?.toString(),
+              pending_amount: order_amount?.toString(),
               deflationary_deduction: deflationaryDeducted,
               fee_deduction: feeDeducted,
               final_order_amount: remainingAfterDeduction,
@@ -295,15 +301,15 @@ router.post(
               order_unit_price: order_unit_price,
               created_at: Date.now(),
               payment_options,
+              description,
             },
           }
         );
 
-        pendingSellOrder = await Order.findOne({
-          order_status: "submitted",
-          order_type: "sell",
-          user: mongoose.Types.ObjectId(user).toString(),
-        });
+        pendingSellOrder = await Order.findById(pendingSellOrder.id)
+          .populate("user")
+          .populate("token")
+          .populate("fiat");
 
         return res.status(201).json(pendingSellOrder);
       }
@@ -313,7 +319,7 @@ router.post(
         order_id: new Date().getTime(),
         user: mongoose.Types.ObjectId(user).toString(),
         order_amount: order_amount,
-        order_amount: order_amount,
+        pending_amount: order_amount,
         deflationary_deduction: deflationaryDeducted,
         fee_deduction: feeDeducted,
         final_order_amount: remainingAfterDeduction,
@@ -321,12 +327,18 @@ router.post(
         fiat: mongoose.Types.ObjectId(fiat).toString(),
         order_unit_price: order_unit_price,
         payment_options,
+        description,
       }).save();
 
-      res.status(201).json(orderObject);
+      const createdOrder = await Order.findById(orderObject.id)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+
+      res.status(201).json(createdOrder);
     } catch (error) {
-      console.log("create_order", error);
-      res.status(400).json({ error });
+      console.log("create buy order error ", error);
+      res.status(400).json({ errors: [{ msg: "Server error" }] });
     }
   }
 );
@@ -342,7 +354,7 @@ router.put(
       const order_id = req.params.order_id;
 
       if (!mongoose.isValidObjectId(order_id)) {
-        return res.status(400).json({ message: "Invalid order id" });
+        return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
       }
 
       const errors = validationResult(req);
@@ -390,6 +402,7 @@ router.put(
                 msg: `Please enter correct order amount! Minimum required order amount ${
                   MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol]
                 } ${orderToken.symbol}.`,
+                location: "order_amount",
               },
             ],
           });
@@ -418,8 +431,6 @@ router.put(
         updateObject.final_order_amount = remainingAfterDeduction;
       }
 
-      console.log("update object ", updateObject);
-
       await Order.findByIdAndUpdate(order_id, {
         $set: updateObject,
       });
@@ -429,7 +440,7 @@ router.put(
       res.status(201).json(updatedOrder);
     } catch (error) {
       console.log("create_order", error);
-      res.status(400).json({ error });
+      res.status(400).json({ errors: [{ msg: "Server error" }] });
     }
   }
 );
@@ -445,7 +456,7 @@ router.patch("/verify-deposit/:order_id", async (req, res) => {
     if (!mongoose.isValidObjectId(order_id)) {
       return res
         .status(400)
-        .json({ errors: [{ message: "Invalid order id" }] });
+        .json({ errors: [{ msg: "Invalid order id", location: "params" }] });
     }
 
     const order = await Order.findById(order_id)
@@ -453,7 +464,7 @@ router.patch("/verify-deposit/:order_id", async (req, res) => {
       .populate("user");
 
     if (!order) {
-      return res.status(400).json({ errors: [{ message: "Order not found" }] });
+      return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
 
     const wallet_address = order.user.wallet_address;
@@ -478,7 +489,7 @@ router.patch("/verify-deposit/:order_id", async (req, res) => {
     return res.status(200).json(finalOrderStatus);
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: error });
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
 
@@ -491,21 +502,19 @@ router.patch("/cancel-order/:order_id", auth, async (req, res) => {
     const order_id = req.params.order_id;
 
     if (!mongoose.isValidObjectId(order_id)) {
-      return res
-        .status(400)
-        .json({ errors: [{ message: "Invalid order id" }] });
+      return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
     }
 
     const order = await Order.findById(order_id);
 
     if (!order) {
-      return res.status(400).json({ errors: [{ message: "Order not found" }] });
+      return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
 
     if (order.user?.toString() !== req.user.id) {
       return res
         .status(400)
-        .json({ errors: [{ message: "Unauthorized access of order" }] });
+        .json({ errors: [{ msg: "Unauthorized access of order" }] });
     }
 
     await Order.findByIdAndUpdate(order_id, {
@@ -517,7 +526,7 @@ router.patch("/cancel-order/:order_id", auth, async (req, res) => {
     return res.status(200).json(finalOrderStatus);
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: error });
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
 
@@ -533,11 +542,19 @@ router.get("/orders/:page_number", async (req, res) => {
     if (req.query.order_type) {
       orderFilter.order_type = req.query.order_type;
     }
+
+    orderFilter.order_status = "active";
     if (req.query.order_status) {
       orderFilter.order_status = req.query.order_status;
     }
     if (req.query.payment_option) {
       orderFilter.payment_options = { $in: req.query.payment_option };
+    }
+    if (req.query.fiat) {
+      orderFilter.fiat = mongoose.Types.ObjectId(req.query.fiat);
+    }
+    if (req.query.token) {
+      orderFilter.token = mongoose.Types.ObjectId(req.query.token);
     }
 
     // prepare sorting
@@ -560,14 +577,14 @@ router.get("/orders/:page_number", async (req, res) => {
     return res.status(200).json(orders);
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: error });
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
 
 router.get("/order/:order_id", async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.order_id)) {
-      return res.status(400).json({ message: "Invalid order id" });
+      return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
     }
 
     const order = await Order.findById(req.params.order_id)
@@ -576,13 +593,13 @@ router.get("/order/:order_id", async (req, res) => {
       .populate("fiat");
 
     if (!order) {
-      return res.status(400).json({ message: "Order not found" });
+      return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
 
     return res.status(200).json(order);
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: error });
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
 
@@ -593,7 +610,18 @@ router.get("/order-tokens", async (req, res) => {
     return res.status(200).json(tokens);
   } catch (error) {
     console.log(error);
-    res.status(401).json({ success: false, message: error });
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+router.get("/fiats", async (req, res) => {
+  try {
+    const fiats = await Fiat.find({}).limit(10);
+
+    return res.status(200).json(fiats);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
 

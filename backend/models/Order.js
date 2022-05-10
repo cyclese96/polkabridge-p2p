@@ -59,6 +59,10 @@ const OrderSchema = new Schema({
     type: [String], //options:  upi / neft / imps
     required: true,
   },
+  description: {
+    type: String,
+    required: true,
+  },
   created_at: {
     type: Date,
     default: Date.now(),
