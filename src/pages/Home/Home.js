@@ -93,7 +93,7 @@ export default function Home() {
 
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
-  const [token, setToken] = useState("BTC");
+  const [token, setToken] = useState("PBR");
   const [payment, setPayment] = useState("UPI");
 
   const [filterParams, setFilterParams] = useState({
@@ -200,14 +200,10 @@ export default function Home() {
                       }}
                       onChange={(e) => setToken(e.target.value)}
                     >
-                      <MenuItem value={"BTC"}>BTC</MenuItem>
                       <MenuItem value={"ETH"}>ETH</MenuItem>
                       <MenuItem value={"PBR"}>PBR</MenuItem>
-                      <MenuItem value={"PBR"}>PWAR</MenuItem>
-                      <MenuItem value={"PBR"}>DOT</MenuItem>
-                      <MenuItem value={"PBR"}>LINK</MenuItem>
-                      <MenuItem value={"PBR"}>SOL</MenuItem>
-                      <MenuItem value={"PBR"}>USDT</MenuItem>
+                      <MenuItem value={"LINK"}>LINK</MenuItem>
+                      <MenuItem value={"USDT"}>USDT</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
@@ -233,7 +229,7 @@ export default function Home() {
                       onChange={(e) => setPayment(e.target.value)}
                     >
                       <MenuItem value={"UPI"}>UPI</MenuItem>
-                      <MenuItem value={"Net Banking"}>Paytm</MenuItem>
+                      <MenuItem value={"PAYTM"}>Paytm</MenuItem>
                       <MenuItem value={"Net Banking"}>Bank Transfer</MenuItem>
                     </Select>
                   </FormControl>

@@ -1,6 +1,13 @@
 import axios from "axios";
 import constants from "../utils/constants";
-import { GET_ORDERS, GET_ORDER, CREATE_NEW_ORDER, GET_ERRORS } from "./types";
+import {
+  GET_ORDERS,
+  GET_ORDER,
+  GET_FIATS,
+  GET_TOKENS,
+  CREATE_NEW_ORDER,
+  GET_ERRORS,
+} from "./types";
 
 let baseUrl = constants.backend_url;
 
@@ -30,10 +37,30 @@ export const getLatestOrders = (orderType, orderDir) => async (dispatch) => {
 // All Tokens
 export const getAllTokens = () => (dispatch) => {
   let response = axios
-    .get(`${baseUrl}/order_apis/v1/order_tokens`)
+    .get(`${baseUrl}/order-apis/v1/order-tokens`)
     .then((res) => {
       dispatch({
-        type: GET_ORDERS,
+        type: GET_TOKENS,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err,
+      });
+    });
+  return response;
+};
+
+// GET
+// All Fiat
+export const getAllFiats = () => (dispatch) => {
+  let response = axios
+    .get(`${baseUrl}/order_apis/v1/order_fiats`)
+    .then((res) => {
+      dispatch({
+        type: GET_FIATS,
         payload: res.data,
       });
     })

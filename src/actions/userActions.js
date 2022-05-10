@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LOAD_USER } from "./types";
+import { LOAD_USER, GET_PROFILE, GET_ERRORS } from "./types";
 import constants from "../utils/constants";
 
 let backend_url = constants.backend_url;
@@ -24,3 +24,5 @@ export const requestChalleng = (address, chainId) => async (dispatch) => {
     console.log("requestChallenge ", error);
   }
 };
+
+// Profile related actions

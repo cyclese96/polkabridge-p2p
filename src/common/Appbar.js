@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Avatar } from "@mui/material";
 import { Link } from "react-router-dom";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 
 import { connect } from "react-redux";
@@ -8,6 +8,8 @@ import { requestChalleng } from "../actions/userActions";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
 import { CONNECTOR_TYPE } from "../constants";
+import { getAllTokens } from "../actions/orderActions";
+import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -92,12 +94,19 @@ const useStyles = makeStyles((theme) => ({
 
 const Appbar = ({ requestChalleng }) => {
   const classes = useStyles();
-
+  const store = useSelector((state) => state);
+  const dispatch = useDispatch();
   const [authStatus, connectWallet] = useUserAuthentication();
 
   const handleConnectWallet = useCallback(() => {
     connectWallet(CONNECTOR_TYPE.injected);
   }, [connectWallet]);
+
+  // Common function calls required for frotend from backend
+
+  useEffect(() => {
+    dispatch(getAllTokens());
+  }, []);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>

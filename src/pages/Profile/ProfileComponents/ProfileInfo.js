@@ -1,6 +1,8 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import makeStyles from "@mui/styles/makeStyles";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserProfile } from "../../../actions/profileActions";
 
 const useStyles = makeStyles((theme) => ({
   infoCard: {
@@ -43,6 +45,14 @@ function ProfileInfo() {
   const classes = useStyles();
   const theme = useTheme();
 
+  const store = useSelector((state) => state);
+  const dispatch = useDispatch();
+
+  const { profile } = store.profile;
+
+  useEffect(() => {
+    dispatch(getUserProfile());
+  }, []);
   return (
     <div className={classes.infoCard}>
       <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
@@ -65,7 +75,7 @@ function ProfileInfo() {
             color="textSecondary"
             className={classes.address}
           >
-            0x874...4f6dB
+            {profile?.wallet_address}
           </Typography>
         </Box>
       </Box>

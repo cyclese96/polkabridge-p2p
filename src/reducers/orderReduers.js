@@ -1,8 +1,16 @@
-import { GET_ORDERS, GET_ORDER, CREATE_NEW_ORDER } from "../actions/types";
+import {
+  GET_ORDERS,
+  GET_ORDER,
+  GET_TOKENS,
+  GET_FIATS,
+  CREATE_NEW_ORDER,
+} from "../actions/types";
 
 const initalState = {
-  order: null,
   orders: [],
+  order: null,
+  fiats: [],
+  tokens: [],
 };
 
 export default function Orders(state = initalState, action) {
@@ -17,6 +25,17 @@ export default function Orders(state = initalState, action) {
         ...state,
         order: action.payload,
       };
+    case GET_TOKENS:
+      return {
+        ...state,
+        tokens: action.payload,
+      };
+    case GET_FIATS:
+      return {
+        ...state,
+        fiats: action.payload,
+      };
+
     case CREATE_NEW_ORDER:
       return {
         ...state,
