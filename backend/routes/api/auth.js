@@ -7,6 +7,7 @@ const {
   isValidUpiId,
   isValidAccountNumber,
 } = require("../../_helpers/utils");
+const mongoose = require("mongoose");
 
 // middleware
 const auth = require("../../middleware/auth");
@@ -68,7 +69,7 @@ router.get(
       }
     } catch (error) {
       console.log("route error ", error);
-      res.status(401).send(error);
+      res.status(401).send({ errors: [{ msg: "Server error" }] });
     }
   }
 );
@@ -78,16 +79,18 @@ router.get(
 // @access PUBLIC
 router.get("/user", auth, async (req, res) => {
   try {
-    let user = await User.findById(req.user.id);
+    let user = await User.findById(req.user.id)
+      .populate("payment_options")
+      .populate("fiat");
 
     if (!user) {
-      return res.status(400).send({ message: "User not found" });
+      return res.status(400).send({ errors: [{ msg: "User not found" }] });
     }
 
     return res.status(200).send(user);
   } catch (error) {
     console.log("user route error ", error);
-    res.status(401).send(error);
+    res.status(401).send({ errors: [{ msg: "Server error" }] });
   }
 });
 
@@ -122,13 +125,13 @@ router.put(
       return res.status(201).send(user);
     } catch (error) {
       console.log("user route error ", error);
-      res.status(401).send(error);
+      res.status(401).send({ errors: [{ msg: "Server error" }] });
     }
   }
 );
 
-// @route PUT /api/auth-apis/v1/user"
-// @desc UPDATE user payment options
+// @route PUT /api/auth-apis/v1/user/payment-option"
+// @desc Add new payment option for a user
 // @access AUTHORIZED
 router.put(
   "/user/payment-option",
@@ -177,7 +180,79 @@ router.put(
 
       const user = await User.findById(userId)
         .populate("payment_options")
-        .populate("fiats");
+        .populate("fiat");
+
+      return res.status(201).send(user);
+    } catch (error) {
+      console.log("user route error ", error);
+      res.status(401).send({ errors: [{ msg: "Server error" }] });
+    }
+  }
+);
+
+// @route PUT /api/auth-apis/v1/user/payment-option/:payment_option_id"
+// @desc Update existing payment option for a user
+// @access AUTHORIZED
+router.put(
+  "/user/payment-option/:payment_option_id",
+  auth,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const payment_option_id = req.params.payment_option_id;
+
+      if (!mongoose.isValidObjectId(payment_option_id)) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: "Invalid payment option id" }] });
+      }
+
+      // payment option field validations
+      if (req.body.upi_id) {
+        if (!isValidUpiId(req.body.upi_id)) {
+          return res.status(400).json({
+            errors: [{ msg: "Please enter valid upi id", params: "upi_id" }],
+          });
+        }
+      }
+
+      if (req.body.account_number) {
+        if (!isValidAccountNumber(req.body.account_number)) {
+          return res.status(400).json({
+            errors: [
+              {
+                msg: "Please enter valid account number ",
+                params: "account_number",
+              },
+            ],
+          });
+        }
+      }
+
+      const optionDoc = await PaymentOption.findById(payment_option_id);
+
+      if (optionDoc?.user_id?.toString() !== req.user.id) {
+        return res.status(400).json({
+          errors: [{ msg: "Unauthorized access" }],
+        });
+      }
+
+      const paymentOptionUpdateObject = req.body;
+
+      console.log("payment option object ", paymentOptionUpdateObject);
+
+      await PaymentOption.findByIdAndUpdate(payment_option_id, {
+        $set: paymentOptionUpdateObject,
+      });
+
+      const user = await User.findById(req.user.id)
+        .populate("payment_options")
+        .populate("fiat_currency");
 
       return res.status(201).send(user);
     } catch (error) {

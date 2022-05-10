@@ -108,11 +108,11 @@ async function verifyTokenDeposit(final_order_amount, tokenAddress, account) {
       .getUserInfo(account, tokenAddress)
       .call();
 
-    console.log("user info ", {
-      userInfo,
-      flag: new BigNumber(final_order_amount).eq(userInfo._amount),
-      final_order_amount,
-    });
+    // console.log("user info ", {
+    //   userInfo,
+    //   flag: new BigNumber(final_order_amount).eq(userInfo._amount),
+    //   final_order_amount,
+    // });
     if (!userInfo) {
       return false;
     }
