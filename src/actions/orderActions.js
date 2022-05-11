@@ -57,7 +57,7 @@ export const getAllTokens = () => (dispatch) => {
 // All Fiat
 export const getAllFiats = () => (dispatch) => {
   let response = axios
-    .get(`${baseUrl}/order_apis/v1/order_fiats`)
+    .get(`${baseUrl}/order-apis/v1/fiats`)
     .then((res) => {
       dispatch({
         type: GET_FIATS,

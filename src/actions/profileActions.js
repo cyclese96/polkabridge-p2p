@@ -15,7 +15,7 @@ export const getUserProfile = () => (dispatch) => {
   let config = {
     headers: {
       "x-auth-token":
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjI3OTNhZWI3ZmQ4OWU2MzAzMzQxNGIxIiwiYWRkcmVzcyI6IjB4OWQ3MTE3YTA3ZmNhOWYyMjkxMWQzNzlhOWZkNTExOGE1ZmE0ZjQ0OCJ9LCJpYXQiOjE2NTIxNTI5MDUsImV4cCI6MTY1MzAxNjkwNX0.wi55fWt_2C46LkG_JkLHrCd0jYNjJ_09RvWFiM9msVI",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjI1ODYwYWExZWQyZWI1ZGE2ZGQ3NmMxIiwiYWRkcmVzcyI6IjB4YWMxMTNhODYzZTg3MWNhMDA3ZGQxYmU4YmUxMjU2MzYwMjUwMmE2ZCJ9LCJpYXQiOjE2NTE3Mzg0NTcsImV4cCI6MTY1MjYwMjQ1N30.LU8fdNQeTpsLASsgWrBY7eebzg1wKdvQ9Op6fAJtjRo",
     },
   };
 
@@ -39,8 +39,17 @@ export const getUserProfile = () => (dispatch) => {
 // POST
 // UPDATE USER PROFILE DATA
 export const updateUserProfile = (data) => (dispatch) => {
+  let config = {
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+      "Access-Control-Allow-Origin": "*",
+      "x-auth-token":
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjI1ODYwYWExZWQyZWI1ZGE2ZGQ3NmMxIiwiYWRkcmVzcyI6IjB4YWMxMTNhODYzZTg3MWNhMDA3ZGQxYmU4YmUxMjU2MzYwMjUwMmE2ZCJ9LCJpYXQiOjE2NTE3Mzg0NTcsImV4cCI6MTY1MjYwMjQ1N30.LU8fdNQeTpsLASsgWrBY7eebzg1wKdvQ9Op6fAJtjRo",
+    },
+  };
+
   let response = axios
-    .post(`${baseUrl}/auth-apis/v1/user`, data)
+    .put(`${baseUrl}/auth-apis/v1/user`, data, config)
     .then((res) => {
       dispatch({
         type: GET_PROFILE,

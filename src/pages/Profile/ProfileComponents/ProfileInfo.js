@@ -1,8 +1,11 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProfile } from "../../../actions/profileActions";
+import {
+  getUserProfile,
+  updateUserProfile,
+} from "../../../actions/profileActions";
 
 const useStyles = makeStyles((theme) => ({
   infoCard: {
@@ -47,14 +50,36 @@ function ProfileInfo() {
 
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
-
   const { profile } = store.profile;
+
+  const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     dispatch(getUserProfile());
   }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name);
+      setEmail(profile.email);
+      setMobile(profile.phone);
+    }
+  }, [profile]);
+
+  const submitProfile = () => {
+    let tempObj = {
+      name: name,
+      phone: mobile,
+      email: email,
+      fiat: "6267e54c3c805016884e50f9",
+    };
+    dispatch(updateUserProfile(tempObj));
+  };
   return (
     <div className={classes.infoCard}>
+      {console.log(profile)}
       <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
         <Box>
           <img
@@ -67,13 +92,16 @@ function ProfileInfo() {
             variant="body2"
             color="textSecondary"
             className={classes.username}
+            fontWeight={600}
           >
-            Tahir Ahmad
+            {profile?.name}
           </Typography>
           <Typography
             variant="body2"
-            color="textSecondary"
+            color="#0C7ED0"
             className={classes.address}
+            fontWeight={400}
+            fontSize={14}
           >
             {profile?.wallet_address}
           </Typography>
@@ -81,26 +109,19 @@ function ProfileInfo() {
       </Box>
       <Box pt={3}>
         <div class="row mt-3">
-          <div class="col-md-6">
+          <div class="col-md-12">
             <label for="inputEmail4" className={classes.label}>
-              First Name
+              Full Name
             </label>
             <input
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
               type="text"
+              value={name}
               class="form-control"
               id="inputEmail4"
-              placeholder="First Name"
-            />
-          </div>
-          <div class="col-md-6">
-            <label for="inputPassword4" className={classes.label}>
-              Last Name
-            </label>
-            <input
-              type="password"
-              class="form-control"
-              id="inputPassword4"
-              placeholder="Last Name"
+              placeholder="Full Name"
             />
           </div>
         </div>
@@ -110,6 +131,10 @@ function ProfileInfo() {
               Email
             </label>
             <input
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              value={email}
               type="email"
               class="form-control"
               id="inputEmail4"
@@ -121,15 +146,20 @@ function ProfileInfo() {
               Mobile
             </label>
             <input
+              onChange={(e) => {
+                setMobile(e.target.value);
+              }}
+              value={mobile}
               type="text"
               class="form-control"
-              id="inputPassword4"
               placeholder="Mobile"
             />
           </div>
         </div>
         <div class="text-center mt-4">
-          <button className={classes.submitButton}>Update profile</button>
+          <button className={classes.submitButton} onClick={submitProfile}>
+            Update profile
+          </button>
         </div>
       </Box>
     </div>

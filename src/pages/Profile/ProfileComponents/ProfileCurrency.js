@@ -1,6 +1,8 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProfile } from "../../../actions/profileActions";
 
 const useStyles = makeStyles((theme) => ({
   infoCard: {
@@ -45,11 +47,32 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 15,
     backgroundColor: "#FFFFFF",
   },
+  submitButton: {
+    borderRadius: 10,
+    backgroundColor: theme.palette.primary.main,
+    padding: "7px 15px 7px 15px",
+    marginRight: 7,
+    color: "white",
+    border: "none",
+  },
 }));
 
 function ProfileCurrency() {
   const classes = useStyles();
   const theme = useTheme();
+
+  const store = useSelector((state) => state);
+  const dispatch = useDispatch();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const { fiats } = store.order;
+
+  const submitCurrency = () => {
+    let tempObj = {
+      fiat: fiats[selectedIndex]._id,
+    };
+    dispatch(updateUserProfile(tempObj));
+  };
 
   return (
     <div className={classes.infoCard}>
@@ -61,236 +84,85 @@ function ProfileCurrency() {
       >
         Select your preferred currency
       </Typography>
-      <Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
+      {fiats.length > 0 && (
+        <Box>
+          {fiats.map((item, index) => (
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              pl={3}
+              onClick={() => setSelectedIndex(index)}
+              className={classes.labelWrapper}
             >
-              RUPEE (INR)
-            </Typography>
-          </Box>
-          <Box
-            style={{
-              height: 20,
-              width: 20,
-              borderRadius: "50%",
-              border: "1px solid #919191",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <div
-              style={{
-                height: 17,
-                width: 17,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-                backgroundColor: "#81c784",
-              }}
-            ></div>
-          </Box>
+              <Box display="flex" justifyContent="start" alignItems="center">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
+                  style={{ height: "15px" }}
+                />{" "}
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  className={classes.label}
+                >
+                  {item.fiat_label} ({item.fiat})
+                </Typography>
+              </Box>
+              {selectedIndex === index ? (
+                <Box
+                  style={{
+                    height: 20,
+                    width: 20,
+                    borderRadius: "50%",
+                    border: "1px solid #919191",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: 17,
+                      width: 17,
+                      borderRadius: "50%",
+                      border: "1px solid #919191",
+                      backgroundColor: "#81c784",
+                    }}
+                  ></div>
+                </Box>
+              ) : (
+                <Box
+                  style={{
+                    height: 20,
+                    width: 20,
+                    borderRadius: "50%",
+                    border: "1px solid #919191",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: 17,
+                      width: 17,
+                      borderRadius: "50%",
+                      border: "1px solid #919191",
+                      backgroundColor: "transparent",
+                    }}
+                  ></div>
+                </Box>
+              )}
+            </Box>
+          ))}
         </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              Euro (EUR)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              Renminbi (CNY)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              Vietnamese dong (VND)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              United States Dollar (USD)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              US DOLLAR (USD)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          pl={3}
-          className={classes.labelWrapper}
-        >
-          <Box display="flex" justifyContent="start" alignItems="center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/25/25473.png"
-              style={{ height: "15px" }}
-            />{" "}
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              className={classes.label}
-            >
-              SINGAPORE DOLLAR (SGD)
-            </Typography>
-          </Box>
-          <Box pl={2}>
-            <div
-              style={{
-                height: 20,
-                width: 20,
-                borderRadius: "50%",
-                border: "1px solid #919191",
-              }}
-            ></div>
-          </Box>
-        </Box>
-      </Box>
+      )}
+      <div class="text-center mt-4">
+        <button className={classes.submitButton} onClick={submitCurrency}>
+          Update currency
+        </button>
+      </div>
     </div>
   );
 }
