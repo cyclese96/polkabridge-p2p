@@ -5,6 +5,7 @@ import {
   GET_ORDER,
   GET_FIATS,
   GET_TOKENS,
+  GET_PAYMENTS,
   CREATE_NEW_ORDER,
   GET_ERRORS,
 } from "./types";
@@ -13,25 +14,38 @@ let baseUrl = constants.backend_url;
 
 // GET
 // Latest orders in the market
-export const getLatestOrders = (orderType, orderDir) => async (dispatch) => {
-  // let url = `${baseUrl}/order-apis/v1/orders/1`;
-  let url = `${baseUrl}/order-apis/v1/orders/1?order_type=${orderType}&order_direction=${orderDir}`;
-  let response = axios
-    .get(url)
-    .then((res) => {
-      dispatch({
-        type: GET_ORDERS,
-        payload: res.data,
+export const getLatestOrders =
+  (orderType, orderDir, paymentOption, fiat, token) => async (dispatch) => {
+    let url = `${baseUrl}/order-apis/v1/orders/1`;
+    console.log(paymentOption.toLowerCase());
+    let params = {
+      params: {
+        order_type: orderType,
+        order_by: "order_amount",
+        order_direction: "desc",
+        payment_option: paymentOption === "all" ? null : paymentOption,
+        order_status: "active",
+        fiat: fiat,
+        token: token,
+      },
+    };
+
+    let response = axios
+      .get(url, params)
+      .then((res) => {
+        dispatch({
+          type: GET_ORDERS,
+          payload: res.data,
+        });
+      })
+      .catch((err) => {
+        dispatch({
+          type: GET_ERRORS,
+          payload: err,
+        });
       });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
-    });
-  return response;
-};
+    return response;
+  };
 
 // GET
 // All Tokens
@@ -61,6 +75,26 @@ export const getAllFiats = () => (dispatch) => {
     .then((res) => {
       dispatch({
         type: GET_FIATS,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch({
+        type: GET_ERRORS,
+        payload: err,
+      });
+    });
+  return response;
+};
+
+// GET
+// All Payment Options
+export const getAllPaymentOptions = () => (dispatch) => {
+  let response = axios
+    .get(`${baseUrl}/order-apis/v1/payment_options`)
+    .then((res) => {
+      dispatch({
+        type: GET_PAYMENTS,
         payload: res.data,
       });
     })

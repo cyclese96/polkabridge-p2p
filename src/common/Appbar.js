@@ -8,7 +8,11 @@ import { requestChalleng } from "../actions/userActions";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
 import { CONNECTOR_TYPE } from "../constants";
-import { getAllFiats, getAllTokens } from "../actions/orderActions";
+import {
+  getAllFiats,
+  getAllPaymentOptions,
+  getAllTokens,
+} from "../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
@@ -107,6 +111,7 @@ const Appbar = ({ requestChalleng }) => {
   useEffect(() => {
     dispatch(getAllTokens());
     dispatch(getAllFiats());
+    dispatch(getAllPaymentOptions());
   }, []);
 
   return (

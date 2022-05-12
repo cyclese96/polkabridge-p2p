@@ -82,17 +82,7 @@ export default function OrderTable({ filterParams }) {
   const [filteredOrder, setFilteredOrder] = useState([]);
 
   useEffect(() => {
-    async function asyncFn() {
-      let res = await dispatch(
-        getLatestOrders(filterParams.orderType, filterParams.orderDir)
-      );
-      console.log(res);
-    }
-    asyncFn();
-  }, []);
-
-  useEffect(() => {
-    if (orders.length > 0) {
+    if (orders) {
       let data = orders.filter(
         (singleOrder) => singleOrder.order_type === filterParams.orderType
       );

@@ -3,6 +3,7 @@ import {
   GET_ORDER,
   GET_TOKENS,
   GET_FIATS,
+  GET_PAYMENTS,
   CREATE_NEW_ORDER,
 } from "../actions/types";
 
@@ -11,6 +12,7 @@ const initalState = {
   order: null,
   fiats: [],
   tokens: [],
+  payments: [],
 };
 
 export default function Orders(state = initalState, action) {
@@ -18,7 +20,7 @@ export default function Orders(state = initalState, action) {
     case GET_ORDERS:
       return {
         ...state,
-        orders: action.payload,
+        orders: [...action.payload],
       };
     case GET_ORDER:
       return {
@@ -34,6 +36,11 @@ export default function Orders(state = initalState, action) {
       return {
         ...state,
         fiats: action.payload,
+      };
+    case GET_PAYMENTS:
+      return {
+        ...state,
+        payments: action.payload,
       };
 
     case CREATE_NEW_ORDER:

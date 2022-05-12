@@ -6,6 +6,7 @@ export const GET_ORDERS = "GET_ORDERS";
 export const CREATE_NEW_ORDER = "CREATE_NEW_ORDER";
 export const GET_FIATS = "GET_FIATS";
 export const GET_TOKENS = "GET_TOKENS";
+export const GET_PAYMENTS = "GET_PAYMENTS";
 
 // Profile reducers
 

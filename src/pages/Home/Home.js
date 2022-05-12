@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import {
   Box,
@@ -14,6 +14,8 @@ import {
 import OrderTable from "./components/OrderTable";
 import HowItWorks from "../../common/HowItWorks";
 import Footer from "../../common/Footer";
+import { useDispatch, useSelector } from "react-redux";
+import { getLatestOrders } from "../../actions/orderActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -90,12 +92,16 @@ const useStyles = makeStyles((theme) => ({
 export default function Home() {
   const classes = useStyles();
   const theme = useTheme();
+  const store = useSelector((state) => state);
+  const dispatch = useDispatch();
+  const { fiats, tokens, payments } = store.order;
 
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("PBR");
-  const [payment, setPayment] = useState("UPI");
-
+  const [fiatId, setFiatId] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [payment, setPayment] = useState("all");
   const [filterParams, setFilterParams] = useState({
     orderType: "buy",
     fiat: "INR",
@@ -103,6 +109,46 @@ export default function Home() {
     payment: "UPI",
     orderDir: "desc",
   });
+  const [queryParams, setQueryParams] = useState({
+    orderType: "buy",
+    fiat: "INR",
+    token: "PBR",
+    payment: "UPI",
+    orderDir: "desc",
+  });
+
+  useEffect(() => {
+    if (fiats.length > 0) {
+      console.log(fiats[0]);
+      setFiatId(fiats[0]._id);
+      setFiat(fiats[0].fiat);
+    }
+    if (tokens.length > 0) {
+      console.log(tokens[0]);
+
+      setTokenId(tokens[0]._id);
+      setToken(tokens[0].symbol);
+    }
+  }, [fiats, tokens]);
+
+  const updateIdValues = (type, value) => {
+    if (type === "FIAT") {
+      let indexOfItem = fiats.findIndex((item) => item.fiat === value);
+      if (indexOfItem > 0) {
+        console.log(fiats[indexOfItem]._id);
+        setFiat(value);
+        setFiatId(fiats[indexOfItem]._id);
+      }
+    } else {
+      let indexOfItem = tokens.findIndex((item) => item.symbol === value);
+      console.log(indexOfItem);
+      console.log(tokens[indexOfItem]._id);
+      if (indexOfItem > 0) {
+        setToken(value);
+        setTokenId(tokens[indexOfItem]._id);
+      }
+    }
+  };
 
   const updateFilters = () => {
     let tempObj = {
@@ -111,7 +157,25 @@ export default function Home() {
       token: token,
       payment: payment,
     };
+    let tempObjQuery = {
+      orderType: orderType,
+      fiat: fiatId,
+      token: tokenId,
+      payment: payment,
+    };
+    console.log(tempObj);
+    console.log(tempObjQuery);
     setFilterParams(tempObj);
+    setQueryParams(tempObjQuery);
+    dispatch(
+      getLatestOrders(
+        tempObjQuery.orderType,
+        tempObjQuery.orderDir,
+        tempObjQuery.payment,
+        tempObjQuery.fiat,
+        tempObjQuery.token
+      )
+    );
   };
   return (
     <Box>
@@ -171,11 +235,11 @@ export default function Home() {
                         letterSpacing: 1,
                         color: "#212121",
                       }}
-                      onChange={(e) => setFiat(e.target.value)}
+                      onChange={(e) => updateIdValues("FIAT", e.target.value)}
                     >
-                      <MenuItem value={"INR"}>INR</MenuItem>
-                      <MenuItem value={"USD"}>USD</MenuItem>
-                      <MenuItem value={"SGP"}>SGP</MenuItem>
+                      {fiats.map((item, index) => (
+                        <MenuItem value={item.fiat}>{item.fiat}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Box>
@@ -198,12 +262,11 @@ export default function Home() {
                         letterSpacing: 1,
                         color: "#212121",
                       }}
-                      onChange={(e) => setToken(e.target.value)}
+                      onChange={(e) => updateIdValues("TOKEN", e.target.value)}
                     >
-                      <MenuItem value={"ETH"}>ETH</MenuItem>
-                      <MenuItem value={"PBR"}>PBR</MenuItem>
-                      <MenuItem value={"LINK"}>LINK</MenuItem>
-                      <MenuItem value={"USDT"}>USDT</MenuItem>
+                      {tokens.map((item, index) => (
+                        <MenuItem value={item.symbol}>{item.symbol}</MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Box>
@@ -228,9 +291,12 @@ export default function Home() {
                       }}
                       onChange={(e) => setPayment(e.target.value)}
                     >
-                      <MenuItem value={"UPI"}>UPI</MenuItem>
-                      <MenuItem value={"PAYTM"}>Paytm</MenuItem>
-                      <MenuItem value={"Net Banking"}>Bank Transfer</MenuItem>
+                      <MenuItem value="all">All</MenuItem>
+                      {payments.map((item, index) => (
+                        <MenuItem value={item.provider}>
+                          {item.provider.toUpperCase()}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </Box>
