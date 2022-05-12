@@ -29,6 +29,12 @@ const UserSchema = new Schema({
     type: mongoose.Types.ObjectId,
     ref: "fiats",
   },
+  availableFrom: {
+    type: Date,
+  },
+  availableTo: {
+    type: Date,
+  },
   payment_options: {
     type: [Schema.Types.ObjectId],
     ref: "payment_options",

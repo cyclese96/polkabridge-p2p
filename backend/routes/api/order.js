@@ -576,7 +576,7 @@ router.get("/orders/:page_number", async (req, res) => {
 
     return res.status(200).json(orders);
   } catch (error) {
-    console.log(error);
+    console.log("get orders error ", error);
     res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
@@ -619,6 +619,33 @@ router.get("/fiats", async (req, res) => {
     const fiats = await Fiat.find({}).limit(10);
 
     return res.status(200).json(fiats);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+const supportedPaymentOptions = [
+  {
+    _id: 1,
+    provider: "upi",
+    desc: "UPI",
+  },
+  {
+    _id: 2,
+    provider: "neft",
+    desc: "Bank Transfer",
+  },
+  {
+    _id: 3,
+    provider: "imps",
+    desc: "Bank Transfer",
+  },
+];
+
+router.get("/payment_options", async (req, res) => {
+  try {
+    return res.status(200).json(supportedPaymentOptions);
   } catch (error) {
     console.log(error);
     res.status(401).json({ errors: [{ msg: "Server error" }] });

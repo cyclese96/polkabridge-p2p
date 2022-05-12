@@ -95,40 +95,41 @@ router.get("/user", auth, async (req, res) => {
 });
 
 // @route PUT /api/auth-apis/v1/user"
-// @desc UPDATE user phone and email
+// @desc UPDATE user
 // @access AUTHORIZED
-router.put(
-  "/user",
-  [check("email", "Please enter valid email address").isEmail()],
-  [check("phone", "Please enter valid phone number").isMobilePhone()],
-  [check("fiat", "Please select user default currency").isMongoId()],
-  auth,
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
+router.put("/user", auth, async (req, res) => {
+  try {
+    const errors = validationResult(req);
 
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      const userId = req.user.id;
-
-      const updateObject = req.body;
-
-      await User.findByIdAndUpdate(userId, {
-        $set: updateObject,
-      });
-
-      const user = await User.findById(userId)
-        .populate("fiat")
-        .populate("payment_options");
-
-      return res.status(201).send(user);
-    } catch (error) {
-      console.log("user route error ", error);
-      res.status(401).send({ errors: [{ msg: "Server error" }] });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+    const userId = req.user.id;
+
+    const updateObject = req.body;
+
+    if (Object.keys(updateObject).length === 0) {
+      return res.status(400).json({
+        errors: {
+          msg: "Request body should contain only atleast one field to update",
+        },
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $set: updateObject,
+    });
+
+    const user = await User.findById(userId)
+      .populate("fiat")
+      .populate("payment_options");
+
+    return res.status(201).send(user);
+  } catch (error) {
+    console.log("user route error ", error);
+    res.status(401).send({ errors: [{ msg: "Server error" }] });
   }
-);
+});
 
 // @route PUT /api/auth-apis/v1/user/payment-option"
 // @desc Add new payment option for a user
