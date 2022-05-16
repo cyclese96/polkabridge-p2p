@@ -178,6 +178,7 @@ export const getOrderDetailsById = (id) => (dispatch) => {
   let response = axios
     .get(`${baseUrl}/order-apis/v1/order/${id}`)
     .then((res) => {
+      console.log(res.data);
       dispatch({
         type: GET_ORDER,
         payload: res.data,

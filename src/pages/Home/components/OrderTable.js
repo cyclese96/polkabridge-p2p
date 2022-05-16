@@ -134,7 +134,7 @@ export default function OrderTable({ filterParams }) {
                       <td className={classes.otherText}>
                         {order.order_type === "buy" ? (
                           <Link
-                            to={`/order/${order.id}`}
+                            to={`/order/${order._id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
@@ -143,7 +143,7 @@ export default function OrderTable({ filterParams }) {
                           </Link>
                         ) : (
                           <Link
-                            to={`/order/${order.id}`}
+                            to={`/order/${order._id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
@@ -172,10 +172,11 @@ export default function OrderTable({ filterParams }) {
                         {order.payment_options.join(", ").toUpperCase()}
                       </td>
                       <td className={classes.otherText}>07, May 2022</td>
+                      {console.log(order)}
                       <td className={classes.otherText}>
                         {order.order_type === "buy" ? (
                           <Link
-                            to={`/order/${order.id}`}
+                            to={`/order/${order._id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
@@ -184,7 +185,7 @@ export default function OrderTable({ filterParams }) {
                           </Link>
                         ) : (
                           <Link
-                            to={`/order/${order.id}`}
+                            to={`/order/${order._id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>

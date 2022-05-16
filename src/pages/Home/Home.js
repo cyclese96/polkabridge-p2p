@@ -134,7 +134,7 @@ export default function Home() {
   const updateIdValues = (type, value) => {
     if (type === "FIAT") {
       let indexOfItem = fiats.findIndex((item) => item.fiat === value);
-      if (indexOfItem > 0) {
+      if (indexOfItem >= 0) {
         console.log(fiats[indexOfItem]._id);
         setFiat(value);
         setFiatId(fiats[indexOfItem]._id);
@@ -143,7 +143,7 @@ export default function Home() {
       let indexOfItem = tokens.findIndex((item) => item.symbol === value);
       console.log(indexOfItem);
       console.log(tokens[indexOfItem]._id);
-      if (indexOfItem > 0) {
+      if (indexOfItem >= 0) {
         setToken(value);
         setTokenId(tokens[indexOfItem]._id);
       }

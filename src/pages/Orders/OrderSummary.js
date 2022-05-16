@@ -10,9 +10,9 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   AccountBalanceWallet,
   AccountBalanceWalletOutlined,
@@ -26,6 +26,9 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
+import { getOrderDetailsById } from "../../actions/orderActions";
+import { useDispatch, useSelector } from "react-redux";
+import Web3 from "web3";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -160,12 +163,43 @@ const useStyles = makeStyles((theme) => ({
 
 function OrderSummary() {
   const classes = useStyles();
+  const store = useSelector((state) => state);
+
   const theme = useTheme();
+  const { order_id } = useParams();
+  const dispatch = useDispatch();
+
+  const { order } = store.order;
 
   //States
-  const [fiat, setFiat] = useState("INR");
+  const [amount, setAmount] = useState(0);
+  const [total, setTotal] = useState(0);
   const [token, setToken] = useState("BTC");
   const [payment, setPayment] = useState("Google Pay");
+
+  useEffect(() => {
+    async function asyncFn() {
+      if (order_id) {
+        console.log(order_id);
+        let data = await dispatch(getOrderDetailsById(order_id));
+        console.log(data);
+      }
+    }
+    asyncFn();
+  }, [order_id]);
+
+  const handleAmountChange = (value, price) => {
+    setAmount(value);
+
+    let totalAmount = parseInt(price) * value;
+    setTotal(totalAmount);
+  };
+  const handleTotalChange = (value, price) => {
+    setTotal(value);
+
+    let orderAmount = parseInt(price) / value;
+    setAmount(orderAmount);
+  };
 
   return (
     <Box className={classes.background}>
@@ -189,163 +223,220 @@ function OrderSummary() {
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Proceed Buy Order
+              Proceed {order?.order_type} order
             </Typography>
 
-            <div className="d-flex justify-content-around mt-5">
-              <Box mt={2}>
-                <Typography
-                  display="flex"
-                  alignItems={"center"}
-                  variant="body2"
-                >
-                  Purchase Amount
-                </Typography>
-                <Typography
-                  variant="body1"
-                  align="left"
-                  style={{ fontWeight: 600 }}
-                >
-                  0.089
-                </Typography>
-              </Box>
-              <Box mt={2}>
-                <Typography
-                  display="flex"
-                  alignItems={"center"}
-                  variant="body2"
-                >
-                  Offer Price
-                </Typography>
-                <Typography
-                  variant="body1"
-                  align="left"
-                  style={{ fontWeight: 600 }}
-                >
-                  37,25,123
-                </Typography>
-              </Box>
-              <Box mt={2}>
-                <Typography
-                  display="flex"
-                  alignItems={"center"}
-                  variant="body2"
-                >
-                  Payment Type
-                </Typography>
-                <Typography
-                  variant="body1"
-                  align="left"
-                  style={{ fontWeight: 600 }}
-                >
-                  Google pay, IMPS
-                </Typography>
-              </Box>
-              <Box mt={2}>
-                <Typography
-                  display="flex"
-                  alignItems={"center"}
-                  variant="body2"
-                >
-                  Activity Time
-                </Typography>
-                <Typography
-                  variant="body1"
-                  align="left"
-                  style={{ fontWeight: 600 }}
-                >
-                  13:30-19:30 IST
-                </Typography>
-              </Box>
-            </div>
-
-            <div className="d-flex justify-content-center align-items-center mt-5">
-              <Grid
-                container
-                mt={2}
-                display="flex"
-                justifyContent={"center"}
-                style={{ width: "70%" }}
-              >
-                <Grid item md={3} display="flex">
-                  <Typography display="flex" alignItems={"center"}>
-                    <MoneyOutlined
-                      style={{ marginRight: 12, color: "#616161" }}
-                    />{" "}
-                    Amount:
-                  </Typography>
-                </Grid>
-                <Grid item md={7}>
-                  <Box
+            {order ? (
+              <div>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="container row mt-5">
+                      <div className="col-md-6">
+                        <Box mt={2}>
+                          <Typography textAlign="left" variant="body2">
+                            Amount{" "}
+                            {order.order_type === "sell" ? "on sell" : "to buy"}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {Web3.utils.fromWei(
+                              order.order_amount.toString(),
+                              "ether"
+                            )}
+                            {" " + order.token.symbol}
+                          </Typography>
+                        </Box>
+                      </div>
+                      <div className="col-md-6">
+                        {" "}
+                        <Box mt={2}>
+                          <Typography textAlign="left" variant="body2">
+                            Price({order.fiat.fiat})
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {order.order_unit_price} per {order.token.symbol}
+                          </Typography>
+                        </Box>
+                      </div>
+                    </div>
+                    <div className="container row mt-3">
+                      <div className="col-md-6">
+                        <Box mt={2}>
+                          <Typography textAlign="left" variant="body2">
+                            Payment Type
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            {order.payment_options.toString().toUpperCase()}
+                          </Typography>
+                        </Box>
+                      </div>
+                      <div className="col-md-6">
+                        <Box mt={2}>
+                          <Typography
+                            display="flex"
+                            textAlign="left"
+                            variant="body2"
+                          >
+                            Activity Time
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            align="left"
+                            style={{ fontWeight: 600 }}
+                          >
+                            13:30-19:30 IST
+                          </Typography>
+                        </Box>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className=" mt-5">
+                      <Box mt={2} style={{ width: "100%" }}>
+                        <Typography
+                          display="flex"
+                          textAlign="left"
+                          variant="body1"
+                          style={{ fontWeight: 600 }}
+                        >
+                          Remarks:
+                        </Typography>
+                        <Box
+                          style={{
+                            border: "1px solid #e5e5e5",
+                            borderRadius: 10,
+                            padding: 10,
+                            width: "100%",
+                            minHeight: 150,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            textAlign="left"
+                            style={{ fontWeight: 400 }}
+                          >
+                            {order.description}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </div>
+                  </div>
+                </div>
+                <div className="d-flex justify-content-center align-items-center mt-5">
+                  <Grid
+                    container
+                    mt={2}
                     display="flex"
-                    alignItems={"center"}
-                    style={{
-                      borderBottom: "1px solid #212121",
-                      width: "fit-content",
-                    }}
+                    justifyContent={"center"}
+                    style={{ width: "70%" }}
                   >
-                    <Input type="number" value={0.1} disableUnderline={true} />
-                    <Select
-                      variant="standard"
-                      disableUnderline={true}
-                      value={token}
-                      label="Age"
+                    <Grid item md={3} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <MoneyOutlined
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Amount:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "fit-content",
+                        }}
+                      >
+                        <Input
+                          type="number"
+                          value={amount}
+                          onChange={(e) =>
+                            handleAmountChange(
+                              e.target.value,
+                              Web3.utils.fromWei(
+                                order.order_amount.toString(),
+                                "ether"
+                              )
+                            )
+                          }
+                          disableUnderline={true}
+                        />
+                        {order.fiat.fiat}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  <Grid
+                    container
+                    mt={2}
+                    display="flex"
+                    justifyContent={"center"}
+                    style={{ width: "70%" }}
+                  >
+                    <Grid item md={3} display="flex">
+                      <Typography display="flex" alignItems={"center"}>
+                        <CreditCard
+                          style={{ marginRight: 12, color: "#616161" }}
+                        />{" "}
+                        Total:
+                      </Typography>
+                    </Grid>
+                    <Grid item md={7}>
+                      <Box
+                        display="flex"
+                        alignItems={"center"}
+                        style={{
+                          borderBottom: "1px solid #212121",
+                          width: "fit-content",
+                        }}
+                      >
+                        <Input
+                          type="number"
+                          value={total}
+                          onChange={(e) =>
+                            handleTotalChange(
+                              e.target.value,
+                              Web3.utils.fromWei(
+                                order.order_amount.toString(),
+                                "ether"
+                              )
+                            )
+                          }
+                          disableUnderline={true}
+                        />
+                        INR
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </div>
+                <div className="text-center mt-4">
+                  <Link to="/order-review">
+                    <Button
                       style={{
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        color: "#212121",
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
                       }}
-                      onChange={(e) => setToken(e.target.value)}
                     >
-                      <MenuItem value={"BTC"}>BTC</MenuItem>
-                      <MenuItem value={"ETH"}>ETH</MenuItem>
-                      <MenuItem value={"PBR"}>PBR</MenuItem>
-                    </Select>
-                  </Box>
-                </Grid>
-              </Grid>
-              <Grid
-                container
-                mt={2}
-                display="flex"
-                justifyContent={"center"}
-                style={{ width: "70%" }}
-              >
-                <Grid item md={3} display="flex">
-                  <Typography display="flex" alignItems={"center"}>
-                    <CreditCard style={{ marginRight: 12, color: "#616161" }} />{" "}
-                    Total:
-                  </Typography>
-                </Grid>
-                <Grid item md={7}>
-                  <Box
-                    display="flex"
-                    alignItems={"center"}
-                    style={{
-                      borderBottom: "1px solid #212121",
-                      width: "fit-content",
-                    }}
-                  >
-                    <Input type="number" value={3000} disableUnderline={true} />
-                    INR
-                  </Box>
-                </Grid>
-              </Grid>
-            </div>
-            <div className="text-center mt-4">
-              <Link to="/order-review">
-                <Button
-                  style={{
-                    borderRadius: 10,
-                    background: "#6A55EA",
-                    padding: "9px 35px 9px 35px",
-                    color: "white",
-                  }}
-                >
-                  Confirm Buy
-                </Button>
-              </Link>
-            </div>
+                      Confirm Buy
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              "Loading"
+            )}
           </div>
           <HowItWorks />
         </Box>
