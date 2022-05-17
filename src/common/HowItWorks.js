@@ -145,7 +145,7 @@ export default function HowItWorks() {
                   STEP 1
                 </h1>
                 <Typography variant="body2" className={classes.description}>
-                  Pay directly to seller bank account
+                  Create Order and Deposit Tokens
                 </Typography>
               </Box>
             </Box>
@@ -165,14 +165,14 @@ export default function HowItWorks() {
                 width={200}
               >
                 <div style={{ height: 100 }}>
-                  <img src="images/bank.png" style={{ height: 80 }} />
+                  <img src="/images/bank.png" style={{ height: 80 }} />
                 </div>
 
                 <h1 variant="h1" className={classes.title}>
                   STEP 2
                 </h1>
                 <Typography variant="body2" className={classes.description}>
-                  Pay directly to seller bank account
+                  Pay directly to seller account
                 </Typography>
               </Box>
             </Box>
@@ -192,14 +192,14 @@ export default function HowItWorks() {
                 width={200}
               >
                 <div style={{ height: 100 }}>
-                  <img src="images/wallet.png" style={{ height: 80 }} />
+                  <img src="/images/wallet.png" style={{ height: 80 }} />
                 </div>
 
                 <h1 variant="h1" className={classes.title}>
                   STEP 3
                 </h1>
                 <Typography variant="body2" className={classes.description}>
-                  Pay directly to seller bank account
+                  We will release tokens to buyer
                 </Typography>
               </Box>
             </Box>

@@ -194,6 +194,7 @@ function OrderSummary() {
     let totalAmount = parseInt(price) * value;
     setTotal(totalAmount);
   };
+
   const handleTotalChange = (value, price) => {
     setTotal(value);
 
@@ -420,7 +421,7 @@ function OrderSummary() {
                   </Grid>
                 </div>
                 <div className="text-center mt-4">
-                  <Link to="/order-review">
+                  <Link to={`/order-payments/${order._id}`}>
                     <Button
                       style={{
                         borderRadius: 10,

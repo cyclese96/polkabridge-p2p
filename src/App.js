@@ -16,6 +16,8 @@ import OrderReview from "./pages/Orders/OrderReview";
 import { Provider } from "react-redux";
 import store from "./store";
 import OrderSummary from "./pages/Orders/OrderSummary";
+import OrderPayments from "./pages/Orders/components/OrderPayments";
+import OrderWaiting from "./pages/Orders/components/OrderWaiting";
 
 function App() {
   return (
@@ -28,6 +30,14 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/order/:order_id" element={<OrderSummary />} />
+              <Route
+                path="/order-payments/:order_id"
+                element={<OrderPayments />}
+              />
+              <Route
+                path="/order-waiting/:order_id"
+                element={<OrderWaiting />}
+              />
 
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed/:order_id" element={<OrderPlaced />} />
