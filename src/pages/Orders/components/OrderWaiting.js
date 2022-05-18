@@ -203,6 +203,7 @@ function OrderWaiting() {
   const [total, setTotal] = useState(0);
   const [token, setToken] = useState("BTC");
   const [payment, setPayment] = useState("Google Pay");
+  const [orderComplete, setOrderComplete] = useState(true);
 
   useEffect(() => {
     async function asyncFn() {
@@ -246,12 +247,12 @@ function OrderWaiting() {
               color="textSecondary"
               className={classes.pageSubtitle}
             >
-              Proceed for payments
+              Waiting to settle your order
             </Typography>
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Sell Order #{order?.order_id} initiated
+              Sell Order #{order?.order_id}
             </Typography>
 
             {order ? (
@@ -326,7 +327,7 @@ function OrderWaiting() {
                         <div>
                           <div
                             style={{
-                              backgroundColor: "#bdbdbd",
+                              backgroundColor: "#4caf50",
                               borderRadius: "50%",
                               height: 14,
                               width: 14,
@@ -369,7 +370,7 @@ function OrderWaiting() {
                         <div>
                           <div
                             style={{
-                              backgroundColor: "#bdbdbd",
+                              backgroundColor: "#4caf50",
                               borderRadius: "50%",
                               height: 14,
                               width: 14,
@@ -382,7 +383,7 @@ function OrderWaiting() {
                         Waiting Seller
                       </h1>
                       <p variant="body2" className={classes.description}>
-                        Pay directly to seller bank account
+                        Let seller confirm your payment first
                       </p>
                     </Box>
                   </Box>
@@ -432,14 +433,19 @@ function OrderWaiting() {
                 </div>
 
                 <h6 className={classes.timer} style={{ marginTop: 30 }}>
-                  Waiting for seller to confirm your payment
+                  {!orderComplete
+                    ? "Waiting for seller to confirm your payment"
+                    : "Fiat and Tokens P2P Transfer Finished"}
                 </h6>
-
+                <div className="text-center my-5">
+                  <img src="/images/order_complete.png" height="150px" />
+                </div>
                 <h6
                   className={classes.description}
                   style={{ color: "#212121", fontSize: 14 }}
                 >
-                  I have transferred exactly 50,000 to the above account.
+                  {!orderComplete &&
+                    "I have transferred exactly 50,000 to the above account."}
                 </h6>
                 <div className="text-center mt-4">
                   <Button
@@ -450,9 +456,15 @@ function OrderWaiting() {
                       color: "white",
                     }}
                   >
-                    Mark payment
+                    {!orderComplete
+                      ? "View Payment Details"
+                      : "Go To Trade Page"}
                   </Button>
                 </div>
+                <h6 className={classes.description} style={{ marginTop: 30 }}>
+                  {orderComplete &&
+                    "If have any issue regarding this trade, let us know in help section."}
+                </h6>
               </Container>
             ) : (
               "Loading"

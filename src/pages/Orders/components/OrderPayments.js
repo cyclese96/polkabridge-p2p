@@ -43,9 +43,6 @@ const useStyles = makeStyles((theme) => ({
     padding: 20,
     borderRadius: 10,
     background: "linear-gradient(181.11deg, #FFFFFF -112.7%, #D9E8FC 233.13%)",
-    display: "flex",
-    justifyContent: "space-around",
-    alignItems: "center",
   },
   pageTitle: {
     color: "#212121",
@@ -75,14 +72,14 @@ const useStyles = makeStyles((theme) => ({
   },
   subtitle: {
     color: "#414141",
-    fontWeight: 600,
+    fontWeight: 500,
     fontSize: 16,
     textAlign: "center",
   },
   timer: {
     color: "#212121",
     fontWeight: 600,
-    fontSize: 24,
+    fontSize: 22,
     textAlign: "center",
   },
   cardTitle: {
@@ -203,6 +200,7 @@ function OrderPayments() {
   const [total, setTotal] = useState(0);
   const [token, setToken] = useState("BTC");
   const [payment, setPayment] = useState("Google Pay");
+  const [details, setDetails] = useState(false);
 
   useEffect(() => {
     async function asyncFn() {
@@ -229,6 +227,10 @@ function OrderPayments() {
     setAmount(orderAmount);
   };
 
+  const displayPaymentDetails = () => {
+    setDetails(true);
+  };
+
   return (
     <Box className={classes.background}>
       <Container>
@@ -251,7 +253,7 @@ function OrderPayments() {
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Sell Order #{order?.order_id} initiated
+              Sell Order #{order?.order_id}
             </Typography>
 
             {order ? (
@@ -443,49 +445,100 @@ function OrderPayments() {
                 </h6>
                 <div className="d-flex justify-content-center">
                   <Box className={classes.paymentBox}>
-                    <div
-                      style={{
-                        borderRight: "1px solid #bdbdbd",
-                        paddingRight: 20,
-                      }}
-                    >
-                      <h6
-                        className={classes.subtitle}
-                        style={{ color: "#919191" }}
-                      >
-                        Pay Exactly
-                      </h6>
-                      <h5 className={classes.subtitle}>50,000 INR</h5>
-                    </div>
-                    <div
-                      style={{
-                        borderRadius: 20,
-                        border: "1px solid #bdbdbd",
-                        padding: 14,
-                      }}
-                    >
-                      <img src="/images/bank.png" height="60px" />
-                    </div>
-                    <div
-                      style={{
-                        borderRadius: 20,
-                        border: "1px solid #bdbdbd",
-                        padding: 14,
-                      }}
-                    >
-                      <img
-                        src="/images/upi.png"
-                        height="60px"
-                        style={{ borderRadius: 10 }}
-                      />
-                    </div>
+                    <Box>
+                      <div className="d-flex justify-content-around align-items-center">
+                        <div
+                          style={{
+                            borderRight: "1px solid #bdbdbd",
+                            paddingRight: 20,
+                          }}
+                        >
+                          <h6
+                            className={classes.subtitle}
+                            style={{ color: "#919191" }}
+                          >
+                            Pay Exactly
+                          </h6>
+                          <h5 className={classes.subtitle}>50,000 INR</h5>
+                        </div>
+                        <div
+                          onClick={displayPaymentDetails}
+                          style={{
+                            borderRadius: 20,
+                            border: "1px solid #bdbdbd",
+                            padding: 14,
+                            cursor: "pointer",
+                          }}
+                        >
+                          <img src="/images/bank.png" height="60px" />
+                        </div>
+                        <div
+                          onClick={displayPaymentDetails}
+                          style={{
+                            borderRadius: 20,
+                            border: "1px solid #bdbdbd",
+                            padding: 14,
+                            cursor: "pointer",
+                          }}
+                        >
+                          <img
+                            src="/images/upi.png"
+                            height="60px"
+                            style={{ borderRadius: 10 }}
+                          />
+                        </div>
+                      </div>
+                      {details && (
+                        <div className="row mt-3">
+                          <div className="col-md-4"></div>
+
+                          <div className="col-md-8">
+                            <div
+                              style={{
+                                padding: 20,
+                                border: "1px solid #e5e5e5",
+                                borderRadius: 20,
+                              }}
+                            >
+                              <div className="row">
+                                <div className="col-md-4">
+                                  <strong>UPI ID:</strong>
+                                </div>
+                                <div className="col-md-8">90441263@ybl</div>
+                              </div>
+                              <div className="row">
+                                <div className="col-md-4">
+                                  <strong>Name:</strong>
+                                </div>
+                                <div className="col-md-8">Hing Singh</div>
+                              </div>
+                              <div className="row">
+                                <div className="col-md-4">
+                                  <strong>Remarks:</strong>
+                                </div>
+                                <div className="col-md-8">3dhevc</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Box>
                   </Box>
                 </div>
                 <h6
                   className={classes.description}
                   style={{ color: "#212121", fontSize: 14 }}
                 >
-                  I have transferred exactly 50,000 to the above account.
+                  <input
+                    type="checkbox"
+                    id="vehicle1"
+                    name="vehicle1"
+                    value="Bike"
+                    style={{ marginRight: 10 }}
+                  />
+                  <label for="vehicle1">
+                    I have transferred exactly 50,000 to the above account.
+                  </label>
                 </h6>
                 <div className="text-center mt-4">
                   <Link to={`/order-waiting/${order._id}`}>

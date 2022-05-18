@@ -4,6 +4,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { getLatestOrders } from "./../../../actions/orderActions";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import Web3 from "web3";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -123,7 +124,11 @@ export default function OrderTable({ filterParams }) {
                         {order.order_unit_price}
                       </td>
                       <td className={classes.otherText}>
-                        {order.order_amount}
+                        {order &&
+                          Web3.utils.fromWei(
+                            order.order_amount.toString(),
+                            "ether"
+                          )}
                       </td>
 
                       <td className={classes.otherText}>
@@ -165,7 +170,11 @@ export default function OrderTable({ filterParams }) {
                         {order.order_unit_price}
                       </td>
                       <td className={classes.otherText}>
-                        {order.order_amount}
+                        {order &&
+                          Web3.utils.fromWei(
+                            order.order_amount.toString(),
+                            "ether"
+                          )}
                       </td>
                       <td className={classes.otherText}>
                         {" "}
