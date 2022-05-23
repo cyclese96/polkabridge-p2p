@@ -26,14 +26,16 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
-import constants from "../../utils/constants";
 import { createBuyOrder, createSellOrder } from "../../actions/orderActions";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toWei } from "../../utils/helper";
 import { useDepositCallback } from "../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../hooks/useAllowance";
-import { ALLOWANCE_AMOUNT } from "../../constants";
+import {
+  ALLOWANCE_AMOUNT,
+  SUPPORTED_PAYMENT_METHODS,
+} from "../../constants/index";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -270,6 +272,7 @@ function CreateOrder() {
     useDepositCallback(selectedToken);
 
   const handleDeposit = () => {
+    console.log("allowance ", allowance);
     if (!allowance) {
       confirmAllowance(ALLOWANCE_AMOUNT);
     } else {
@@ -605,7 +608,7 @@ function CreateOrder() {
                             width: "fit-content",
                           }}
                         >
-                          {constants.SUPPORTED_PAYMENT_METHODS.map((value) => {
+                          {SUPPORTED_PAYMENT_METHODS.map((value) => {
                             return (
                               <Box
                                 onClick={() => updatePaymentMethods(value)}

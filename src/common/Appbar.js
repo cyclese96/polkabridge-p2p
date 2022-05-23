@@ -4,7 +4,6 @@ import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 
 import { connect } from "react-redux";
-import { requestChalleng } from "../actions/userActions";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
 import { CONNECTOR_TYPE } from "../constants";
@@ -96,9 +95,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Appbar = ({ requestChalleng }) => {
+const Appbar = () => {
   const classes = useStyles();
-  const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const [authStatus, connectWallet] = useUserAuthentication();
 
@@ -250,4 +248,4 @@ const mapStateToProps = (state) => ({
   user: state.user,
 });
 
-export default connect(mapStateToProps, { requestChalleng })(Appbar);
+export default connect(mapStateToProps, {})(Appbar);

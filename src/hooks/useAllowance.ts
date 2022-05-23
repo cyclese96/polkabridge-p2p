@@ -33,11 +33,13 @@ export function useTokenAllowance(
     async (tokenAmount?: string) => {
       try {
         const _amount = toWei(tokenAmount, token?.decimals);
+        console.log("allowance ", _amount);
         setData({ ...data, status: "waiting" });
         const tx = await tokenContract?.approve(spender, _amount);
 
         setData({ ...data, hash: tx?.hash, status: "pending" });
       } catch (error) {
+        console.log("confirmAllowance  ", error);
         setData({ ...data, status: "" });
       }
     },

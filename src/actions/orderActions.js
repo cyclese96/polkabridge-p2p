@@ -1,5 +1,12 @@
 import axios from "axios";
-import constants from "../utils/constants";
+import {
+  createOrder,
+  getFiats,
+  getGlobalPaymentOptions,
+  getOrderById,
+  getOrders,
+  getTokens,
+} from "../utils/httpCalls";
 import {
   GET_ORDERS,
   GET_ORDER,
@@ -11,21 +18,11 @@ import {
   RESET_NEW_ORDER,
 } from "./types";
 
-let baseUrl = constants.backend_url;
-
-let headerObj = {
-  "Content-Type": "application/json;charset=UTF-8",
-  "Access-Control-Allow-Origin": "*",
-  "x-auth-token":
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjI4NDljOGVlZmViZjE5OThiZmY0ZTQ3IiwiYWRkcmVzcyI6IjB4OTFmZDA5M2VhMGI5YzE0MjExNGNlNDhlOTFiNGI3NjM5NTVkNDM3YyJ9LCJpYXQiOjE2NTI4NTc5OTgsImV4cCI6MTY1MzcyMTk5OH0.DoNoNCuXQ5MaxWnfkweJ__sMLXbhbZghzU2G-4ckHl8",
-};
-
 // GET
 // Latest orders in the market
 export const getLatestOrders =
-  (orderType, orderDir, paymentOption, fiat, token) => async (dispatch) => {
-    let url = `${baseUrl}/order-apis/v1/orders/1`;
-    console.log(paymentOption.toLowerCase());
+  (pageNumber, orderType, orderDir, paymentOption, fiat, token) =>
+  async (dispatch) => {
     let paramsObj = {
       order_type: orderType,
       order_by: "order_amount",
@@ -36,177 +33,160 @@ export const getLatestOrders =
       token: "6263a3e538fd8c30a7c4d8b5",
     };
 
-    console.log("fetching orders");
-    let response = axios
-      .get(url, { params: paramsObj, headers: headerObj })
-      .then((res) => {
-        console.log("orders", res.data);
-        dispatch({
-          type: GET_ORDERS,
-          payload: res.data,
-        });
-      })
-      .catch((err) => {
-        console.log("getLatestOrders orders", err);
-        dispatch({
-          type: GET_ERRORS,
-          payload: err,
-        });
+    const result = await getOrders(pageNumber, paramsObj);
+
+    if (!result) {
+      dispatch({
+        type: GET_ERRORS,
+        payload: "failed to fetch orders",
       });
-    return response;
+      return;
+    }
+
+    dispatch({
+      type: GET_ORDERS,
+      payload: result,
+    });
   };
 
 // GET
 // All Tokens
-export const getAllTokens = () => (dispatch) => {
-  let response = axios
-    .get(`${baseUrl}/order-apis/v1/order-tokens`, { headers: headerObj })
-    .then((res) => {
-      dispatch({
-        type: GET_TOKENS,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
+export const getAllTokens = () => async (dispatch) => {
+  const result = await getTokens();
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to fetch tokens",
     });
-  return response;
+    return;
+  }
+
+  dispatch({
+    type: GET_TOKENS,
+    payload: result,
+  });
 };
 
 // GET
 // All Fiat
-export const getAllFiats = () => (dispatch) => {
-  let response = axios
-    .get(`${baseUrl}/order-apis/v1/fiats`, { headers: headerObj })
-    .then((res) => {
-      dispatch({
-        type: GET_FIATS,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
+export const getAllFiats = () => async (dispatch) => {
+  const result = await getFiats();
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to fetch fiats",
     });
-  return response;
+    return;
+  }
+
+  dispatch({
+    type: GET_FIATS,
+    payload: result,
+  });
 };
 
 // GET
 // All Payment Options
-export const getAllPaymentOptions = () => (dispatch) => {
-  let response = axios
-    .get(`${baseUrl}/order-apis/v1/payment_options`, { headers: headerObj })
-    .then((res) => {
-      dispatch({
-        type: GET_PAYMENTS,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
+export const getAllPaymentOptions = () => async (dispatch) => {
+  const result = await getGlobalPaymentOptions();
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to fetch global payments",
     });
-  return response;
+    return;
+  }
+
+  dispatch({
+    type: GET_PAYMENTS,
+    payload: result,
+  });
 };
 
 // POST
 // CREATE SELL ORDER
-export const createSellOrder = (orderObject) => (dispatch) => {
+export const createSellOrder = (orderObject) => async (dispatch) => {
   dispatch({ type: RESET_NEW_ORDER });
-  let response = axios
-    .post(`${baseUrl}/order-apis/v1/sell-order`, orderObject, {
-      headers: headerObj,
-    })
-    .then((res) => {
-      dispatch({
-        type: GET_ORDERS,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      console.log("createSellOrder orders", err);
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
-      dispatch({ type: RESET_NEW_ORDER });
+
+  const result = await createOrder("sell", orderObject);
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to create sell order",
     });
-  return response;
+    return;
+  }
+
+  dispatch({
+    type: GET_ORDER,
+    payload: result,
+  });
+
+  dispatch({ type: RESET_NEW_ORDER });
 };
 
 // POST
 // CREATE BUY ORDER
-export const createBuyOrder = (orderObject) => (dispatch) => {
-  console.log("hello");
-  let response;
+export const createBuyOrder = (orderObject) => async (dispatch) => {
+  dispatch({ type: RESET_NEW_ORDER });
+
+  const result = await createOrder("buy", orderObject);
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to create buy order",
+    });
+    return;
+  }
+
+  dispatch({
+    type: GET_ORDER,
+    payload: result,
+  });
 
   dispatch({ type: RESET_NEW_ORDER });
-  axios
-    .post(`${baseUrl}/order-apis/v1/buy-order`, orderObject, {
-      headers: headerObj,
-    })
-    .then((res) => {
-      response = res;
-      dispatch({
-        type: CREATE_NEW_ORDER,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      response = err;
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
-      dispatch({ type: RESET_NEW_ORDER });
-    });
-  return response;
 };
 
-// POST
-// CREATE BUY ORDER
-export const verifyTokenDeposit = () => (dispatch) => {
-  let response = axios
-    .get(`${baseUrl}/order_apis/v1/verify_deposit`, { headers: headerObj })
-    .then((res) => {
-      dispatch({
-        type: GET_ORDERS,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
-    });
-  return response;
-};
+// // POST
+// // CREATE BUY ORDER
+// export const verifyTokenDeposit = () => (dispatch) => {
+//   let response = axios
+//     .get(`${baseUrl}/order_apis/v1/verify_deposit`, { headers: headerObj })
+//     .then((res) => {
+//       dispatch({
+//         type: GET_ORDERS,
+//         payload: res.data,
+//       });
+//     })
+//     .catch((err) => {
+//       dispatch({
+//         type: GET_ERRORS,
+//         payload: err,
+//       });
+//     });
+//   return response;
+// };
 
 // GET
 // Single order detail
-export const getOrderDetailsById = (id) => (dispatch) => {
-  let response = axios
-    .get(`${baseUrl}/order-apis/v1/order/${id}`, { headers: headerObj })
-    .then((res) => {
-      console.log(res.data);
-      dispatch({
-        type: GET_ORDER,
-        payload: res.data,
-      });
-    })
-    .catch((err) => {
-      dispatch({
-        type: GET_ERRORS,
-        payload: err,
-      });
+export const getOrderDetailsById = (id) => async (dispatch) => {
+  const result = await getOrderById(id);
+
+  if (!result) {
+    dispatch({
+      type: GET_ERRORS,
+      payload: "failed to fetch order",
     });
-  return response;
+    return;
+  }
+
+  dispatch({
+    type: GET_ORDER,
+    payload: result,
+  });
 };
