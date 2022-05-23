@@ -598,7 +598,7 @@ router.get("/order/:order_id", auth, async (req, res) => {
 
 router.get("/order-tokens", auth, async (req, res) => {
   try {
-    const tokens = await Token.find({ active: true, chainId: 1 }).limit(10);
+    const tokens = await Token.find({ active: true, chainId: 4 }).limit(10);
 
     return res.status(200).json(tokens);
   } catch (error) {

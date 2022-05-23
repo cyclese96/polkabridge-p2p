@@ -16,40 +16,38 @@ export function useDepositCallback(
   let stakeRes: any = null;
 
   const depositTokens = useCallback(
-    async (tokenAmount?: string, poolId?: number) => {
+    async (tokenAmount?: string) => {
       try {
         const depositTokens = toWei(tokenAmount, token?.decimals);
         setData({ ...data, status: "waiting" });
 
-        stakeRes = await p2pContract?.deposit(poolId, depositTokens);
+        stakeRes = await p2pContract?.depositToken(
+          token?.address,
+          depositTokens
+        );
         setData({ ...data, hash: stakeRes?.hash, status: "pending" });
       } catch (error) {
         setData({ ...data, status: "" });
 
-        console.log("stake trx error ", { error, poolId });
+        console.log("depositTokens trx error ", { error });
       }
     },
-    [p2pContract, setData]
+    [p2pContract, token, setData]
   );
 
-  const withdrawTokens = useCallback(
-    async (tokenAmount?: string, poolId?: number) => {
-      const withdrawTokens = toWei(tokenAmount, token?.decimals);
+  const withdrawTokens = useCallback(async () => {
+    try {
+      setData({ ...data, status: "waiting" });
 
-      try {
-        setData({ ...data, status: "waiting" });
+      const res = await p2pContract?.withdrawToken(token?.address);
 
-        const res = await p2pContract?.withdraw(poolId, withdrawTokens);
+      setData({ ...data, hash: res?.hash, status: "pending" });
+    } catch (error) {
+      setData({ ...data, status: "" });
 
-        setData({ ...data, hash: res?.hash, status: "pending" });
-      } catch (error) {
-        setData({ ...data, status: "" });
-
-        console.log("unstake error ", error);
-      }
-    },
-    [p2pContract, setData]
-  );
+      console.log("unstake error ", error);
+    }
+  }, [p2pContract, token, setData]);
 
   useEffect(() => {
     if (!data?.hash) {
