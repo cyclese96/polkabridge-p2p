@@ -14,15 +14,16 @@ import {
 export const getUserProfile = () => async (dispatch) => {
   const result = await getUser();
 
-  if (!result) {
+  if (result?.status !== 200) {
     dispatch({
       type: GET_ERRORS,
-      pyaload: "Failed to fetch user",
+      payload: result.message,
     });
+    return;
   }
   dispatch({
     type: GET_PROFILE,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -31,15 +32,16 @@ export const getUserProfile = () => async (dispatch) => {
 export const updateUserProfile = (data) => async (dispatch) => {
   const result = await updateProfile(data);
 
-  if (!result) {
+  if (result?.status !== 201) {
     dispatch({
       type: GET_ERRORS,
-      pyaload: "Failed to update user profile",
+      payload: result.message,
     });
+    return;
   }
   dispatch({
     type: GET_PROFILE,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -48,15 +50,16 @@ export const updateUserProfile = (data) => async (dispatch) => {
 export const updateUserPaymentPreferences = (data) => async (dispatch) => {
   const result = await updatePayments(data);
 
-  if (!result) {
+  if (result?.status !== 201) {
     dispatch({
       type: GET_ERRORS,
-      pyaload: "Failed to update user payments",
+      payload: result.message,
     });
+    return;
   }
   dispatch({
     type: UPDATE_PAYMENTS,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -65,14 +68,15 @@ export const updateUserPaymentPreferences = (data) => async (dispatch) => {
 export const updateUserCurrency = (data) => async (dispatch) => {
   const result = await updateDefaultCurrency(data);
 
-  if (!result) {
+  if (result?.status !== 201) {
     dispatch({
       type: GET_ERRORS,
-      pyaload: "Failed to update user default currency",
+      payload: result.message,
     });
+    return;
   }
   dispatch({
     type: UPDATE_CURRENCY,
-    payload: result,
+    payload: result.data,
   });
 };

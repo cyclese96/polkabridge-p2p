@@ -13,57 +13,69 @@ const baseUrl =
 
 export const getUser = async () => {
   try {
-    let response = await axios.get(`${baseUrl}/auth-apis/v1/user`, {
+    const result = await axios.get(`${baseUrl}/auth-apis/v1/user`, {
       headers: headers,
     });
 
-    return response.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getUser ", error);
-    return null;
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const updateProfile = async (updateData: any) => {
   try {
-    let response = await axios.put(`${baseUrl}/auth-apis/v1/user`, updateData, {
+    const result = await axios.put(`${baseUrl}/auth-apis/v1/user`, updateData, {
       headers: headers,
     });
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("updateProfile ", error);
-    return {};
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const updatePayments = async (updateData: any) => {
   try {
-    let response = await axios.post(
+    const result = await axios.post(
       `${baseUrl}/auth-apis/v1/user/payment-option`,
       updateData,
       { headers: headers }
     );
 
-    return response?.data?.payment_options;
-  } catch (error) {
+    return { status: result?.status, data: result?.data?.payment_options };
+  } catch (error: any) {
     console.log("updatePayments ", error);
-    return [];
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const updateDefaultCurrency = async (updateData: any) => {
   try {
-    let response = await axios.post(
+    const result = await axios.post(
       `${baseUrl}/auth-apis/v1/user/payment-option`,
       updateData,
       { headers: headers }
     );
 
-    return response?.data?.fiat;
-  } catch (error) {
+    return { status: result?.status, data: result?.data?.fiat };
+  } catch (error: any) {
     console.log("updateDefaultCurrency ", error);
-    return {};
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
@@ -71,67 +83,82 @@ export const updateDefaultCurrency = async (updateData: any) => {
 
 export const getOrders = async (page: number, params: any) => {
   try {
-    let response = await axios.get(
+    const result = await axios.get(
       `${baseUrl}/order-apis/v1/orders/${page || 1}`,
       { params: params, headers: headers }
     );
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getOrders ", error);
-    return {};
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const getOrderById = async (id: string) => {
   try {
-    let response = await axios.get(`${baseUrl}/order-apis/v1/order/${id}`, {
+    const result = await axios.get(`${baseUrl}/order-apis/v1/order/${id}`, {
       headers: headers,
     });
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getOrders ", error);
-    return {};
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const getTokens = async () => {
   try {
-    let response = await axios.get(`${baseUrl}/order-apis/v1/order-tokens`, {
+    const result = await axios.get(`${baseUrl}/order-apis/v1/order-tokens`, {
       headers: headers,
     });
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getTokens ", error);
-    return [];
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const getFiats = async () => {
   try {
-    let response = await axios.get(`${baseUrl}/order-apis/v1/fiats`, {
+    const result = await axios.get(`${baseUrl}/order-apis/v1/fiats`, {
       headers: headers,
     });
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getFiats ", error);
-    return [];
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
 export const getGlobalPaymentOptions = async () => {
   try {
-    let response = await axios.get(`${baseUrl}/order-apis/v1/payment_options`, {
+    const result = await axios.get(`${baseUrl}/order-apis/v1/payment_options`, {
       headers: headers,
     });
 
-    return response?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("getGlobalPaymentOptions ", error);
-    return [];
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
@@ -157,10 +184,13 @@ export const createOrder = async (orderType: string, payload: any) => {
       );
     }
 
-    return response?.data;
-  } catch (error) {
-    console.log("getGlobalPaymentOptions ", error);
-    return {};
+    return { status: response?.status, data: response?.data };
+  } catch (error: any) {
+    console.log("getGlobalPaymentOptions ", { error });
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };
 
@@ -170,9 +200,12 @@ export const verifyDeposit = async () => {
       headers: headers,
     });
 
-    return result?.data;
-  } catch (error) {
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
     console.log("error ", error);
-    return false;
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
   }
 };

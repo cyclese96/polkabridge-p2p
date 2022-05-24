@@ -46,15 +46,14 @@ const useStyles = makeStyles((theme) => ({
 
 function ProfileInfo() {
   const classes = useStyles();
-  const theme = useTheme();
 
-  const store = useSelector((state) => state);
   const dispatch = useDispatch();
-  const { profile } = store.profile;
 
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
+
+  const profile = useSelector((state) => state?.profile?.profile);
 
   useEffect(() => {
     dispatch(getUserProfile());
@@ -62,6 +61,7 @@ function ProfileInfo() {
 
   useEffect(() => {
     if (profile) {
+      console.log("profile fetched", profile);
       setName(profile.name);
       setEmail(profile.email);
       setMobile(profile.phone);
@@ -73,13 +73,11 @@ function ProfileInfo() {
       name: name,
       phone: mobile,
       email: email,
-      fiat: "6267e54c3c805016884e50f9",
     };
     dispatch(updateUserProfile(tempObj));
   };
   return (
     <div className={classes.infoCard}>
-      {console.log(profile)}
       <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
         <Box>
           <img

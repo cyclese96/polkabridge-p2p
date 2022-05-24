@@ -1,5 +1,5 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../../../actions/profileActions";
@@ -61,18 +61,28 @@ function ProfileCurrency() {
   const classes = useStyles();
   const theme = useTheme();
 
-  const store = useSelector((state) => state);
   const dispatch = useDispatch();
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedId, setSelectedId] = useState("");
 
-  const { fiats } = store.order;
+  const profile = useSelector((state) => state?.profile?.profile);
 
-  const submitCurrency = () => {
-    let tempObj = {
-      fiat: fiats[selectedIndex]._id,
-    };
-    dispatch(updateUserProfile(tempObj));
-  };
+  useEffect(() => {
+    if (!profile) {
+      return;
+    }
+    setSelectedId(profile?.fiat?._id);
+  }, [profile]);
+
+  const fiats = useSelector((state) => state?.order?.fiats);
+
+  const submitCurrency = useCallback(() => {
+    {
+      let tempObj = {
+        fiat: selectedId,
+      };
+      dispatch(updateUserProfile(tempObj));
+    }
+  }, [fiats, selectedId]);
 
   return (
     <div className={classes.infoCard}>
@@ -92,7 +102,7 @@ function ProfileCurrency() {
               justifyContent="space-between"
               alignItems="center"
               pl={3}
-              onClick={() => setSelectedIndex(index)}
+              onClick={() => setSelectedId(item?._id)}
               className={classes.labelWrapper}
             >
               <Box display="flex" justifyContent="start" alignItems="center">
@@ -108,7 +118,7 @@ function ProfileCurrency() {
                   {item.fiat_label} ({item.fiat})
                 </Typography>
               </Box>
-              {selectedIndex === index ? (
+              {selectedId === item?._id ? (
                 <Box
                   style={{
                     height: 20,

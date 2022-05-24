@@ -203,6 +203,7 @@ router.post(
 
       // check minimun order amount, 0.01 for ETH and 1 for rest
       if (!orderToken) {
+        console.log("invalid order token");
         return res.status(400).json({ message: "Invalid token to sell" });
       }
 
@@ -210,6 +211,8 @@ router.post(
       const userObject = await User.findById(user);
 
       if (userObject?.payment_options?.length === 0) {
+        console.log("Please add atleast one payment method");
+
         return res.status(400).json({
           message: "Please add atleast one payment method to sell your tokens",
         });
@@ -220,6 +223,9 @@ router.post(
           toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
         )
       ) {
+        console.log(
+          "Please enter correct order amount! Minimum required order amou"
+        );
         return res.status(400).json({
           errors: [
             {

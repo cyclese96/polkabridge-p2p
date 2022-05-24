@@ -54,7 +54,7 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
       try {
         const user = await getUser();
 
-        if (user && user?.wallet_address === account) {
+        if (user?.status === 200 && user?.data?.wallet_address === account) {
           setAuthenticated(true);
           return;
         }

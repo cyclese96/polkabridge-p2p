@@ -35,17 +35,17 @@ export const getLatestOrders =
 
     const result = await getOrders(pageNumber, paramsObj);
 
-    if (!result) {
+    if (result?.status !== 200) {
       dispatch({
         type: GET_ERRORS,
-        payload: "failed to fetch orders",
+        payload: result.message,
       });
       return;
     }
 
     dispatch({
       type: GET_ORDERS,
-      payload: result,
+      payload: result.data,
     });
   };
 
@@ -54,17 +54,17 @@ export const getLatestOrders =
 export const getAllTokens = () => async (dispatch) => {
   const result = await getTokens();
 
-  if (!result) {
+  if (result?.status !== 200) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to fetch tokens",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_TOKENS,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -73,17 +73,17 @@ export const getAllTokens = () => async (dispatch) => {
 export const getAllFiats = () => async (dispatch) => {
   const result = await getFiats();
 
-  if (!result) {
+  if (result?.status !== 200) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to fetch fiats",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_FIATS,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -92,17 +92,17 @@ export const getAllFiats = () => async (dispatch) => {
 export const getAllPaymentOptions = () => async (dispatch) => {
   const result = await getGlobalPaymentOptions();
 
-  if (!result) {
+  if (result?.status !== 200) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to fetch global payments",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_PAYMENTS,
-    payload: result,
+    payload: result.data,
   });
 };
 
@@ -113,17 +113,17 @@ export const createSellOrder = (orderObject) => async (dispatch) => {
 
   const result = await createOrder("sell", orderObject);
 
-  if (!result) {
+  if (result?.status !== 201) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to create sell order",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_ORDER,
-    payload: result,
+    payload: result.data,
   });
 
   dispatch({ type: RESET_NEW_ORDER });
@@ -136,57 +136,35 @@ export const createBuyOrder = (orderObject) => async (dispatch) => {
 
   const result = await createOrder("buy", orderObject);
 
-  if (!result) {
+  if (result?.status !== 201) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to create buy order",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_ORDER,
-    payload: result,
+    payload: result.data,
   });
 
   dispatch({ type: RESET_NEW_ORDER });
 };
 
-// // POST
-// // CREATE BUY ORDER
-// export const verifyTokenDeposit = () => (dispatch) => {
-//   let response = axios
-//     .get(`${baseUrl}/order_apis/v1/verify_deposit`, { headers: headerObj })
-//     .then((res) => {
-//       dispatch({
-//         type: GET_ORDERS,
-//         payload: res.data,
-//       });
-//     })
-//     .catch((err) => {
-//       dispatch({
-//         type: GET_ERRORS,
-//         payload: err,
-//       });
-//     });
-//   return response;
-// };
-
-// GET
-// Single order detail
 export const getOrderDetailsById = (id) => async (dispatch) => {
   const result = await getOrderById(id);
 
-  if (!result) {
+  if (result?.status !== 200) {
     dispatch({
       type: GET_ERRORS,
-      payload: "failed to fetch order",
+      payload: result.message,
     });
     return;
   }
 
   dispatch({
     type: GET_ORDER,
-    payload: result,
+    payload: result.data,
   });
 };

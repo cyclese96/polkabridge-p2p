@@ -6,13 +6,16 @@ import { makeStyles } from "@mui/styles";
 import { connect } from "react-redux";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
-import { CONNECTOR_TYPE } from "../constants";
+import { CONNECTOR_TYPE, TOKENS } from "../constants";
 import {
   getAllFiats,
   getAllPaymentOptions,
   getAllTokens,
 } from "../actions/orderActions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useCurrencyBalance, useETHBalances } from "../hooks/useBalance";
+import useActiveWeb3React from "../hooks/useActiveWeb3React";
+import { formatCurrency, fromWei } from "../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -111,6 +114,9 @@ const Appbar = () => {
     dispatch(getAllFiats());
     dispatch(getAllPaymentOptions());
   }, []);
+
+  const { account, chainId } = useActiveWeb3React();
+  const balance = useCurrencyBalance(account, TOKENS[4].ETH);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>
@@ -221,7 +227,9 @@ const Appbar = () => {
                         lineHeight: 1.5,
                       }}
                     >
-                      3.65 MATIC
+                      {balance &&
+                        formatCurrency(fromWei(balance?.toString(), 18)) +
+                          "ETH"}
                     </span>{" "}
                     <span className={classes.connectedAddress}>
                       0x98..32342
