@@ -167,12 +167,13 @@ function OrderPlaced() {
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { order_id } = useParams();
-  const { order } = store.order;
+  // const { order } = store.order;
+  const order = useSelector((state) => state?.order?.order);
 
-  useEffect(async () => {
-    let response = await dispatch(getOrderDetailsById(order_id));
-    console.log(response);
-  }, []);
+  // useEffect(async () => {
+  //   let response = await dispatch(getOrderDetailsById(order_id));
+  //   console.log(response);
+  // }, []);
 
   return (
     <Box className={classes.background}>

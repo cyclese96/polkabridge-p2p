@@ -10,7 +10,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link } from "react-router-dom";
 import {
@@ -26,10 +26,16 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
-import constants from "../../utils/constants";
-import { createBuyOrder } from "../../actions/orderActions";
+import { createBuyOrder, createSellOrder } from "../../actions/orderActions";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toWei } from "../../utils/helper";
+import { useDepositCallback } from "../../hooks/useDepositCallback";
+import { useTokenAllowance } from "../../hooks/useAllowance";
+import {
+  ALLOWANCE_AMOUNT,
+  SUPPORTED_PAYMENT_METHODS,
+} from "../../constants/index";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -174,12 +180,17 @@ function CreateOrder() {
 
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState("");
   const [token, setToken] = useState("PBR");
-  const [tokenAmount, setTokenAmount] = useState(0);
+  const [tokenAmount, setTokenAmount] = useState("");
   const [totalAmount, setTotalAmount] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [error, setError] = useState("");
+  const [depositStatus, setDepositState] = useState(0); //0 : not ready for deposit,1 ready for deposit, 2: deposit verified
+
+  const fiats = useSelector((state) => state?.order?.fiats);
+  const tokens = useSelector((state) => state?.order?.tokens);
+  const paymentOptions = useSelector((state) => state?.order?.payments);
 
   // const updateTotalAmount = (inputValue) => {};
   const updatePaymentMethods = (selectedValue) => {
@@ -204,21 +215,83 @@ function CreateOrder() {
       setError("Please fill all the fields.");
     }
   };
-  const submitOrder = async () => {
-    let buyOrderObject = {
-      user: "625860aa1ed2eb5da6dd76c1",
-      order_amount: parseFloat(tokenAmount),
-      token: "6263a44638fd8c30a7c4d8e2",
-      fiat: "6263a5c254f64766e549a622",
-      order_unit_price: parseFloat(price),
-      payment_options: paymentMethods,
-    };
-    console.log(buyOrderObject);
 
-    let response = await dispatch(createBuyOrder(buyOrderObject));
-    console.log(response);
-    navigate(`/order-placed/${response._id}`);
+  const selectedFiat = useMemo(() => {
+    const fiatObj = fiats?.filter((item) => item?.fiat === fiat);
+    if (fiatObj?.length > 0) {
+      return fiatObj?.[0];
+    }
+  }, [fiats, fiat]);
+
+  const selectedToken = useMemo(() => {
+    const tokenObj = tokens?.filter((item) => item?.symbol === token);
+    if (tokenObj?.length > 0) {
+      return tokenObj?.[0];
+    }
+  }, [tokens, token]);
+
+  const currentOrder = useSelector((state) => state?.order?.order);
+
+  const submitOrder = async () => {
+    let orderBodyObj;
+    let response;
+    if (orderType === "buy") {
+      orderBodyObj = {
+        order_amount: tokenAmount,
+        token: selectedToken?._id,
+        fiat: selectedFiat?._id,
+        order_unit_price: parseFloat(price),
+        payment_options: paymentMethods,
+      };
+
+      response = await dispatch(createBuyOrder(orderBodyObj));
+      navigate(`/order-placed/${response?._id}`);
+    } else {
+      orderBodyObj = {
+        order_amount: toWei(tokenAmount, selectedToken?.decimals),
+        token: selectedToken?._id,
+        fiat: selectedFiat?._id,
+        order_unit_price: parseFloat(price),
+        payment_options: paymentMethods,
+      };
+      response = await dispatch(createSellOrder(orderBodyObj));
+
+      setDepositState(1);
+    }
+
+    console.log("create order response", { currentOrder, orderBodyObj, fiats });
   };
+
+  const handleConfirm = async () => {
+    // call verify order deposit api
+  };
+
+  const [allowance, confirmAllowance, allowanceTrxStatus] =
+    useTokenAllowance(selectedToken);
+  const [depositTokens, withdrawTokens, depositTrxStatus] =
+    useDepositCallback(selectedToken);
+
+  const handleDeposit = () => {
+    console.log("allowance ", allowance);
+    if (!allowance) {
+      confirmAllowance(ALLOWANCE_AMOUNT);
+    } else {
+      depositTokens(tokenAmount);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentOrder) {
+      return;
+    }
+
+    if (currentOrder?.order_type === "sell") {
+      if (depositStatus === 3) {
+        navigate(`/order-placed`);
+      }
+    }
+  }, [currentOrder, depositStatus]);
+
   return (
     <Box className={classes.background}>
       {step === 0 && (
@@ -408,6 +481,7 @@ function CreateOrder() {
                           <Input
                             type="number"
                             value={price}
+                            placeholder="0"
                             onChange={(e) => setPrice(e.target.value)}
                             disableUnderline={true}
                           />
@@ -423,9 +497,11 @@ function CreateOrder() {
                             }}
                             onChange={(e) => setFiat(e.target.value)}
                           >
-                            <MenuItem value={"INR"}>INR</MenuItem>
-                            <MenuItem value={"USD"}>USD</MenuItem>
-                            <MenuItem value={"SGP"}>SGP</MenuItem>
+                            {fiats?.map((item) => (
+                              <MenuItem value={item?.fiat}>
+                                {item?.fiat}
+                              </MenuItem>
+                            ))}
                           </Select>
                         </Box>
                       </Grid>
@@ -455,6 +531,7 @@ function CreateOrder() {
                           <Input
                             type="number"
                             value={tokenAmount}
+                            placeholder="0"
                             onChange={(e) => setTokenAmount(e.target.value)}
                             disableUnderline={true}
                           />
@@ -470,9 +547,14 @@ function CreateOrder() {
                             }}
                             onChange={(e) => setToken(e.target.value)}
                           >
-                            <MenuItem value={"PBR"}>PBR</MenuItem>
-                            <MenuItem value={"ETH"}>ETH</MenuItem>
-                            <MenuItem value={"ETH"}>LINK</MenuItem>
+                            {tokens?.map((item) => (
+                              <MenuItem
+                                onClick={() => setToken(item?.symbol)}
+                                value={item?.symbol}
+                              >
+                                {item?.symbol}
+                              </MenuItem>
+                            ))}
                           </Select>
                         </Box>
                       </Grid>
@@ -526,7 +608,7 @@ function CreateOrder() {
                             width: "fit-content",
                           }}
                         >
-                          {constants.SUPPORTED_PAYMENT_METHODS.map((value) => {
+                          {SUPPORTED_PAYMENT_METHODS.map((value) => {
                             return (
                               <Box
                                 onClick={() => updatePaymentMethods(value)}
@@ -829,17 +911,46 @@ function CreateOrder() {
                 </div>
               </div>
               <div className="text-center mt-4">
-                <Button
-                  onClick={submitOrder}
-                  style={{
-                    borderRadius: 10,
-                    background: "#6A55EA",
-                    padding: "9px 35px 9px 35px",
-                    color: "white",
-                  }}
-                >
-                  Confirm Place Order
-                </Button>
+                {depositStatus === 0 && (
+                  <Button
+                    onClick={submitOrder}
+                    style={{
+                      borderRadius: 10,
+                      background: "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: "white",
+                    }}
+                  >
+                    Create sell order
+                  </Button>
+                )}
+
+                {depositStatus === 1 && (
+                  <Button
+                    onClick={handleDeposit}
+                    style={{
+                      borderRadius: 10,
+                      background: "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: "white",
+                    }}
+                  >
+                    {!allowance ? "Approve tokens" : "Deposit tokens"}
+                  </Button>
+                )}
+                {depositTrxStatus.status === "verified" && (
+                  <Button
+                    onClick={handleConfirm}
+                    style={{
+                      borderRadius: 10,
+                      background: "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: "white",
+                    }}
+                  >
+                    Confirm place sell order
+                  </Button>
+                )}
               </div>
             </div>
             <HowItWorks />

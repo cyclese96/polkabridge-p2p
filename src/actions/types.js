@@ -4,6 +4,7 @@ export const GET_ERRORS = "GET_ERRORS";
 export const GET_ORDER = "GET_ORDER";
 export const GET_ORDERS = "GET_ORDERS";
 export const CREATE_NEW_ORDER = "CREATE_NEW_ORDER";
+export const RESET_NEW_ORDER = "RESET_NEW_ORDER";
 export const GET_FIATS = "GET_FIATS";
 export const GET_TOKENS = "GET_TOKENS";
 export const GET_PAYMENTS = "GET_PAYMENTS";

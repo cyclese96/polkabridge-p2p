@@ -38,11 +38,6 @@ router.post(
   [check("token", "Please specify token to sell").not().isEmpty()],
   [check("fiat", "Please specify payment currency").not().isEmpty()],
   [
-    check("description", "Please add description for your order")
-      .not()
-      .isEmpty(),
-  ],
-  [
     check(
       "payment_options",
       "Please add payment option for the order"
@@ -175,24 +170,18 @@ router.post(
   [check("order_unit_price", "Order unit price required").isNumeric()],
   [check("token", "Please specify token to sell").not().isEmpty()],
   [check("fiat", "Please specify payment currency").not().isEmpty()],
-  [
-    check("description", "Please add description for your order")
-      .not()
-      .isEmpty(),
-  ],
+
   [
     check(
       "payment_options",
       "Please add payment option for the order"
     ).isArray(),
   ],
-
-  // auth,
+  auth,
   async (req, res) => {
     try {
       let orderObject;
       const {
-        user,
         order_amount,
         token,
         fiat,
@@ -201,9 +190,12 @@ router.post(
         description,
       } = req.body;
 
+      const user = req.user.id;
+
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
+        console.log("sell order error ", errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
@@ -211,6 +203,7 @@ router.post(
 
       // check minimun order amount, 0.01 for ETH and 1 for rest
       if (!orderToken) {
+        console.log("invalid order token");
         return res.status(400).json({ message: "Invalid token to sell" });
       }
 
@@ -218,6 +211,8 @@ router.post(
       const userObject = await User.findById(user);
 
       if (userObject?.payment_options?.length === 0) {
+        console.log("Please add atleast one payment method");
+
         return res.status(400).json({
           message: "Please add atleast one payment method to sell your tokens",
         });
@@ -228,6 +223,9 @@ router.post(
           toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
         )
       ) {
+        console.log(
+          "Please enter correct order amount! Minimum required order amou"
+        );
         return res.status(400).json({
           errors: [
             {
@@ -337,7 +335,7 @@ router.post(
 
       res.status(201).json(createdOrder);
     } catch (error) {
-      console.log("create buy order error ", error);
+      console.log("create sell order error ", error);
       res.status(400).json({ errors: [{ msg: "Server error" }] });
     }
   }
@@ -346,110 +344,106 @@ router.post(
 // @route put /api/order_apis/v1/sell-order/:order_id"
 // @desc Update sell order
 // @access Authenticated
-router.put(
-  "/sell-order/:order_id",
-  // auth,
-  async (req, res) => {
-    try {
-      const order_id = req.params.order_id;
+router.put("/sell-order/:order_id", auth, async (req, res) => {
+  try {
+    const order_id = req.params.order_id;
 
-      if (!mongoose.isValidObjectId(order_id)) {
-        return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
-      }
-
-      const errors = validationResult(req);
-
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const updateObject = req.body;
-      const fieldsToUpdate = Object.keys(updateObject);
-
-      console.log("fields to update ", fieldsToUpdate);
-      if (!isArrayIncludes(ORDER_UPDATE_FIELDS, fieldsToUpdate)) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "Invalid fields to update" }] });
-      }
-
-      const order = await Order.findById(order_id);
-      if (!order) {
-        if (!mongoose.isValidObjectId(order_id)) {
-          return res.status(400).json({ errors: [{ msg: "Order not found" }] });
-        }
-      }
-
-      const tokenId = order.token;
-      const orderToken = await Token.findById(tokenId);
-      // check minimun order amount, 0.01 for ETH and 1 for rest
-      if (!orderToken) {
-        return res
-          .status(400)
-          .json({ erros: [{ msg: "Invalid token to sell" }] });
-      }
-
-      // check if update includes order amount to be updated then adjust new duductions
-      if (fieldsToUpdate.includes("order_amount")) {
-        if (
-          new BigNumber(order.order_amount).lt(
-            toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
-          )
-        ) {
-          return res.status(400).json({
-            errors: [
-              {
-                msg: `Please enter correct order amount! Minimum required order amount ${
-                  MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol]
-                } ${orderToken.symbol}.`,
-                location: "order_amount",
-              },
-            ],
-          });
-        }
-
-        // order amount fee deduction computations start
-        let remainingAfterDeduction = order.order_amount;
-        const deflationaryDeducted = deflationaryDeduction(
-          order.order_amount,
-          orderToken.address
-        );
-        // deduct 0.5% if token is deflationary
-        remainingAfterDeduction = performDeduction(
-          remainingAfterDeduction,
-          isDeflationary(orderToken.address) ? 0.5 : 0
-        );
-
-        const feeDeducted = feeDeduction(remainingAfterDeduction);
-        // deduct 1% fee from all token
-        remainingAfterDeduction = performDeduction(remainingAfterDeduction, 1);
-
-        // order amount fee deduction computations end
-
-        updateObject.deflationary_deduction = deflationaryDeducted;
-        updateObject.fee_deduction = feeDeducted;
-        updateObject.final_order_amount = remainingAfterDeduction;
-      }
-
-      await Order.findByIdAndUpdate(order_id, {
-        $set: updateObject,
-      });
-
-      const updatedOrder = await Order.findById(order_id);
-
-      res.status(201).json(updatedOrder);
-    } catch (error) {
-      console.log("create_order", error);
-      res.status(400).json({ errors: [{ msg: "Server error" }] });
+    if (!mongoose.isValidObjectId(order_id)) {
+      return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
     }
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const updateObject = req.body;
+    const fieldsToUpdate = Object.keys(updateObject);
+
+    console.log("fields to update ", fieldsToUpdate);
+    if (!isArrayIncludes(ORDER_UPDATE_FIELDS, fieldsToUpdate)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid fields to update" }] });
+    }
+
+    const order = await Order.findById(order_id);
+    if (!order) {
+      if (!mongoose.isValidObjectId(order_id)) {
+        return res.status(400).json({ errors: [{ msg: "Order not found" }] });
+      }
+    }
+
+    const tokenId = order.token;
+    const orderToken = await Token.findById(tokenId);
+    // check minimun order amount, 0.01 for ETH and 1 for rest
+    if (!orderToken) {
+      return res
+        .status(400)
+        .json({ erros: [{ msg: "Invalid token to sell" }] });
+    }
+
+    // check if update includes order amount to be updated then adjust new duductions
+    if (fieldsToUpdate.includes("order_amount")) {
+      if (
+        new BigNumber(order.order_amount).lt(
+          toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
+        )
+      ) {
+        return res.status(400).json({
+          errors: [
+            {
+              msg: `Please enter correct order amount! Minimum required order amount ${
+                MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol]
+              } ${orderToken.symbol}.`,
+              location: "order_amount",
+            },
+          ],
+        });
+      }
+
+      // order amount fee deduction computations start
+      let remainingAfterDeduction = order.order_amount;
+      const deflationaryDeducted = deflationaryDeduction(
+        order.order_amount,
+        orderToken.address
+      );
+      // deduct 0.5% if token is deflationary
+      remainingAfterDeduction = performDeduction(
+        remainingAfterDeduction,
+        isDeflationary(orderToken.address) ? 0.5 : 0
+      );
+
+      const feeDeducted = feeDeduction(remainingAfterDeduction);
+      // deduct 1% fee from all token
+      remainingAfterDeduction = performDeduction(remainingAfterDeduction, 1);
+
+      // order amount fee deduction computations end
+
+      updateObject.deflationary_deduction = deflationaryDeducted;
+      updateObject.fee_deduction = feeDeducted;
+      updateObject.final_order_amount = remainingAfterDeduction;
+    }
+
+    await Order.findByIdAndUpdate(order_id, {
+      $set: updateObject,
+    });
+
+    const updatedOrder = await Order.findById(order_id);
+
+    res.status(201).json(updatedOrder);
+  } catch (error) {
+    console.log("create_order", error);
+    res.status(400).json({ errors: [{ msg: "Server error" }] });
   }
-);
+});
 
 // @route post /api/order-apis/v1/verify-deposit"
 // @desc verify sell order token deposit
 // @access Authenticated
 // Todo: check user access when auth added: only user who created the order can verify deposit status
-router.patch("/verify-deposit/:order_id", async (req, res) => {
+router.patch("/verify-deposit/:order_id", auth, async (req, res) => {
   try {
     const order_id = req.params.order_id;
 
@@ -465,6 +459,10 @@ router.patch("/verify-deposit/:order_id", async (req, res) => {
 
     if (!order) {
       return res.status(400).json({ errors: [{ msg: "Order not found" }] });
+    }
+
+    if (order?.user?.toString() !== req.user?.id?.toString()) {
+      return res.status(400).json({ errors: [{ msg: "Unauthorized access" }] });
     }
 
     const wallet_address = order.user.wallet_address;
@@ -496,7 +494,7 @@ router.patch("/verify-deposit/:order_id", async (req, res) => {
 // @route patch /api/order-apis/v1/cancel-order"
 // @desc cancel an order
 // @access Authenticated
-// Todo: check user access when auth added: only user who created the order can verify deposit status
+
 router.patch("/cancel-order/:order_id", auth, async (req, res) => {
   try {
     const order_id = req.params.order_id;
@@ -533,7 +531,7 @@ router.patch("/cancel-order/:order_id", auth, async (req, res) => {
 // @route get /api/order_apis/v1/orders/:page_number"
 // @desc get list of orders with filters
 // @access Authenticated
-router.get("/orders/:page_number", async (req, res) => {
+router.get("/orders/:page_number", auth, async (req, res) => {
   try {
     const page = req.params.page_number ? req.params.page_number : 1;
 
@@ -544,6 +542,7 @@ router.get("/orders/:page_number", async (req, res) => {
     }
 
     orderFilter.order_status = "active";
+    console.log(req.query);
     if (req.query.order_status) {
       orderFilter.order_status = req.query.order_status;
     }
@@ -581,7 +580,7 @@ router.get("/orders/:page_number", async (req, res) => {
   }
 });
 
-router.get("/order/:order_id", async (req, res) => {
+router.get("/order/:order_id", auth, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.order_id)) {
       return res.status(400).json({ errors: [{ msg: "Invalid order id" }] });
@@ -603,9 +602,9 @@ router.get("/order/:order_id", async (req, res) => {
   }
 });
 
-router.get("/order-tokens", async (req, res) => {
+router.get("/order-tokens", auth, async (req, res) => {
   try {
-    const tokens = await Token.find({ active: true, chainId: 1 }).limit(10);
+    const tokens = await Token.find({ active: true, chainId: 4 }).limit(10);
 
     return res.status(200).json(tokens);
   } catch (error) {
@@ -614,7 +613,7 @@ router.get("/order-tokens", async (req, res) => {
   }
 });
 
-router.get("/fiats", async (req, res) => {
+router.get("/fiats", auth, async (req, res) => {
   try {
     const fiats = await Fiat.find({}).limit(10);
 

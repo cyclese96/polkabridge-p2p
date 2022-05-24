@@ -3,12 +3,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3 from "web3";
 import connectors from "../connections/connectors";
 import { CONNECTOR_TYPE } from "../constants";
+import { getUser } from "../utils/httpCalls";
 import { AuthStatus } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
 
 export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
-  const { library, chainId, deactivate, activate, account } =
-    useActiveWeb3React();
+  const { chainId, deactivate, activate, account } = useActiveWeb3React();
   const [authenticated, setAuthenticated] = useState(false);
 
   const connectWallet = useCallback(
@@ -38,13 +38,27 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
   }, [setAuthenticated]);
 
   useEffect(() => {
+    if (localStorage.connector) {
+      connectWallet(localStorage.connector);
+    }
+  }, []);
+
+  useEffect(() => {
     async function signAndVerify() {
       //:Note sign message is only working for metamast
       //:todo fix this for wallet connect as well
+      setAuthenticated(false);
       const web3 = new Web3(window.ethereum);
       let messageHash: string | null;
       let signature: string | null;
       try {
+        const user = await getUser();
+
+        if (user?.status === 200 && user?.data?.wallet_address === account) {
+          setAuthenticated(true);
+          return;
+        }
+
         messageHash = web3.utils.sha3("Hello ethereum");
 
         if (!messageHash || !account) {
@@ -72,25 +86,12 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
       }
     }
 
-    // // check user already have valid token
-    // async function checkAuthStatus() {
-    //   if (localStorage.user) {
-    //     // temp solution to avoind reassign token on refresh
-    //     if (!account) {
-    //       connectWallet(localStorage.connector);
-    //     } else {
-    //       console.log("auth status aready validated ", localStorage.user);
-    //       setAuthenticated(true);
-    //     }
-    //   } else {
-    //     signAndVerify();
-    //   }
-    // }
-
-    // checkAuthStatus();
+    if (!account) {
+      return;
+    }
 
     signAndVerify();
-  }, [account]);
+  }, [account, chainId]);
 
   const authStatus = useMemo(() => {
     return { authenticated, account };

@@ -5,6 +5,7 @@ import {
   GET_FIATS,
   GET_PAYMENTS,
   CREATE_NEW_ORDER,
+  RESET_NEW_ORDER,
 } from "../actions/types";
 
 const initalState = {
@@ -48,7 +49,11 @@ export default function Orders(state = initalState, action) {
         ...state,
         order: action.payload,
       };
-
+    case RESET_NEW_ORDER:
+      return {
+        ...state,
+        order: {},
+      };
     default:
       return state;
   }

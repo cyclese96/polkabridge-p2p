@@ -14,3 +14,18 @@ export const CONNECTOR_TYPE = {
   injected: "injected",
   walletConnect: "walletConnect",
 };
+
+export const NETWORK_TYPE = 1;
+export const SUPPORTED_PAYMENT_METHODS = ["UPI", "BANK TRANSFER"];
+
+export const TOKENS = {
+  4: {
+    ETH: {
+      name: "Ether",
+      decimals: 18,
+      symbol: "ETH",
+      address: "",
+      chainId: 4,
+    },
+  },
+};
