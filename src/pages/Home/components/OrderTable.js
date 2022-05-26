@@ -5,6 +5,7 @@ import { getLatestOrders } from "./../../../actions/orderActions";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Web3 from "web3";
+import { formattedAddress, fromWei } from "../../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -82,16 +83,16 @@ export default function OrderTable({ filterParams }) {
   const { orders } = store.order;
   const [filteredOrder, setFilteredOrder] = useState([]);
 
-  useEffect(() => {
-    if (orders) {
-      let data = orders.filter(
-        (singleOrder) => singleOrder.order_type === filterParams.orderType
-      );
-      console.log(data);
-      console.log(orders);
-      setFilteredOrder([...data]);
-    }
-  }, [filterParams, orders]);
+  // useEffect(() => {
+  //   if (orders) {
+  //     let data = orders.filter(
+  //       (singleOrder) => singleOrder.order_type === filterParams.orderType
+  //     );
+  //     console.log(data);
+  //     console.log(orders);
+  //     setFilteredOrder([...data]);
+  //   }
+  // }, [filterParams, orders]);
   return (
     <Box mt={5}>
       <h5 className={classes.title}>Market Open Orders</h5>
@@ -109,83 +110,34 @@ export default function OrderTable({ filterParams }) {
 
               <th className={classes.tableHeading}>Actions</th>
             </thead>
-            {filteredOrder.map((order, index) => {
+            {orders?.map((order, index) => {
               return (
                 <>
-                  {index % 2 === 1 ? (
-                    <tr className={classes.tr}>
-                      <td
-                        className={classes.userText}
-                        style={{ paddingLeft: 10 }}
-                      >
-                        {order.user.wallet_address.slice(0, 6)}...
-                      </td>
-                      <td className={classes.otherText}>
-                        {order.order_unit_price}
-                      </td>
-                      <td className={classes.otherText}>
-                        {order &&
-                          Web3.utils.fromWei(
-                            order.order_amount.toString(),
-                            "ether"
-                          )}
-                      </td>
-
-                      <td className={classes.otherText}>
-                        {" "}
-                        {order.payment_options.join(", ").toUpperCase()}
-                      </td>
-                      <td className={classes.otherText}>04, May 2022</td>
-                      <td className={classes.otherText}>
-                        {order.order_type === "buy" ? (
-                          <Link
-                            to={`/order/${order._id}`}
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Button className={classes.buttonAction}>
-                              BUY
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Link
-                            to={`/order/${order._id}`}
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Button className={classes.buttonAction}>
-                              SELL
-                            </Button>
-                          </Link>
-                        )}
-                      </td>
-                    </tr>
-                  ) : (
+                  {
                     <tr className={classes.trHighlight}>
                       <td
                         className={classes.userText}
                         style={{ paddingLeft: 10 }}
                       >
-                        0x98...3234
+                        {formattedAddress(order?.user?.wallet_address)}
                       </td>
                       <td className={classes.otherText}>
-                        {order.order_unit_price}
+                        {order?.order_unit_price}
                       </td>
                       <td className={classes.otherText}>
-                        {order &&
-                          Web3.utils.fromWei(
-                            order.order_amount.toString(),
-                            "ether"
-                          )}
+                        {order?.order_type === "sell"
+                          ? fromWei(order?.order_amount, order?.token?.decimals)
+                          : order?.order_amount}
                       </td>
                       <td className={classes.otherText}>
                         {" "}
-                        {order.payment_options.join(", ").toUpperCase()}
+                        {order?.payment_options?.join(", ").toUpperCase()}
                       </td>
                       <td className={classes.otherText}>07, May 2022</td>
-                      {console.log(order)}
                       <td className={classes.otherText}>
-                        {order.order_type === "buy" ? (
+                        {order?.order_type === "sell" ? (
                           <Link
-                            to={`/order/${order._id}`}
+                            to={`/order/${order?._id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
@@ -204,7 +156,50 @@ export default function OrderTable({ filterParams }) {
                         )}
                       </td>
                     </tr>
-                  )}
+                  }
+                  {/* <tr className={classes.tr}>
+                      <td
+                        className={classes.userText}
+                        style={{ paddingLeft: 10 }}
+                      >
+                        
+                      </td>
+                      <td className={classes.otherText}>
+                        {order?.order_unit_price}
+                      </td>
+                      <td className={classes.otherText}>
+                        {order?.type === "sell"
+                          ? fromWei(order?.amount)
+                          : order?.order_amount}
+                      </td>
+
+                      <td className={classes.otherText}>
+                        {" "}
+                        {order?.payment_options?.join(", ").toUpperCase()}
+                      </td>
+                      <td className={classes.otherText}>04, May 2022</td>
+                      <td className={classes.otherText}>
+                        {order?.order_type === "buy" ? (
+                          <Link
+                            to={`/order/${order._id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              SELL
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link
+                            to={`/order/${order?._id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <Button className={classes.buttonAction}>
+                              BUY
+                            </Button>
+                          </Link>
+                        )}
+                      </td>
+                    </tr> */}
                 </>
               );
             })}

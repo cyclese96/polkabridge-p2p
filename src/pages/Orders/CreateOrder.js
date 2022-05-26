@@ -26,16 +26,16 @@ import {
   PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
-import { createBuyOrder, createSellOrder } from "../../actions/orderActions";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toWei } from "../../utils/helper";
 import { useDepositCallback } from "../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../hooks/useAllowance";
-import {
-  ALLOWANCE_AMOUNT,
-  SUPPORTED_PAYMENT_METHODS,
-} from "../../constants/index";
+import { ALLOWANCE_AMOUNT } from "../../constants/index";
+import { getUserProfile } from "../../actions/profileActions";
+import useActiveWeb3React from "../../hooks/useActiveWeb3React";
+import { useCreateOrderCallback } from "../../hooks/useCreateOrderCallback";
+import { CreateStatus, TransactionState } from "../../utils/interface";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -172,6 +172,7 @@ function CreateOrder() {
   const classes = useStyles();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { chainId } = useActiveWeb3React();
 
   const theme = useTheme();
 
@@ -190,7 +191,9 @@ function CreateOrder() {
 
   const fiats = useSelector((state) => state?.order?.fiats);
   const tokens = useSelector((state) => state?.order?.tokens);
-  const paymentOptions = useSelector((state) => state?.order?.payments);
+  const userPaymentOptions = useSelector(
+    (state) => state?.profile?.profile?.payment_options
+  );
 
   // const updateTotalAmount = (inputValue) => {};
   const updatePaymentMethods = (selectedValue) => {
@@ -230,13 +233,23 @@ function CreateOrder() {
     }
   }, [tokens, token]);
 
-  const currentOrder = useSelector((state) => state?.order?.order);
+  useEffect(() => {
+    if (!chainId) {
+      return;
+    }
+    dispatch(getUserProfile());
+  }, [chainId]);
 
-  const submitOrder = async () => {
-    let orderBodyObj;
-    let response;
+  const [allowance, confirmAllowance, allowanceTrxStatus] =
+    useTokenAllowance(selectedToken);
+  const [depositTokens, withdrawTokens, depositTrxStatus] =
+    useDepositCallback(selectedToken);
+  const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
+    useCreateOrderCallback();
+
+  const submitOrder = () => {
     if (orderType === "buy") {
-      orderBodyObj = {
+      const payload = {
         order_amount: tokenAmount,
         token: selectedToken?._id,
         fiat: selectedFiat?._id,
@@ -244,32 +257,19 @@ function CreateOrder() {
         payment_options: paymentMethods,
       };
 
-      response = await dispatch(createBuyOrder(orderBodyObj));
-      navigate(`/order-placed/${response?._id}`);
+      createBuyOrder(payload);
     } else {
-      orderBodyObj = {
+      const payload = {
         order_amount: toWei(tokenAmount, selectedToken?.decimals),
         token: selectedToken?._id,
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),
         payment_options: paymentMethods,
       };
-      response = await dispatch(createSellOrder(orderBodyObj));
 
-      setDepositState(1);
+      createSellOrder(payload);
     }
-
-    console.log("create order response", { currentOrder, orderBodyObj, fiats });
   };
-
-  const handleConfirm = async () => {
-    // call verify order deposit api
-  };
-
-  const [allowance, confirmAllowance, allowanceTrxStatus] =
-    useTokenAllowance(selectedToken);
-  const [depositTokens, withdrawTokens, depositTrxStatus] =
-    useDepositCallback(selectedToken);
 
   const handleDeposit = () => {
     console.log("allowance ", allowance);
@@ -281,16 +281,38 @@ function CreateOrder() {
   };
 
   useEffect(() => {
-    if (!currentOrder) {
-      return;
+    console.log("deposit trx", { orderStatus, depositTrxStatus });
+    if (orderStatus.status === CreateStatus.ACTIVE) {
+      // navigate to confirmation page
+      navigate(`/order-placed/${orderStatus.id}`);
     }
 
-    if (currentOrder?.order_type === "sell") {
-      if (depositStatus === 3) {
-        navigate(`/order-placed`);
-      }
+    if (
+      orderType === "sell" &&
+      orderStatus.status === CreateStatus.SUBMITTED &&
+      depositTrxStatus.status === TransactionState.COMPLETED
+    ) {
+      console.log("starting validation ... ", orderStatus.id);
+      validateSellOrder(orderStatus.id);
     }
-  }, [currentOrder, depositStatus]);
+  }, [depositTrxStatus, orderStatus, orderType]);
+
+  // const handleConfirm = async () => {
+  //   // call verify order deposit api
+  // };
+
+  useEffect(() => {
+    console.log("payment optios ", userPaymentOptions?.length === 0);
+  }, [userPaymentOptions]);
+
+  const isPendingTrx = useMemo(() => {
+    return (
+      allowanceTrxStatus?.status === TransactionState.PENDING ||
+      allowanceTrxStatus?.status === TransactionState.WAITING ||
+      depositTrxStatus.status === TransactionState.PENDING ||
+      depositTrxStatus.status === TransactionState.WAITING
+    );
+  }, [allowanceTrxStatus, depositTrxStatus]);
 
   return (
     <Box className={classes.background}>
@@ -608,13 +630,15 @@ function CreateOrder() {
                             width: "fit-content",
                           }}
                         >
-                          {SUPPORTED_PAYMENT_METHODS.map((value) => {
+                          {userPaymentOptions?.map((value) => {
                             return (
                               <Box
-                                onClick={() => updatePaymentMethods(value)}
+                                onClick={() =>
+                                  updatePaymentMethods(value?.payment_mode)
+                                }
                                 style={{
                                   backgroundColor: paymentMethods.includes(
-                                    value
+                                    value?.payment_mode
                                   )
                                     ? "#E1DCFF"
                                     : "transparent",
@@ -627,10 +651,29 @@ function CreateOrder() {
                                   border: "1px solid #E1DCFF",
                                 }}
                               >
-                                {value}
+                                {value?.payment_mode}
                               </Box>
                             );
                           })}
+                          {userPaymentOptions?.length === 0 && (
+                            <a
+                              href="/profile"
+                              style={{
+                                backgroundColor: "#E1DCFF",
+                                width: "fit-content",
+                                padding: "5px 14px 5px 14px",
+                                borderRadius: 7,
+                                marginRight: 5,
+                                fontSize: 14,
+                                cursor: "pointer",
+                                textDecoration: "none",
+                                color: "black",
+                                border: "1px solid #E1DCFF",
+                              }}
+                            >
+                              {"Add payment method"}
+                            </a>
+                          )}
                         </Box>
                       </Grid>
                     </Grid>
@@ -831,12 +874,12 @@ function CreateOrder() {
                             width: "fit-content",
                           }}
                         >
-                          {paymentMethods.map((value) => {
+                          {userPaymentOptions?.map((value) => {
                             return (
                               <Box
                                 style={{
                                   backgroundColor: paymentMethods.includes(
-                                    value
+                                    value?.payment_mode
                                   )
                                     ? "#E1DCFF"
                                     : "transparent",
@@ -849,7 +892,7 @@ function CreateOrder() {
                                   border: "1px solid #E1DCFF",
                                 }}
                               >
-                                {value}
+                                {value?.payment_mode}
                               </Box>
                             );
                           })}
@@ -911,7 +954,65 @@ function CreateOrder() {
                 </div>
               </div>
               <div className="text-center mt-4">
-                {depositStatus === 0 && (
+                {orderStatus.status === CreateStatus.PENDING &&
+                  orderType === "sell" && (
+                    <Button
+                      onClick={submitOrder}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+                      }}
+                    >
+                      Create sell order
+                    </Button>
+                  )}
+
+                {orderStatus.status === CreateStatus.SUBMITTED &&
+                  !isPendingTrx &&
+                  orderType === "sell" && (
+                    <Button
+                      onClick={handleDeposit}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+                      }}
+                    >
+                      {!allowance ? "Approve tokens" : "Deposit tokens"}
+                    </Button>
+                  )}
+                {isPendingTrx && (
+                  <Button
+                    disabled={isPendingTrx}
+                    style={{
+                      borderRadius: 10,
+                      background: "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: "white",
+                    }}
+                  >
+                    Pending transaction...
+                  </Button>
+                )}
+
+                {/* {depositTrxStatus.status === "verified" &&
+                  orderType === "sell" && (
+                    <Button
+                      onClick={handleConfirm}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+                      }}
+                    >
+                      Confirm place sell order
+                    </Button>
+                  )} */}
+                {orderType === "buy" && (
                   <Button
                     onClick={submitOrder}
                     style={{
@@ -921,34 +1022,7 @@ function CreateOrder() {
                       color: "white",
                     }}
                   >
-                    Create sell order
-                  </Button>
-                )}
-
-                {depositStatus === 1 && (
-                  <Button
-                    onClick={handleDeposit}
-                    style={{
-                      borderRadius: 10,
-                      background: "#6A55EA",
-                      padding: "9px 35px 9px 35px",
-                      color: "white",
-                    }}
-                  >
-                    {!allowance ? "Approve tokens" : "Deposit tokens"}
-                  </Button>
-                )}
-                {depositTrxStatus.status === "verified" && (
-                  <Button
-                    onClick={handleConfirm}
-                    style={{
-                      borderRadius: 10,
-                      background: "#6A55EA",
-                      padding: "9px 35px 9px 35px",
-                      color: "white",
-                    }}
-                  >
-                    Confirm place sell order
+                    Confirm place buy order
                   </Button>
                 )}
               </div>

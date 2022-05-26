@@ -118,6 +118,38 @@ const Appbar = () => {
   const { account, chainId } = useActiveWeb3React();
   const balance = useCurrencyBalance(account, TOKENS[4].ETH);
 
+  useEffect(() => {
+    if (!chainId) {
+      return;
+    }
+    const cachedChain = localStorage.getItem("cachedChain");
+
+    console.log("chain changed ", { chainId, cachedChain });
+    if (cachedChain && chainId?.toString() !== cachedChain) {
+      localStorage.setItem("cachedChain", chainId?.toString());
+
+      window.location.reload();
+    } else if (!cachedChain) {
+      localStorage.setItem("cachedChain", chainId?.toString());
+    }
+  }, [chainId, account]);
+
+  useEffect(() => {
+    if (!account) {
+      return;
+    }
+    const cachedAccount = localStorage.getItem("cachedAccount");
+
+    console.log("chain changed ", { account, cachedAccount });
+    if (cachedAccount && account?.toString() !== cachedAccount) {
+      localStorage.setItem("cachedAccount", account?.toString());
+
+      window.location.reload();
+    } else if (!cachedAccount) {
+      localStorage.setItem("cachedAccount", account?.toString());
+    }
+  }, [account]);
+
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>
       <header>
@@ -232,7 +264,8 @@ const Appbar = () => {
                           "ETH"}
                     </span>{" "}
                     <span className={classes.connectedAddress}>
-                      0x98..32342
+                      {[...account].splice(0, 7)} {"..."}
+                      {[...account].splice([...account].length - 7, 7)}
                     </span>
                   </button>
                 ) : (

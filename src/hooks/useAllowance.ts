@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSingleCallResult } from "../state/multicall/hooks";
 import { useTokenContract } from "./useContract";
-import { Token, TransactionStatus } from "../utils/interface";
+import { Token, TransactionState, TransactionStatus } from "../utils/interface";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ALLOWANCE_AMOUNT, P2P_ADDRESSES } from "../constants";
 import useBlockNumber from "./useBlockNumber";
@@ -12,7 +12,11 @@ export function useTokenAllowance(
   token?: Token
 ): [boolean, () => {}, TransactionStatus] {
   const tokenContract = useTokenContract(token?.address);
-  const [data, setData] = useState({ hash: "", status: "" });
+  const initialState: TransactionStatus = {
+    hash: "",
+    status: null,
+  };
+  const [data, setData] = useState(initialState);
   const blockNumber = useBlockNumber();
   const { account, chainId } = useActiveWeb3React();
 
@@ -34,17 +38,21 @@ export function useTokenAllowance(
       try {
         const _amount = toWei(tokenAmount, token?.decimals);
         console.log("allowance ", _amount);
-        setData({ ...data, status: "waiting" });
+        setData({ ...data, status: TransactionState.WAITING });
         const tx = await tokenContract?.approve(spender, _amount);
 
-        setData({ ...data, hash: tx?.hash, status: "pending" });
+        setData({ ...data, hash: tx?.hash, status: TransactionState.PENDING });
       } catch (error) {
         console.log("confirmAllowance  ", error);
-        setData({ ...data, status: "" });
+        setData({ ...data, status: TransactionState.FAILED });
       }
     },
     [tokenContract, setData]
   );
+
+  useEffect(() => {
+    setData(initialState);
+  }, []);
 
   const allowanceStatus = useMemo(
     () =>

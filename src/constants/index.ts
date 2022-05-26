@@ -16,7 +16,7 @@ export const CONNECTOR_TYPE = {
 };
 
 export const NETWORK_TYPE = 1;
-export const SUPPORTED_PAYMENT_METHODS = ["UPI", "BANK TRANSFER"];
+export const SUPPORTED_PAYMENT_METHODS = ["upi", "BANK TRANSFER"];
 
 export const TOKENS = {
   4: {

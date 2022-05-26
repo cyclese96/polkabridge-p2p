@@ -21,19 +21,19 @@ import {
 // GET
 // Latest orders in the market
 export const getLatestOrders =
-  (pageNumber, orderType, orderDir, paymentOption, fiat, token) =>
+  (pageNumber, filters = {}) =>
   async (dispatch) => {
-    let paramsObj = {
-      order_type: orderType,
-      order_by: "order_amount",
-      order_direction: "desc",
-      payment_option: paymentOption === "all" ? null : paymentOption,
-      order_status: "active",
-      fiat: fiat,
-      token: "6263a3e538fd8c30a7c4d8b5",
-    };
+    // let paramsObj = {
+    //   order_type: orderType,
+    //   order_by: "order_amount",
+    //   order_direction: "desc",
+    //   payment_option: paymentOption === "all" ? null : paymentOption,
+    //   order_status: "active",
+    //   // fiat: fiat,
+    //   // token: "6263a3e538fd8c30a7c4d8b5",
+    // };
 
-    const result = await getOrders(pageNumber, paramsObj);
+    const result = await getOrders(pageNumber, {});
 
     if (result?.status !== 200) {
       dispatch({

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toWei } from "../utils/helper";
-import { TransactionStatus, Token } from "../utils/interface";
+import { TransactionStatus, Token, TransactionState } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
 import useBlockNumber from "./useBlockNumber";
 import { useP2pContract } from "./useContract";
@@ -10,7 +10,11 @@ export function useDepositCallback(
 ): [() => {}, () => {}, TransactionStatus] {
   const { library, chainId } = useActiveWeb3React();
   const p2pContract = useP2pContract();
-  const [data, setData] = useState({ hash: "", status: "" });
+  const initialState: TransactionStatus = {
+    hash: "",
+    status: null,
+  };
+  const [data, setData] = useState<TransactionStatus>(initialState);
   const blockNumber = useBlockNumber();
 
   let stakeRes: any = null;
@@ -19,15 +23,19 @@ export function useDepositCallback(
     async (tokenAmount?: string) => {
       try {
         const depositTokens = toWei(tokenAmount, token?.decimals);
-        setData({ ...data, status: "waiting" });
+        setData({ ...data, status: TransactionState.WAITING });
 
         stakeRes = await p2pContract?.depositToken(
           token?.address,
           depositTokens
         );
-        setData({ ...data, hash: stakeRes?.hash, status: "pending" });
+        setData({
+          ...data,
+          hash: stakeRes?.hash,
+          status: TransactionState.PENDING,
+        });
       } catch (error) {
-        setData({ ...data, status: "" });
+        setData({ ...data, status: TransactionState.FAILED });
 
         console.log("depositTokens trx error ", { error });
       }
@@ -37,24 +45,31 @@ export function useDepositCallback(
 
   const withdrawTokens = useCallback(async () => {
     try {
-      setData({ ...data, status: "waiting" });
+      setData({ ...data, status: TransactionState.WAITING });
 
       const res = await p2pContract?.withdrawToken(token?.address);
 
-      setData({ ...data, hash: res?.hash, status: "pending" });
+      setData({ ...data, hash: res?.hash, status: TransactionState.PENDING });
     } catch (error) {
-      setData({ ...data, status: "" });
+      setData({ ...data, status: TransactionState.FAILED });
 
       console.log("unstake error ", error);
     }
   }, [p2pContract, token, setData]);
 
   useEffect(() => {
+    setData(initialState);
+  }, []);
+
+  useEffect(() => {
     if (!data?.hash) {
       return;
     }
 
-    if (data?.status === "completed" || data?.status === "failed") {
+    if (
+      data?.status === TransactionState.COMPLETED ||
+      data?.status === TransactionState.FAILED
+    ) {
       return;
     }
 
@@ -62,12 +77,12 @@ export function useDepositCallback(
       ?.getTransactionReceipt(data?.hash)
       .then((res) => {
         if (res?.blockHash && res?.blockNumber) {
-          setData({ ...data, status: "completed" });
+          setData({ ...data, status: TransactionState.COMPLETED });
         }
       })
       .catch((err) => {
         console.log("transaction failed ", err);
-        setData({ ...data, status: "failed" });
+        setData({ ...data, status: TransactionState.FAILED });
       });
   }, [blockNumber]);
 
