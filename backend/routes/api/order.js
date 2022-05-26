@@ -461,7 +461,12 @@ router.patch("/verify-deposit/:order_id", auth, async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
 
-    if (order?.user?.toString() !== req.user?.id?.toString()) {
+    console.log("order  user", order?.user);
+    console.log("req   user", req?.user);
+    if (
+      order?.user?.wallet_address?.toLowerCase() !==
+      req.user?.address?.toLowerCase()
+    ) {
       return res.status(400).json({ errors: [{ msg: "Unauthorized access" }] });
     }
 
@@ -476,15 +481,17 @@ router.patch("/verify-deposit/:order_id", auth, async (req, res) => {
       wallet_address
     );
 
+    // console.log("verify", verify);
+
     if (verify) {
       await Order.findByIdAndUpdate(order_id, {
         $set: { deposit_verified: true, order_status: "active" },
       });
     }
 
-    const finalOrderStatus = await Order.findById(order_id);
+    // const finalOrderStatus = await Order.findById(order_id);
 
-    return res.status(200).json(finalOrderStatus);
+    return res.status(200).json({ verified: verify });
   } catch (error) {
     console.log(error);
     res.status(401).json({ errors: [{ msg: "Server error" }] });

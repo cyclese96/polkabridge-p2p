@@ -198,6 +198,22 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "revokeETH",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_token", "type": "address" }
+    ],
+    "name": "revokeToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "tokenList",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],

@@ -109,7 +109,7 @@ async function verifyTokenDeposit(final_order_amount, tokenAddress, account) {
       .call();
 
     // console.log("user info ", {
-    //   userInfo,
+    //   userAmount: userInfo._amount,
     //   flag: new BigNumber(final_order_amount).eq(userInfo._amount),
     //   final_order_amount,
     // });

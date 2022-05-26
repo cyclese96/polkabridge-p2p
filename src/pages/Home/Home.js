@@ -16,6 +16,8 @@ import HowItWorks from "../../common/HowItWorks";
 import Footer from "../../common/Footer";
 import { useDispatch, useSelector } from "react-redux";
 import { getLatestOrders } from "../../actions/orderActions";
+import { getUserProfile } from "../../actions/profileActions";
+import useActiveWeb3React from "../../hooks/useActiveWeb3React";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -25,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover,contain",
     height: "100%",
     width: "100%",
-    paddingTop: "10%",
+    paddingTop: "5%",
   },
   mainHeading: {
     fontWeight: 600,
@@ -92,10 +94,12 @@ const useStyles = makeStyles((theme) => ({
 export default function Home() {
   const classes = useStyles();
   const theme = useTheme();
+
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { fiats, tokens, payments } = store.order;
-
+  const { chainId, account } = useActiveWeb3React();
+  const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("PBR");
@@ -119,17 +123,17 @@ export default function Home() {
 
   useEffect(() => {
     if (fiats.length > 0) {
-      console.log(fiats[0]);
+      // console.log(fiats[0]);
       setFiatId(fiats[0]._id);
       setFiat(fiats[0].fiat);
     }
     if (tokens.length > 0) {
-      console.log(tokens[0]);
+      // console.log(tokens[0]);
 
       setTokenId(tokens[0]._id);
       setToken(tokens[0].symbol);
     }
-  }, [fiats, tokens]);
+  }, [fiats, tokens, chainId]);
 
   const updateIdValues = (type, value) => {
     if (type === "FIAT") {
@@ -167,28 +171,20 @@ export default function Home() {
     console.log(tempObjQuery);
     setFilterParams(tempObj);
     setQueryParams(tempObjQuery);
-    dispatch(
-      getLatestOrders(
-        tempObjQuery.orderType,
-        tempObjQuery.orderDir,
-        tempObjQuery.payment,
-        tempObjQuery.fiat,
-        tempObjQuery.token
-      )
-    );
+    dispatch(getLatestOrders(pageNumber));
   };
   return (
     <Box>
       <Box className={classes.background}>
-        <h1 variant="h1" className={classes.mainHeading}>
+        {/* <h1 variant="h1" className={classes.mainHeading}>
           Trade Tokens <br />
           With Decentralized P2P
-        </h1>
+        </h1> */}
         <Typography variant="body2" className={classes.para}>
           Experience first decentralized P2P trading with PolkaBridge
         </Typography>
 
-        <Container style={{ marginTop: 100 }}>
+        <Container style={{ marginTop: 10 }}>
           <Box className={classes.buttonWrapper}>
             <Box
               className={classes.buttonFirst}

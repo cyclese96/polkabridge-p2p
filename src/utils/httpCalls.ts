@@ -88,6 +88,7 @@ export const getOrders = async (page: number, params: any) => {
       { params: params, headers: headers }
     );
 
+    console.log("orders fetched ", result.data);
     return { status: result?.status, data: result?.data };
   } catch (error: any) {
     console.log("getOrders ", error);
@@ -194,11 +195,19 @@ export const createOrder = async (orderType: string, payload: any) => {
   }
 };
 
-export const verifyDeposit = async () => {
+export const verifyDeposit = async (orderId: string) => {
   try {
-    const result = await axios.get(`${baseUrl}/order_apis/v1/verify_deposit`, {
-      headers: headers,
-    });
+    if (!orderId) {
+      return { status: false, data: null };
+    }
+
+    const result = await axios.patch(
+      `${baseUrl}/order-apis/v1/verify-deposit/${orderId}`,
+      {},
+      {
+        headers: headers,
+      }
+    );
 
     return { status: result?.status, data: result?.data };
   } catch (error: any) {
