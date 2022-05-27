@@ -2,6 +2,8 @@ import { Box, Container, Grid, Hidden, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
 import React, { useState } from "react";
+import PopupLayout from "../../common/popups/PopupLayout";
+import TxPopup from "../../common/popups/TxPopup";
 import ProfileCurrency from "./ProfileComponents/ProfileCurrency";
 import ProfileInfo from "./ProfileComponents/ProfileInfo";
 import ProfileSidebar from "./ProfileComponents/ProfileSidebar";
@@ -72,6 +74,9 @@ function Profile() {
             {tab === 1 && <ProfileCurrency />}
           </Grid>
         </Grid>{" "}
+        {/* <PopupLayout popupActive={true}>
+          <TxPopup txCase={3} />
+        </PopupLayout> */}
       </Container>
     </Box>
   );
