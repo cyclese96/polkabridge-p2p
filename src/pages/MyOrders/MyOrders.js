@@ -3,10 +3,14 @@ import {
   Button,
   CircularProgress,
   Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useSelector } from "react-redux";
 import { useUserOrders } from "../../hooks/useOrders";
@@ -90,18 +94,65 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     fontWeight: 400,
   },
+  filterCard: {
+    marginTop: 10,
+    marginBottom: 10,
+    height: "100%",
+    width: "80%",
+    border: "1px solid #eeeeee",
+
+    paddingTop: 5,
+    paddingBottom: 5,
+    backgroundColor: "#FFFFFF",
+    boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
+    borderRadius: 10,
+  },
 }));
 
 function MyOrders() {
   const classes = useStyles();
   const theme = useTheme();
+
+  const store = useSelector((state) => state);
+  const { fiats, tokens, payments } = store.order;
+  const [pageNumber, setPageNumber] = useState(1);
+  const [orderType, setOrderType] = useState("buy");
+  // const [fiat, setFiat] = useState("INR");
+  const [token, setToken] = useState("All");
+  const [orderStatus, setorderStatus] = useState("all");
+
   const profile = useSelector((state) => state?.profile?.profile);
 
-  const [userOrders, ordersLoading] = useUserOrders(profile?._id);
+  const [userOrders, ordersLoading, updatePageNumber, updateFilters] =
+    useUserOrders(profile?._id);
+
+  const selectedToken = useMemo(() => {
+    const tokenObject = tokens?.find((item) => item?.symbol === token);
+    if (!tokenObject) {
+      return { _id: null };
+    }
+    return tokenObject;
+  }, [tokens, token]);
 
   useEffect(() => {
     console.log("fetchedd user orders ", { userOrders, profile });
   }, [userOrders, profile]);
+
+  const handleApplyFilters = () => {
+    // prepare filter object based on current selection
+    const filter = {
+      order_type:
+        orderType === "all" ? null : orderType === "sell" ? "buy" : "sell",
+      token: selectedToken?._id,
+      order_status: orderStatus === "all" ? null : orderStatus,
+    };
+
+    updateFilters(filter);
+  };
+
+  useEffect(() => {
+    handleApplyFilters();
+  }, [orderType, selectedToken, orderStatus]);
 
   return (
     <Box className={classes.background}>
@@ -123,7 +174,124 @@ function MyOrders() {
           </Typography>
         </Box>
         <Box mt={4}>
-          <div className={classes.infoCard}>
+          <Container style={{ marginTop: 10 }}>
+            <div className="d-flex justify-content-center">
+              <div className={classes.filterCard}>
+                <Box
+                  display="flex"
+                  justifyContent="space-around"
+                  alignItems="center"
+                  mt={3}
+                >
+                  <Box px={2}>
+                    <FormControl
+                      variant="standard"
+                      sx={{ m: 1, minWidth: 120 }}
+                    >
+                      <InputLabel id="demo-simple-select-standard-label">
+                        Order Type
+                      </InputLabel>
+
+                      <Select
+                        variant="standard"
+                        disableUnderline={true}
+                        value={orderType}
+                        label="Age"
+                        style={{
+                          fontWeight: 600,
+                          letterSpacing: 1,
+                          color: "#212121",
+                        }}
+                        onChange={(e) => setOrderType(e?.target?.value)}
+                      >
+                        <MenuItem value="all">All</MenuItem>
+                        <MenuItem value="buy">Buy</MenuItem>
+                        <MenuItem value="sell">Sell</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <div
+                    style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                  ></div>
+                  <Box px={2}>
+                    <FormControl
+                      variant="standard"
+                      sx={{ m: 1, minWidth: 120 }}
+                    >
+                      <InputLabel id="demo-simple-select-standard-label">
+                        Token
+                      </InputLabel>
+
+                      <Select
+                        variant="standard"
+                        disableUnderline={true}
+                        value={token}
+                        label="Age"
+                        style={{
+                          fontWeight: 600,
+                          lßtterSpacing: 1,
+                          color: "#212121",
+                        }}
+                        onChange={(e) => setToken(e.target.value)}
+                      >
+                        {[{ symbol: "All" }, ...tokens].map((item, index) => (
+                          <MenuItem value={item.symbol}>{item.symbol}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  <div
+                    style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                  ></div>
+                  <Box px={2}>
+                    <FormControl
+                      variant="standard"
+                      sx={{ m: 1, minWidth: 120 }}
+                    >
+                      <InputLabel id="demo-simple-select-standard-label">
+                        Status
+                      </InputLabel>
+
+                      <Select
+                        variant="standard"
+                        disableUnderline={true}
+                        value={orderStatus}
+                        label="Age"
+                        style={{
+                          fontWeight: 600,
+                          letterSpacing: 1,
+                          color: "#212121",
+                        }}
+                        onChange={(e) => setorderStatus(e.target.value)}
+                      >
+                        <MenuItem value="all">All</MenuItem>
+                        <MenuItem value="processing">Processing</MenuItem>
+                        <MenuItem value="completed">Completed</MenuItem>
+                        <MenuItem value="cancelled">Cancelled</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                  {/* <div
+                    style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
+                  ></div>
+                  <Box px={2}>
+                    <Button
+                      onClick={handleApplyFilters}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+                      }}
+                    >
+                      Find Orders
+                    </Button>
+                  </Box> */}
+                </Box>
+              </div>
+            </div>
+          </Container>
+          {/* <div className={classes.infoCard}>
             <Box display="flex" justifyContent="center" alignItems="center">
               <div className={classes.orderTab}>Pending</div>
               <div className={classes.orderTabSelected}>Completed</div>
@@ -172,7 +340,7 @@ function MyOrders() {
                 </Button>
               </div>
             </Box>
-          </div>
+          </div> */}
           <Box>
             <Box className={classes.tableCard}>
               <table className={classes.table}>
@@ -215,127 +383,6 @@ function MyOrders() {
                     </td>
                   </tr>
                 ))}
-
-                {/* <tr className={classes.tr}>
-                  <td className={classes.userText}>BTC/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText}>ETH/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Sell</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText}>BTC/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText}>BTC/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText}>BTC/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText}>BTC/INR</td>
-                  <td className={classes.otherText}>0.13</td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    {" "}
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr> */}
               </table>
               <div className="text-center">
                 {ordersLoading && <CircularProgress />}

@@ -69,14 +69,14 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer",
   },
   filterCard: {
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 10,
     height: "100%",
     width: "80%",
     border: "1px solid #eeeeee",
 
-    paddingTop: 30,
-    paddingBottom: 30,
+    paddingTop: 5,
+    paddingBottom: 5,
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
@@ -97,13 +97,10 @@ export default function Home() {
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { fiats, tokens, payments } = store.order;
-  const { chainId, account } = useActiveWeb3React();
   const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("All");
-  // const [fiatId, setFiatId] = useState("");
-  // const [tokenId, setTokenId] = useState("");
   const [payment, setPayment] = useState("All");
 
   const [orders, ordersLoading, updatePageNumber, updateFilters] =

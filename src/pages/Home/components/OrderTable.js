@@ -82,13 +82,12 @@ export default function OrderTable({ orders }) {
         <Box className={classes.tableCard}>
           <table className={classes.table}>
             <thead>
-              <th className={classes.tableHeading}>User</th>
+              <th className={classes.tableHeading}>Seller</th>
+              <th className={classes.tableHeading}>Order Amount</th>
               <th className={classes.tableHeading}>Price</th>
-              <th className={classes.tableHeading}>Quantity</th>
               <th className={classes.tableHeading}>Payment Mode</th>
               <th className={classes.tableHeading}>Date</th>
-
-              <th className={classes.tableHeading}>Actions</th>
+              <th className={classes.tableHeading}>Action</th>
             </thead>
             {orders?.map((order, index) => {
               return (
@@ -99,16 +98,23 @@ export default function OrderTable({ orders }) {
                         className={classes.userText}
                         style={{ paddingLeft: 10 }}
                       >
-                        {formattedAddress(order?.user?.wallet_address)}
-                      </td>
-                      <td className={classes.otherText}>
-                        {order?.order_unit_price}
+                        {order?.user?.name ||
+                          formattedAddress(order?.user?.wallet_address)}
                       </td>
                       <td className={classes.otherText}>
                         {order?.order_type === "sell"
-                          ? fromWei(order?.order_amount, order?.token?.decimals)
-                          : order?.order_amount}
+                          ? fromWei(
+                              order?.order_amount,
+                              order?.token?.decimals
+                            ) +
+                            " " +
+                            order?.token?.symbol
+                          : order?.order_amount + " " + order?.token?.symbol}
                       </td>
+                      <td className={classes.otherText}>
+                        {order?.order_unit_price + " " + order?.fiat?.fiat}
+                      </td>
+
                       <td className={classes.otherText}>
                         {" "}
                         {order?.payment_options?.join(", ").toUpperCase()}
