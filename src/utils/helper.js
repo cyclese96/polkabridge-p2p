@@ -112,7 +112,6 @@ export const formattedAddress = (address) => {
   }
 
   const _formatted = _address?.slice(0, 4) + "..." + _address?.slice(-4);
-  console.log("formatting ", _formatted);
   return _formatted;
 };
 // //input  { chainId, chainName, currency: {name, symbol, decimals }, rpcUrls, blockExplorer }

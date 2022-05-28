@@ -16,6 +16,8 @@ import {
   CREATE_NEW_ORDER,
   GET_ERRORS,
   RESET_NEW_ORDER,
+  GET_USER_ORDERS,
+  SET_ORDER_LOADING,
 } from "./types";
 
 // GET
@@ -33,20 +35,38 @@ export const getLatestOrders =
     //   // token: "6263a3e538fd8c30a7c4d8b5",
     // };
 
-    const result = await getOrders(pageNumber, {});
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: true,
+    });
+
+    const result = await getOrders(pageNumber, filters);
+
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: false,
+    });
 
     if (result?.status !== 200) {
       dispatch({
         type: GET_ERRORS,
         payload: result.message,
       });
+
       return;
     }
 
-    dispatch({
-      type: GET_ORDERS,
-      payload: result.data,
-    });
+    if (Object.keys(filters).includes("user")) {
+      dispatch({
+        type: GET_USER_ORDERS,
+        payload: result.data,
+      });
+    } else {
+      dispatch({
+        type: GET_ORDERS,
+        payload: result.data,
+      });
+    }
   };
 
 // GET

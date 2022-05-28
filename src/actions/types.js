@@ -3,6 +3,8 @@ export const GET_ERRORS = "GET_ERRORS";
 //Order reducers
 export const GET_ORDER = "GET_ORDER";
 export const GET_ORDERS = "GET_ORDERS";
+export const GET_USER_ORDERS = "GET_USER_ORDERS";
+export const SET_ORDER_LOADING = "SET_ORDER_LOADING";
 export const CREATE_NEW_ORDER = "CREATE_NEW_ORDER";
 export const RESET_NEW_ORDER = "RESET_NEW_ORDER";
 export const GET_FIATS = "GET_FIATS";

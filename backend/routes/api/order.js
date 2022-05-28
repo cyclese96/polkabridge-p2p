@@ -43,11 +43,10 @@ router.post(
       "Please add payment option for the order"
     ).isArray(),
   ],
-  // auth,
+  auth,
   async (req, res) => {
     try {
       const {
-        user,
         order_amount,
         token,
         fiat,
@@ -55,6 +54,8 @@ router.post(
         payment_options,
         description,
       } = req.body;
+
+      const user = req.user?.id;
 
       const errors = validationResult(req);
 
@@ -549,7 +550,6 @@ router.get("/orders/:page_number", auth, async (req, res) => {
     }
 
     orderFilter.order_status = "active";
-    console.log(req.query);
     if (req.query.order_status) {
       orderFilter.order_status = req.query.order_status;
     }
@@ -563,6 +563,11 @@ router.get("/orders/:page_number", auth, async (req, res) => {
       orderFilter.token = mongoose.Types.ObjectId(req.query.token);
     }
 
+    if (req.query.user) {
+      orderFilter.user = mongoose.Types.ObjectId(req.query.user);
+    }
+    console.log("orderFilter ", orderFilter);
+
     // prepare sorting
     let sortBy = {};
     if (req.query.order_by === "order_amount") {
@@ -570,7 +575,6 @@ router.get("/orders/:page_number", auth, async (req, res) => {
     } else {
       sortBy = { created_at: req.query.order_direction === "desc" ? 1 : -1 };
     }
-
     // apply filter
     const orders = await Order.find(orderFilter)
       .populate("token")

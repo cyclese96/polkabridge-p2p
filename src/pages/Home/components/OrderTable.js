@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Box, Button, Typography } from "@mui/material";
-import { getLatestOrders } from "./../../../actions/orderActions";
-import { useSelector, useDispatch } from "react-redux";
+import { Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import Web3 from "web3";
 import { formattedAddress, fromWei } from "../../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
@@ -75,24 +72,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function OrderTable({ filterParams }) {
-  const store = useSelector((state) => state);
+export default function OrderTable({ orders }) {
   const classes = useStyles();
-  const dispatch = useDispatch();
 
-  const { orders } = store.order;
-  const [filteredOrder, setFilteredOrder] = useState([]);
-
-  // useEffect(() => {
-  //   if (orders) {
-  //     let data = orders.filter(
-  //       (singleOrder) => singleOrder.order_type === filterParams.orderType
-  //     );
-  //     console.log(data);
-  //     console.log(orders);
-  //     setFilteredOrder([...data]);
-  //   }
-  // }, [filterParams, orders]);
   return (
     <Box mt={5}>
       <h5 className={classes.title}>Market Open Orders</h5>
@@ -101,9 +83,7 @@ export default function OrderTable({ filterParams }) {
           <table className={classes.table}>
             <thead>
               <th className={classes.tableHeading}>User</th>
-              <th className={classes.tableHeading}>
-                Price ({filterParams.token}/{filterParams.fiat})
-              </th>
+              <th className={classes.tableHeading}>Price</th>
               <th className={classes.tableHeading}>Quantity</th>
               <th className={classes.tableHeading}>Payment Mode</th>
               <th className={classes.tableHeading}>Date</th>

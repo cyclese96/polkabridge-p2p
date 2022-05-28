@@ -1,6 +1,16 @@
-import { Box, Button, Container, Typography, useTheme } from "@mui/material";
-import React from "react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import React, { useEffect } from "react";
 import makeStyles from "@mui/styles/makeStyles";
+import { useSelector } from "react-redux";
+import { useUserOrders } from "../../hooks/useOrders";
+import { fromWei } from "../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -85,6 +95,13 @@ const useStyles = makeStyles((theme) => ({
 function MyOrders() {
   const classes = useStyles();
   const theme = useTheme();
+  const profile = useSelector((state) => state?.profile?.profile);
+
+  const [userOrders, ordersLoading] = useUserOrders(profile?._id);
+
+  useEffect(() => {
+    console.log("fetchedd user orders ", { userOrders, profile });
+  }, [userOrders, profile]);
 
   return (
     <Box className={classes.background}>
@@ -168,30 +185,38 @@ function MyOrders() {
 
                   <th>Actions</th>
                 </tr>
-                <tr className={classes.tr}>
-                  <td className={classes.userText} style={{ width: "15%" }}>
-                    BTC/INR
-                  </td>
-                  <td className={classes.otherText} style={{ width: "15%" }}>
-                    0.13
-                  </td>
-                  <td className={classes.otherText}>35,34,400</td>
-                  <td className={classes.otherText}>Buy</td>
-                  <td className={classes.otherText}>04, April 2022</td>
-                  <td className={classes.otherText}>
-                    <Button
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: theme.palette.primary.main,
-                        padding: "5px 20px 5px 20px",
-                        color: "white",
-                      }}
-                    >
-                      View Order
-                    </Button>
-                  </td>
-                </tr>
-                <tr className={classes.tr}>
+
+                {userOrders?.map((item) => (
+                  <tr className={classes.tr}>
+                    <td className={classes.userText} style={{ width: "15%" }}>
+                      {item?.token?.symbol}
+                    </td>
+                    <td className={classes.otherText} style={{ width: "15%" }}>
+                      {item?.order_type === "sell"
+                        ? fromWei(item?.order_amount, item?.token?.decimals)
+                        : item?.order_amount}
+                    </td>
+                    <td className={classes.otherText}>
+                      {item?.order_unit_price}
+                    </td>
+                    <td className={classes.otherText}>{item?.order_type}</td>
+                    <td className={classes.otherText}>{item?.created_at}</td>
+                    <td className={classes.otherText}>
+                      <Button
+                        style={{
+                          borderRadius: 10,
+                          backgroundColor: theme.palette.primary.main,
+                          padding: "5px 20px 5px 20px",
+                          color: "white",
+                        }}
+                      >
+                        View Order
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+
+                {/* <tr className={classes.tr}>
                   <td className={classes.userText}>BTC/INR</td>
                   <td className={classes.otherText}>0.13</td>
                   <td className={classes.otherText}>35,34,400</td>
@@ -310,8 +335,11 @@ function MyOrders() {
                       View Order
                     </Button>
                   </td>
-                </tr>
+                </tr> */}
               </table>
+              <div className="text-center">
+                {ordersLoading && <CircularProgress />}
+              </div>
             </Box>
           </Box>
         </Box>

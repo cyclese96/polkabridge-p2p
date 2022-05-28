@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { useCurrencyBalance, useETHBalances } from "../hooks/useBalance";
 import useActiveWeb3React from "../hooks/useActiveWeb3React";
 import { formatCurrency, fromWei } from "../utils/helper";
+import { getUserProfile } from "../actions/profileActions";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -113,6 +114,7 @@ const Appbar = () => {
     dispatch(getAllTokens());
     dispatch(getAllFiats());
     dispatch(getAllPaymentOptions());
+    dispatch(getUserProfile());
   }, []);
 
   const { account, chainId } = useActiveWeb3React();
