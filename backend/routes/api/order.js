@@ -551,7 +551,10 @@ router.get("/orders/:page_number", auth, async (req, res) => {
 
     orderFilter.order_status = "active";
     if (req.query.order_status) {
-      orderFilter.order_status = req.query.order_status;
+      orderFilter.order_status =
+        req.query.order_status?.toLowerCase() === "all"
+          ? { $in: ["active", "completed", "cancelled"] }
+          : req.query.order_status;
     }
     if (req.query.payment_option) {
       orderFilter.payment_options = { $in: req.query.payment_option };

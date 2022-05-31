@@ -116,8 +116,7 @@ function MyOrders() {
   const store = useSelector((state) => state);
   const { fiats, tokens, payments } = store.order;
   const [pageNumber, setPageNumber] = useState(1);
-  const [orderType, setOrderType] = useState("buy");
-  // const [fiat, setFiat] = useState("INR");
+  const [orderType, setOrderType] = useState("all");
   const [token, setToken] = useState("All");
   const [orderStatus, setorderStatus] = useState("all");
 
@@ -144,7 +143,7 @@ function MyOrders() {
       order_type:
         orderType === "all" ? null : orderType === "sell" ? "buy" : "sell",
       token: selectedToken?._id,
-      order_status: orderStatus === "all" ? null : orderStatus,
+      order_status: orderStatus,
     };
 
     updateFilters(filter);
@@ -265,7 +264,7 @@ function MyOrders() {
                         onChange={(e) => setorderStatus(e.target.value)}
                       >
                         <MenuItem value="all">All</MenuItem>
-                        <MenuItem value="processing">Processing</MenuItem>
+                        <MenuItem value="active">Active</MenuItem>
                         <MenuItem value="completed">Completed</MenuItem>
                         <MenuItem value="cancelled">Cancelled</MenuItem>
                       </Select>
