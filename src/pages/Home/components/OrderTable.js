@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Box, Button, Typography } from "@mui/material";
-import { getLatestOrders } from "./../../../actions/orderActions";
-import { useSelector, useDispatch } from "react-redux";
+import { Box, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-import Web3 from "web3";
 import { formattedAddress, fromWei } from "../../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
@@ -75,24 +72,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function OrderTable({ filterParams }) {
-  const store = useSelector((state) => state);
+export default function OrderTable({ orders }) {
   const classes = useStyles();
-  const dispatch = useDispatch();
 
-  const { orders } = store.order;
-  const [filteredOrder, setFilteredOrder] = useState([]);
-
-  // useEffect(() => {
-  //   if (orders) {
-  //     let data = orders.filter(
-  //       (singleOrder) => singleOrder.order_type === filterParams.orderType
-  //     );
-  //     console.log(data);
-  //     console.log(orders);
-  //     setFilteredOrder([...data]);
-  //   }
-  // }, [filterParams, orders]);
   return (
     <Box mt={5}>
       <h5 className={classes.title}>Market Open Orders</h5>
@@ -100,15 +82,12 @@ export default function OrderTable({ filterParams }) {
         <Box className={classes.tableCard}>
           <table className={classes.table}>
             <thead>
-              <th className={classes.tableHeading}>User</th>
-              <th className={classes.tableHeading}>
-                Price ({filterParams.token}/{filterParams.fiat})
-              </th>
-              <th className={classes.tableHeading}>Quantity</th>
+              <th className={classes.tableHeading}>Seller</th>
+              <th className={classes.tableHeading}>Order Amount</th>
+              <th className={classes.tableHeading}>Price</th>
               <th className={classes.tableHeading}>Payment Mode</th>
               <th className={classes.tableHeading}>Date</th>
-
-              <th className={classes.tableHeading}>Actions</th>
+              <th className={classes.tableHeading}>Action</th>
             </thead>
             {orders?.map((order, index) => {
               return (
@@ -119,16 +98,21 @@ export default function OrderTable({ filterParams }) {
                         className={classes.userText}
                         style={{ paddingLeft: 10 }}
                       >
-                        {formattedAddress(order?.user?.wallet_address)}
+                        {order?.user?.name ||
+                          formattedAddress(order?.user?.wallet_address)}
                       </td>
                       <td className={classes.otherText}>
-                        {order?.order_unit_price}
+                        {fromWei(
+                          order?.pending_amount,
+                          order?.token?.decimals
+                        ) +
+                          " " +
+                          order?.token?.symbol}
                       </td>
                       <td className={classes.otherText}>
-                        {order?.order_type === "sell"
-                          ? fromWei(order?.order_amount, order?.token?.decimals)
-                          : order?.order_amount}
+                        {order?.order_unit_price + " " + order?.fiat?.fiat}
                       </td>
+
                       <td className={classes.otherText}>
                         {" "}
                         {order?.payment_options?.join(", ").toUpperCase()}
@@ -141,7 +125,7 @@ export default function OrderTable({ filterParams }) {
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
-                              BUY
+                              BUY {order?.token?.symbol}
                             </Button>
                           </Link>
                         ) : (
@@ -150,7 +134,7 @@ export default function OrderTable({ filterParams }) {
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
-                              SELL
+                              SELL {order?.token?.symbol}
                             </Button>
                           </Link>
                         )}

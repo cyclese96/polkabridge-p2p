@@ -170,10 +170,9 @@ function OrderPlaced() {
   // const { order } = store.order;
   const order = useSelector((state) => state?.order?.order);
 
-  // useEffect(async () => {
-  //   let response = await dispatch(getOrderDetailsById(order_id));
-  //   console.log(response);
-  // }, []);
+  useEffect(async () => {
+    dispatch(getOrderDetailsById(order_id));
+  }, [order_id]);
 
   return (
     <Box className={classes.background}>
@@ -221,7 +220,7 @@ function OrderPlaced() {
                           align="left"
                           style={{ fontWeight: 600 }}
                         >
-                          {order.order_type}
+                          {order?.order_type}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -231,7 +230,7 @@ function OrderPlaced() {
                           <AttachMoney
                             style={{ marginRight: 12, color: "#616161" }}
                           />{" "}
-                          Price ({order.fiat.fiat}):
+                          Price ({order?.fiat?.fiat}):
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -247,7 +246,7 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order.order_unit_price}
+                            {order?.order_unit_price}
                           </Typography>
                         </Box>
                       </Grid>
@@ -258,7 +257,7 @@ function OrderPlaced() {
                           <MoneyOutlined
                             style={{ marginRight: 12, color: "#616161" }}
                           />{" "}
-                          Amount ({order.token.symbol}):
+                          Amount ({order?.token?.symbol}):
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -274,7 +273,7 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order.order_amount} {order.token.symbol}
+                            {order?.order_amount} {order?.token?.symbol}
                           </Typography>
                         </Box>
                       </Grid>
@@ -285,7 +284,7 @@ function OrderPlaced() {
                           <CreditCard
                             style={{ marginRight: 12, color: "#616161" }}
                           />{" "}
-                          Total ({order.fiat.fiat}):
+                          Total ({order?.fiat?.fiat}):
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -301,8 +300,8 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order.order_unit_price * order.order_unit_price}{" "}
-                            {order.fiat.fiat}
+                            {order?.order_unit_price * order?.order_unit_price}{" "}
+                            {order?.fiat?.fiat}
                           </Typography>
                         </Box>
                       </Grid>
@@ -324,7 +323,7 @@ function OrderPlaced() {
                             width: "fit-content",
                           }}
                         >
-                          {order.payment_options.map((value) => (
+                          {order?.payment_options?.map((value) => (
                             <Box
                               style={{
                                 backgroundColor: "#E1DCFF",

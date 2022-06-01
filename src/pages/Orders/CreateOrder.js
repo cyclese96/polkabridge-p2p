@@ -250,7 +250,7 @@ function CreateOrder() {
   const submitOrder = () => {
     if (orderType === "buy") {
       const payload = {
-        order_amount: tokenAmount,
+        order_amount: toWei(tokenAmount, selectedToken?.decimals),
         token: selectedToken?._id,
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),

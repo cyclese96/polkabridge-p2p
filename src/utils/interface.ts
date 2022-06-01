@@ -56,4 +56,4 @@ export enum CreateStatus {
   FAILED = "FAILED",
 }
 
-export interface Order {}
+export interface OrderList extends Array<any> {}

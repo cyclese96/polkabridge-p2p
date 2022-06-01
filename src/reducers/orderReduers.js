@@ -6,11 +6,15 @@ import {
   GET_PAYMENTS,
   CREATE_NEW_ORDER,
   RESET_NEW_ORDER,
+  GET_USER_ORDERS,
+  SET_ORDER_LOADING,
 } from "../actions/types";
 
 const initalState = {
   orders: [],
-  order: null,
+  order: {},
+  userOrders: [],
+  orderLoading: false,
   fiats: [],
   tokens: [],
   payments: [],
@@ -22,6 +26,16 @@ export default function Orders(state = initalState, action) {
       return {
         ...state,
         orders: [...action.payload],
+      };
+    case GET_USER_ORDERS:
+      return {
+        ...state,
+        userOrders: [...action.payload],
+      };
+    case SET_ORDER_LOADING:
+      return {
+        ...state,
+        orderLoading: action.payload,
       };
     case GET_ORDER:
       return {

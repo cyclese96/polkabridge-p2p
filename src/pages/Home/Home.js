@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   FormControl,
   InputLabel,
@@ -13,11 +14,9 @@ import {
 } from "@mui/material";
 import OrderTable from "./components/OrderTable";
 import HowItWorks from "../../common/HowItWorks";
-import Footer from "../../common/Footer";
 import { useDispatch, useSelector } from "react-redux";
-import { getLatestOrders } from "../../actions/orderActions";
-import { getUserProfile } from "../../actions/profileActions";
 import useActiveWeb3React from "../../hooks/useActiveWeb3React";
+import { useGlobalOrders } from "../../hooks/useOrders";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -70,14 +69,14 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer",
   },
   filterCard: {
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 10,
     height: "100%",
     width: "80%",
     border: "1px solid #eeeeee",
 
-    paddingTop: 30,
-    paddingBottom: 30,
+    paddingTop: 5,
+    paddingBottom: 5,
     backgroundColor: "#FFFFFF",
     boxShadow: "0px 12px 24px rgba(0, 0, 0, 0.03)",
     borderRadius: 10,
@@ -98,81 +97,47 @@ export default function Home() {
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { fiats, tokens, payments } = store.order;
-  const { chainId, account } = useActiveWeb3React();
   const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
-  const [token, setToken] = useState("PBR");
-  const [fiatId, setFiatId] = useState("");
-  const [tokenId, setTokenId] = useState("");
-  const [payment, setPayment] = useState("all");
-  const [filterParams, setFilterParams] = useState({
-    orderType: "buy",
-    fiat: "INR",
-    token: "PBR",
-    payment: "UPI",
-    orderDir: "desc",
-  });
-  const [queryParams, setQueryParams] = useState({
-    orderType: "buy",
-    fiat: "INR",
-    token: "PBR",
-    payment: "UPI",
-    orderDir: "desc",
-  });
+  const [token, setToken] = useState("All");
+  const [payment, setPayment] = useState("All");
+
+  const [orders, ordersLoading, updatePageNumber, updateFilters] =
+    useGlobalOrders(orderType);
+
+  const selectedFiat = useMemo(() => {
+    const fiatObject = fiats?.find((item) => item?.fiat === fiat);
+    if (!fiatObject) {
+      return { _id: null };
+    }
+    return fiatObject;
+  }, [fiats, fiat]);
+
+  const selectedToken = useMemo(() => {
+    const tokenObject = tokens?.find((item) => item?.symbol === token);
+    if (!tokenObject) {
+      return { _id: null };
+    }
+    return tokenObject;
+  }, [tokens, token]);
+
+  const handleApplyFilters = () => {
+    // prepare filter object based on current selection
+    const filter = {
+      order_type: orderType === "sell" ? "buy" : "sell",
+      fiat: selectedFiat?._id,
+      token: selectedToken?._id,
+      payment_option: payment === "All" ? null : payment,
+    };
+
+    updateFilters(filter);
+  };
 
   useEffect(() => {
-    if (fiats.length > 0) {
-      // console.log(fiats[0]);
-      setFiatId(fiats[0]._id);
-      setFiat(fiats[0].fiat);
-    }
-    if (tokens.length > 0) {
-      // console.log(tokens[0]);
+    handleApplyFilters();
+  }, [orderType]);
 
-      setTokenId(tokens[0]._id);
-      setToken(tokens[0].symbol);
-    }
-  }, [fiats, tokens, chainId]);
-
-  const updateIdValues = (type, value) => {
-    if (type === "FIAT") {
-      let indexOfItem = fiats.findIndex((item) => item.fiat === value);
-      if (indexOfItem >= 0) {
-        console.log(fiats[indexOfItem]._id);
-        setFiat(value);
-        setFiatId(fiats[indexOfItem]._id);
-      }
-    } else {
-      let indexOfItem = tokens.findIndex((item) => item.symbol === value);
-      console.log(indexOfItem);
-      console.log(tokens[indexOfItem]._id);
-      if (indexOfItem >= 0) {
-        setToken(value);
-        setTokenId(tokens[indexOfItem]._id);
-      }
-    }
-  };
-
-  const updateFilters = () => {
-    let tempObj = {
-      orderType: orderType,
-      fiat: fiat,
-      token: token,
-      payment: payment,
-    };
-    let tempObjQuery = {
-      orderType: orderType,
-      fiat: fiatId,
-      token: tokenId,
-      payment: payment,
-    };
-    console.log(tempObj);
-    console.log(tempObjQuery);
-    setFilterParams(tempObj);
-    setQueryParams(tempObjQuery);
-    dispatch(getLatestOrders(pageNumber));
-  };
   return (
     <Box>
       <Box className={classes.background}>
@@ -231,7 +196,7 @@ export default function Home() {
                         letterSpacing: 1,
                         color: "#212121",
                       }}
-                      onChange={(e) => updateIdValues("FIAT", e.target.value)}
+                      onChange={(e) => setFiat(e?.target?.value)}
                     >
                       {fiats.map((item, index) => (
                         <MenuItem value={item.fiat}>{item.fiat}</MenuItem>
@@ -255,12 +220,12 @@ export default function Home() {
                       label="Age"
                       style={{
                         fontWeight: 600,
-                        letterSpacing: 1,
+                        lßtterSpacing: 1,
                         color: "#212121",
                       }}
-                      onChange={(e) => updateIdValues("TOKEN", e.target.value)}
+                      onChange={(e) => setToken(e.target.value)}
                     >
-                      {tokens.map((item, index) => (
+                      {[{ symbol: "All" }, ...tokens].map((item, index) => (
                         <MenuItem value={item.symbol}>{item.symbol}</MenuItem>
                       ))}
                     </Select>
@@ -287,7 +252,7 @@ export default function Home() {
                       }}
                       onChange={(e) => setPayment(e.target.value)}
                     >
-                      <MenuItem value="all">All</MenuItem>
+                      <MenuItem value="All">All</MenuItem>
                       {payments.map((item, index) => (
                         <MenuItem value={item.provider}>
                           {item.provider.toUpperCase()}
@@ -301,7 +266,7 @@ export default function Home() {
                 ></div>
                 <Box px={2}>
                   <Button
-                    onClick={updateFilters}
+                    onClick={handleApplyFilters}
                     style={{
                       borderRadius: 10,
                       background: "#6A55EA",
@@ -318,7 +283,10 @@ export default function Home() {
         </Container>
       </Box>
       <Container>
-        <OrderTable filterParams={filterParams} />
+        <OrderTable orders={orders} />
+        <div className="text-center">
+          {ordersLoading && <CircularProgress />}
+        </div>
       </Container>
       <Container>
         <HowItWorks />

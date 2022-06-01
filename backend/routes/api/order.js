@@ -43,11 +43,10 @@ router.post(
       "Please add payment option for the order"
     ).isArray(),
   ],
-  // auth,
+  auth,
   async (req, res) => {
     try {
       const {
-        user,
         order_amount,
         token,
         fiat,
@@ -55,6 +54,8 @@ router.post(
         payment_options,
         description,
       } = req.body;
+
+      const user = req.user?.id;
 
       const errors = validationResult(req);
 
@@ -80,6 +81,7 @@ router.post(
         order_id: new Date().getTime(),
         user: mongoose.Types.ObjectId(user),
         order_amount: order_amount?.toString(),
+        pending_amount: order_amount?.toString(),
         token: mongoose.Types.ObjectId(token),
         fiat: mongoose.Types.ObjectId(fiat),
         order_unit_price: order_unit_price,
@@ -290,10 +292,10 @@ router.post(
               order_id: new Date().getTime(),
               user: mongoose.Types.ObjectId(user),
               order_amount: order_amount?.toString(),
-              pending_amount: order_amount?.toString(),
               deflationary_deduction: deflationaryDeducted,
               fee_deduction: feeDeducted,
               final_order_amount: remainingAfterDeduction,
+              pending_amount: remainingAfterDeduction,
               token: mongoose.Types.ObjectId(token),
               fiat: mongoose.Types.ObjectId(fiat),
               order_unit_price: order_unit_price,
@@ -317,10 +319,10 @@ router.post(
         order_id: new Date().getTime(),
         user: mongoose.Types.ObjectId(user).toString(),
         order_amount: order_amount,
-        pending_amount: order_amount,
         deflationary_deduction: deflationaryDeducted,
         fee_deduction: feeDeducted,
         final_order_amount: remainingAfterDeduction,
+        pending_amount: remainingAfterDeduction,
         token: mongoose.Types.ObjectId(token).toString(),
         fiat: mongoose.Types.ObjectId(fiat).toString(),
         order_unit_price: order_unit_price,
@@ -549,9 +551,11 @@ router.get("/orders/:page_number", auth, async (req, res) => {
     }
 
     orderFilter.order_status = "active";
-    console.log(req.query);
     if (req.query.order_status) {
-      orderFilter.order_status = req.query.order_status;
+      orderFilter.order_status =
+        req.query.order_status?.toLowerCase() === "all"
+          ? { $in: ["active", "completed", "cancelled"] }
+          : req.query.order_status;
     }
     if (req.query.payment_option) {
       orderFilter.payment_options = { $in: req.query.payment_option };
@@ -563,6 +567,11 @@ router.get("/orders/:page_number", auth, async (req, res) => {
       orderFilter.token = mongoose.Types.ObjectId(req.query.token);
     }
 
+    if (req.query.user) {
+      orderFilter.user = mongoose.Types.ObjectId(req.query.user);
+    }
+    console.log("orderFilter ", orderFilter);
+
     // prepare sorting
     let sortBy = {};
     if (req.query.order_by === "order_amount") {
@@ -570,7 +579,6 @@ router.get("/orders/:page_number", auth, async (req, res) => {
     } else {
       sortBy = { created_at: req.query.order_direction === "desc" ? 1 : -1 };
     }
-
     // apply filter
     const orders = await Order.find(orderFilter)
       .populate("token")
