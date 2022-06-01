@@ -13,6 +13,6 @@ const OrderStatusSchema = new Schema({
 });
 
 module.exports = OrderStatus = mongoose.model(
-  "order_status",
+  "transaction_status",
   OrderStatusSchema
 );

@@ -102,14 +102,12 @@ export default function OrderTable({ orders }) {
                           formattedAddress(order?.user?.wallet_address)}
                       </td>
                       <td className={classes.otherText}>
-                        {order?.order_type === "sell"
-                          ? fromWei(
-                              order?.order_amount,
-                              order?.token?.decimals
-                            ) +
-                            " " +
-                            order?.token?.symbol
-                          : order?.order_amount + " " + order?.token?.symbol}
+                        {fromWei(
+                          order?.pending_amount,
+                          order?.token?.decimals
+                        ) +
+                          " " +
+                          order?.token?.symbol}
                       </td>
                       <td className={classes.otherText}>
                         {order?.order_unit_price + " " + order?.fiat?.fiat}
@@ -127,7 +125,7 @@ export default function OrderTable({ orders }) {
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
-                              BUY
+                              BUY {order?.token?.symbol}
                             </Button>
                           </Link>
                         ) : (
@@ -136,7 +134,7 @@ export default function OrderTable({ orders }) {
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
-                              SELL
+                              SELL {order?.token?.symbol}
                             </Button>
                           </Link>
                         )}

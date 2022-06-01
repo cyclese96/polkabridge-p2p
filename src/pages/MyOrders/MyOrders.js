@@ -359,9 +359,7 @@ function MyOrders() {
                       {item?.token?.symbol}
                     </td>
                     <td className={classes.otherText} style={{ width: "15%" }}>
-                      {item?.order_type === "sell"
-                        ? fromWei(item?.order_amount, item?.token?.decimals)
-                        : item?.order_amount}
+                      {fromWei(item?.pending_amount, item?.token?.decimals)}
                     </td>
                     <td className={classes.otherText}>
                       {item?.order_unit_price}

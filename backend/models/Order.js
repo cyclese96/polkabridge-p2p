@@ -18,8 +18,8 @@ const OrderSchema = new Schema({
   },
   order_amount: {
     // amount of currrent buy or sell orders
-    type: String, // token amounts in wei
-    required: true, // fiat amounts in normal decimals
+    type: String, // token amounts in wei for buy and sell orders
+    required: true,
   },
   pending_amount: {
     // remaining order amount to be sold or bought
@@ -52,7 +52,7 @@ const OrderSchema = new Schema({
   },
   order_status: {
     type: String,
-    default: "submitted", // submitted/ active/ completed / cancelled
+    default: "submitted", // submitted / active / completed / cancelled
   },
   payment_options: {
     // payment for buy/sell orders
