@@ -16,6 +16,18 @@ const auth = require("../../middleware/auth");
 const User = require("../../models/User");
 const PaymentOption = require("../../models/PaymentOption");
 
+// @route PUT /api/auth-apis/v1/user/test"
+// @desc UPDATE user
+// @access AUTHORIZED
+router.get("/users/test", async (req, res) => {
+  try {
+    return res.status(200).send("I'm listening... auths");
+  } catch (error) {
+    // console.log("user route error ", error);
+    res.status(401).send({ errors: [{ msg: "Server error" }] });
+  }
+});
+
 // @route GET /api/auth-apis/v1/signatureVerify/:messageHash/:signature/:account
 // @desc Verify User wallet
 // @access PUBLIC
@@ -90,7 +102,7 @@ router.get("/user", auth, async (req, res) => {
     return res.status(200).send(user);
   } catch (error) {
     console.log("user route error ", error);
-    res.status(401).send({ errors: [{ msg: "Server error" }] });
+    res.status(401).send({ errors: [{ msg: error }] });
   }
 });
 

@@ -18,6 +18,7 @@ import store from "./store";
 import OrderSummary from "./pages/Orders/OrderSummary";
 import OrderPayments from "./pages/Orders/components/OrderPayments";
 import OrderWaiting from "./pages/Orders/components/OrderWaiting";
+import ViewMyOrder from "./pages/MyOrders/ViewMyOrder";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed/:order_id" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/my-orders/1" element={<ViewMyOrder />} />
               <Route path="/order-review" element={<OrderReview />} />
             </Routes>
             <Container>

@@ -22,4 +22,17 @@ const getToken = async (payload) => {
   return token;
 };
 
-module.exports = { generatePasswordHash, verifyPasswordHash, getToken };
+const getTestToken = async (payload) => {
+  const token = await jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "1 days",
+  });
+
+  return token;
+};
+
+module.exports = {
+  generatePasswordHash,
+  verifyPasswordHash,
+  getToken,
+  getTestToken,
+};
