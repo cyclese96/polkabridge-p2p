@@ -15,6 +15,19 @@ const Order = require("../../models/Order");
 const Token = require("../../models/Token");
 const Fiat = require("../../models/FiatCurrency");
 const Transaction = require("../../models/Transaction");
+const { triggerEvent } = require("../../_helpers/pusher-service");
+
+// @route PUT /api/auth-apis/v1/transaction/test"
+// @desc TEST  order routes
+// @access
+router.get("/transaction/test", async (req, res) => {
+  try {
+    return res.status(200).send("I'm listening...trxs");
+  } catch (error) {
+    // console.log("user route error ", error);
+    res.status(401).send({ errors: [{ msg: "Server error" }] });
+  }
+});
 
 // @route Post /transaction-apis/v1/buy-order"
 // @desc Create buy order transaction
@@ -126,6 +139,8 @@ router.post(
           order_status: orderStatus,
         },
       });
+
+      // await triggerEvent("my-channel", "my-event", "order created");
 
       const transaction = await Transaction.findById(orderTrx.id)
         .populate("order")

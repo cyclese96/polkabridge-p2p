@@ -28,6 +28,19 @@ const Token = require("../../models/Token");
 const Fiat = require("../../models/FiatCurrency");
 const User = require("../../models/User");
 
+// @route PUT /api/auth-apis/v1/order/test"
+// @desc TEST  order routes
+// @access
+router.get("/order/test", auth, async (req, res) => {
+  try {
+    console.log("requesting test with ", req.user);
+    return res.status(200).send("I'm listening...orders");
+  } catch (error) {
+    // console.log("user route error ", error);
+    res.status(401).send({ errors: [{ msg: "Server error" }] });
+  }
+});
+
 // @route Post /api/order_apis/v1/buy-order"
 // @desc Create buy order
 // @access Authenticated
