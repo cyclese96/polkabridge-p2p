@@ -114,7 +114,8 @@ router.post(
         order: order._id,
         seller: order?.user,
         buyer: userId,
-        transaction_status: 0,
+        order_amount: tokenAmountToBuy,
+        transaction_status: 1,
       };
 
       console.log("order", order);
@@ -244,14 +245,6 @@ router.post(
         transaction_status: 0,
       };
 
-      console.log("order", order);
-      console.log("status", {
-        orderTransactionObject,
-        orderRemainingAmount,
-        orderStatus,
-        tokenAmountToSell,
-      });
-
       const orderTrx = await new Transaction(orderTransactionObject).save();
 
       if (!orderTrx?.id) {
@@ -280,6 +273,183 @@ router.post(
   }
 );
 
+router.get("/order-transactions", auth, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.user.id;
+
+    const page = req.params.page ? req.params.page : 1;
+    const itemsToShow = (page - 1) * 10 + 10;
+    const itemsToSkip = (page - 1) * 10;
+
+    const query = {};
+    const filterBy = req.query.params?.filterBy;
+
+    if (filterBy === "pending") {
+      query.transaction_status = { $gte: 0, $lte: 2 };
+    } else if (filterBy === "completed") {
+      query.transaction_status = { $in: [3, 5] };
+    } else if (filterBy === "cancelled") {
+      query.transaction_status = { $in: [6, 7] };
+    } else if (filterBy === "resolving") {
+      // issue raised
+      query.transaction_status = 4;
+    }
+
+    // user filter
+    if (req.query.params?.orderType === "buy") {
+      query.buyer = userId;
+    } else {
+      query.seller = userId;
+    }
+
+    console.log("final query ", query);
+    console.log("user", userId);
+    const transactions = await Transaction.find(query)
+      .populate("buyer")
+      .populate("seller")
+      .populate("order")
+      .limit(itemsToShow)
+      .skip(itemsToSkip);
+
+    return res.status(200).json(transactions);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+router.get("/order-transaction/:trx_id", auth, async (req, res) => {
+  try {
+    const transactionId = req.params.trx_id;
+
+    if (!mongoose.isValidObjectId(transactionId)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid transaction id" }] });
+    }
+
+    const transaction = await Transaction.findById(transactionId);
+
+    if (!transaction) {
+      return res.status(400).json({ errors: [{ msg: "Order not found" }] });
+    }
+
+    const finalTrx = await Transaction.findById(transactionId)
+      .populate("buyer")
+      .populate("seller")
+      .populate("order");
+
+    return res.status(200).json(finalTrx);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+router.patch("/update/:trx_id", auth, async (req, res) => {
+  try {
+    const transactionId = req.params.trx_id;
+
+    if (!mongoose.isValidObjectId(transactionId)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid transaction id" }] });
+    }
+
+    const transaction = await Transaction.findById(transactionId);
+
+    if (!transaction) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Order transaction not found" }] });
+    }
+
+    if (
+      transaction?.transaction_status === 1 &&
+      transaction?.buyer?.toString() === req.user.id
+    ) {
+      // buyer can only update transaction if it has status:1, pending fiat payment status
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 2 },
+      });
+    } else if (
+      transaction?.transaction_status === 2 &&
+      transaction?.seller?.toString() === req.user.id
+    ) {
+      // seller can only update transaction if it has status:2, pending token relase status
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 3 },
+      });
+    } else {
+      return res.status(400).json({
+        errors: [{ msg: "Unauthorized access of update order transaction" }],
+      });
+    }
+
+    const finalTrx = await Transaction.findById(transactionId);
+
+    return res.status(200).json(finalTrx);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
+  try {
+    const transactionId = req.params.trx_id;
+
+    if (!mongoose.isValidObjectId(transactionId)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid transaction id" }] });
+    }
+
+    const transaction = await Transaction.findById(transactionId);
+
+    if (!transaction) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Order transaction not found" }] });
+    }
+
+    // buyer can cancel the order if he did not make the payment yet or seller did not deposited the token in the order transaction
+    if (
+      transaction?.buyer?.toString() === req.user.id &&
+      transaction?.transaction_status >= 2
+    ) {
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 6 },
+      });
+    } else if (
+      transaction?.seller?.toString() === req.user.id &&
+      transaction?.transaction_status === 0
+    ) {
+      // seller can cancel the order if he did not deposit the tokens
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 7 },
+      });
+    } else {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Unauthorized access of cancel order" }] });
+    }
+
+    const finalTrx = await Transaction.findById(transactionId);
+
+    return res.status(200).json(finalTrx);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
 router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -295,15 +465,46 @@ router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
     if (!transaction) {
       return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
-    // check if the requested user is buyer of the transaction
-    if (transaction?.buyer?.toString() !== req.user.id) {
+
+    // buyer can cancel the order if he did not make the payment yet or seller did not deposited the token in the order transaction
+    if (
+      transaction?.buyer?.toString() === req.user.id &&
+      transaction?.transaction_status < 2
+    ) {
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 6 },
+      });
+    } else if (
+      transaction?.seller?.toString() === req.user.id &&
+      transaction?.transaction_status === 0
+    ) {
+      // seller can cancel the order if he did not deposit the tokens
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $set: { transaction_status: 7 },
+      });
+    } else {
       return res
         .status(400)
         .json({ errors: [{ msg: "Unauthorized access of cancel order" }] });
     }
 
-    await Transaction.findByIdAndUpdate(transactionId, {
-      $set: { transaction_status: 5 },
+    // revert deducted pending order amount
+    const orderId = transaction?.order;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(400).json({
+        errors: [{ msg: "No order found for this order transaction" }],
+      });
+    }
+
+    const newPendingAmount = new BigNumber(order?.pending_amount)
+      .plus(transaction?.order_amount)
+      ?.toString();
+
+    await Order.findByIdAndUpdate(orderId, {
+      $set: { pending_amount: newPendingAmount },
     });
 
     const finalTrx = await Transaction.findById(transactionId);
@@ -314,5 +515,4 @@ router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
     res.status(401).json({ errors: [{ msg: "Server error" }] });
   }
 });
-
 module.exports = router;

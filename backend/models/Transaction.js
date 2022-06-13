@@ -14,6 +14,10 @@ const TransactionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
+  order_amount: {
+    type: String,
+    require: true,
+  },
   // for a buy order
   // 0: initiated: // no locked token
   // 1: seller has locked token in buy order ad / seller created sell order ad with locked token

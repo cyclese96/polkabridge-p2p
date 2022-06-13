@@ -17,6 +17,7 @@ import HowItWorks from "../../common/HowItWorks";
 import { useDispatch, useSelector } from "react-redux";
 import useActiveWeb3React from "../../hooks/useActiveWeb3React";
 import { useGlobalOrders } from "../../hooks/useOrders";
+import Pusher from "pusher-js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -136,6 +137,16 @@ export default function Home() {
 
   useEffect(() => {
     handleApplyFilters();
+
+    // var pusher = new Pusher("2b6d4de7e6a194cb8aeb", {
+    //   cluster: "ap2",
+    // });
+
+    // var channel = pusher.subscribe("my-channel");
+    // channel.bind("my-event", function (data) {
+    //   console.log("event fired ", data);
+    //   alert(JSON.stringify(data));
+    // });
   }, [orderType]);
 
   return (

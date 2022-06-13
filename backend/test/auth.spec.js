@@ -11,6 +11,9 @@ let userAHeader, userBHeader, invalidUserHeader;
 
 beforeAll(async () => {
   // console.log("##### before all ######");
+  console.log("connection state", mongoose.connection.readyState);
+
+  await mongoose.disconnect();
 
   await mongoose.connect(process.env.TEST_DB_URL, {
     useNewUrlParser: true,
@@ -59,6 +62,26 @@ beforeEach(async () => {
 });
 afterAll(async () => {
   // console.log("##### after all  ######");
+  // // reset users to initial state
+  const userAiId = "628a8c19fae6444d49162761";
+  const userAPayload = {
+    email: "aamiralam1992@gmail.com",
+    name: "Aamir Alam",
+    phone: "8355038185",
+    fiat: "6267e54c3c805016884e50f9",
+  };
+
+  await User.findByIdAndUpdate(userAiId, userAPayload);
+
+  const userBId = "625860aa1ed2eb5da6dd76c1";
+  const userBPayload = {
+    email: "aamiralam1991@gmail.com",
+    phone: "8355038184",
+    name: "Tahir",
+    fiat: "6263a50d54f64766e549a621",
+  };
+  await User.findByIdAndUpdate(userBId, userBPayload);
+
   mongoose.disconnect(() => {
     console.log("database connection closed");
   });
@@ -81,5 +104,39 @@ describe("Auth routes", () => {
       .get("/auth-apis/v1/user/")
       .set(invalidUserHeader)
       .expect(401);
+  });
+
+  test("Should update correct user fields", async () => {
+    const updatePayload = {
+      name: "Amir siddiaui",
+      email: "amirsiddiqu420@gmail.com",
+      phone: "1722140922",
+    };
+    const updatedUser = await request(app)
+      .put("/auth-apis/v1/user/")
+      .send(updatePayload)
+      .set(userAHeader)
+      .expect(201);
+
+    expect({
+      name: updatedUser?.body?.name,
+      email: updatedUser?.body?.email,
+      phone: updatedUser?.body?.phone,
+    }).toEqual(updatePayload);
+  });
+
+  test("Should update correct fiat", async () => {
+    const updatePayload = {
+      fiat: "6263a50d54f64766e549a621",
+    };
+    const updatedUser = await request(app)
+      .put("/auth-apis/v1/user/")
+      .send(updatePayload)
+      .set(userAHeader)
+      .expect(201);
+
+    expect({
+      fiat: updatedUser?.body?.fiat?._id,
+    }).toEqual(updatePayload);
   });
 });

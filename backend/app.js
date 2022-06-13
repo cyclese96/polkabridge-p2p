@@ -11,7 +11,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //Connect Database
-connectDB();
+if (process?.env.NODE_ENV !== "test") {
+  connectDB();
+}
 
 const auth = require("./routes/api/auth");
 const order = require("./routes/api/order");
