@@ -308,6 +308,8 @@ router.get("/order-transactions", auth, async (req, res) => {
       query.seller = userId;
     }
 
+    console.log("final query ", query);
+    console.log("user", userId);
     const transactions = await Transaction.find(query)
       .populate("buyer")
       .populate("seller")
@@ -485,6 +487,25 @@ router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
         .status(400)
         .json({ errors: [{ msg: "Unauthorized access of cancel order" }] });
     }
+
+    // revert deducted pending order amount
+    const orderId = transaction?.order;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(400).json({
+        errors: [{ msg: "No order found for this order transaction" }],
+      });
+    }
+
+    const newPendingAmount = new BigNumber(order?.pending_amount)
+      .plus(transaction?.order_amount)
+      ?.toString();
+
+    await Order.findByIdAndUpdate(orderId, {
+      $set: { pending_amount: newPendingAmount },
+    });
 
     const finalTrx = await Transaction.findById(transactionId);
 
