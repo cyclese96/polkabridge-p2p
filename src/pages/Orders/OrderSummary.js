@@ -29,6 +29,7 @@ import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
 import Web3 from "web3";
+import { fromWei } from "../../utils/helper";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -181,12 +182,15 @@ function OrderSummary() {
     async function asyncFn() {
       if (order_id) {
         console.log(order_id);
-        let data = await dispatch(getOrderDetailsById(order_id));
-        console.log(data);
+        await dispatch(getOrderDetailsById(order_id));
       }
     }
     asyncFn();
   }, [order_id]);
+
+  useEffect(() => {
+    console.log("order by id fetched", { order_id, order });
+  }, [order]);
 
   const handleAmountChange = (value, price) => {
     setAmount(value);
@@ -236,18 +240,20 @@ function OrderSummary() {
                         <Box mt={2}>
                           <Typography textAlign="left" variant="body2">
                             Amount{" "}
-                            {order.order_type === "sell" ? "on sell" : "to buy"}
+                            {order?.order_type === "sell"
+                              ? "on sell"
+                              : "to buy"}
                           </Typography>
                           <Typography
                             variant="body1"
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {Web3.utils.fromWei(
-                              order.order_amount.toString(),
-                              "ether"
+                            {fromWei(
+                              order?.order_amount,
+                              order?.token?.decimals
                             )}
-                            {" " + order.token.symbol}
+                            {" " + order?.token?.symbol}
                           </Typography>
                         </Box>
                       </div>
@@ -255,14 +261,14 @@ function OrderSummary() {
                         {" "}
                         <Box mt={2}>
                           <Typography textAlign="left" variant="body2">
-                            Price({order.fiat.fiat})
+                            Price({order?.fiat?.fiat})
                           </Typography>
                           <Typography
                             variant="body1"
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order.order_unit_price} per {order.token.symbol}
+                            {order?.order_unit_price} per {order?.token?.symbol}
                           </Typography>
                         </Box>
                       </div>
@@ -278,7 +284,7 @@ function OrderSummary() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order.payment_options.toString().toUpperCase()}
+                            {order?.payment_options?.toString()?.toUpperCase()}
                           </Typography>
                         </Box>
                       </div>
@@ -327,7 +333,7 @@ function OrderSummary() {
                             textAlign="left"
                             style={{ fontWeight: 400 }}
                           >
-                            {order.description}
+                            {order?.description}
                           </Typography>
                         </Box>
                       </Box>
@@ -365,15 +371,15 @@ function OrderSummary() {
                           onChange={(e) =>
                             handleAmountChange(
                               e.target.value,
-                              Web3.utils.fromWei(
-                                order.order_amount.toString(),
-                                "ether"
+                              fromWei(
+                                order?.order_amount,
+                                order?.token?.decimals
                               )
                             )
                           }
                           disableUnderline={true}
                         />
-                        {order.fiat.fiat}
+                        {order?.fiat?.fiat}
                       </Box>
                     </Grid>
                   </Grid>
@@ -407,9 +413,9 @@ function OrderSummary() {
                           onChange={(e) =>
                             handleTotalChange(
                               e.target.value,
-                              Web3.utils.fromWei(
-                                order.order_amount.toString(),
-                                "ether"
+                              fromWei(
+                                order?.order_amount?.toString(),
+                                order?.token?.decimals
                               )
                             )
                           }
@@ -421,7 +427,7 @@ function OrderSummary() {
                   </Grid>
                 </div>
                 <div className="text-center mt-4">
-                  <Link to={`/order-payments/${order._id}`}>
+                  <Link to={`/order-payments/${order?._id}`}>
                     <Button
                       style={{
                         borderRadius: 10,

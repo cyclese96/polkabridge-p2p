@@ -8,7 +8,8 @@ import { AuthStatus } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
 
 export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
-  const { chainId, deactivate, activate, account } = useActiveWeb3React();
+  const { chainId, active, deactivate, activate, account } =
+    useActiveWeb3React();
   const [authenticated, setAuthenticated] = useState(false);
 
   const connectWallet = useCallback(
@@ -37,11 +38,14 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
     setAuthenticated(false);
   }, [setAuthenticated]);
 
-  useEffect(() => {
-    if (localStorage.connector) {
-      connectWallet(localStorage.connector);
-    }
-  }, []);
+  // useEffect(() => {
+  //   // if (localStorage.connector) {
+  //   //   connectWallet(localStorage.connector);
+  //   // }
+  //   if (active) {
+  //     console.log("active ", { account, active });
+  //   }
+  // }, [active, account]);
 
   useEffect(() => {
     async function signAndVerify() {
@@ -86,12 +90,15 @@ export function useUserAuthentication(): [AuthStatus, () => {}, () => void] {
       }
     }
 
-    if (!account) {
+    if (!active && localStorage.connector) {
+      console.log("reconnecting wallet with ", localStorage.connector);
+      connectWallet(localStorage.connector);
       return;
     }
 
+    console.log("running sign and verify ");
     signAndVerify();
-  }, [account, chainId]);
+  }, [account, active]);
 
   const authStatus = useMemo(() => {
     return { authenticated, account };

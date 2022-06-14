@@ -133,9 +133,9 @@ function MyOrders() {
     return tokenObject;
   }, [tokens, token]);
 
-  useEffect(() => {
-    console.log("fetchedd user orders ", { userOrders, profile });
-  }, [userOrders, profile]);
+  // useEffect(() => {
+  //   console.log("my orders ", { userOrders, profile, authStatus });
+  // }, [userOrders, profile, authStatus]);
 
   const handleApplyFilters = () => {
     // prepare filter object based on current selection

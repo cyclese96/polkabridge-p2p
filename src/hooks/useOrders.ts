@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getLatestOrders } from "../actions/orderActions";
 import useActiveWeb3React from "./useActiveWeb3React";
+import { useUserAuthentication } from "./useUserAuthentication";
 
 export function useGlobalOrders(
   orderType: string
@@ -66,13 +67,20 @@ export function useUserOrders(
     [setPageNumber]
   );
 
+  const [authStatus, connectWallet] = useUserAuthentication();
+
   useEffect(() => {
-    if (!chainId || !user) {
+    console.log("auth status", authStatus);
+  }, [authStatus]);
+
+  useEffect(() => {
+    if (!authStatus?.authenticated) {
       return;
     }
+    console.log("fetching orders on auth status update", authStatus);
     // console.log("fetching user orders ", { pageNumber, orderFilters });
     dispatch(getLatestOrders(pageNumber, { ...orderFilters, user }));
-  }, [account, chainId, orderFilters, pageNumber, user]);
+  }, [orderFilters, pageNumber, authStatus, user]);
 
   return useMemo(() => {
     return [orders, orderLoading, updatePageNumber, applyFilter];
