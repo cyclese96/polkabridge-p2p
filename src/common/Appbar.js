@@ -126,7 +126,7 @@ const Appbar = () => {
     }
     const cachedChain = localStorage.getItem("cachedChain");
 
-    console.log("chain changed ", { chainId, cachedChain });
+    // console.log("chain changed ", { chainId, cachedChain });
     if (cachedChain && chainId?.toString() !== cachedChain) {
       localStorage.setItem("cachedChain", chainId?.toString());
 
@@ -142,7 +142,7 @@ const Appbar = () => {
     }
     const cachedAccount = localStorage.getItem("cachedAccount");
 
-    console.log("chain changed ", { account, cachedAccount });
+    // console.log("chain changed ", { account, cachedAccount });
     if (cachedAccount && account?.toString() !== cachedAccount) {
       localStorage.setItem("cachedAccount", account?.toString());
 
