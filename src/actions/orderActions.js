@@ -23,7 +23,7 @@ import {
 // GET
 // Latest orders in the market
 export const getLatestOrders =
-  (pageNumber, filters = {}) =>
+  (pageNumber, filters = {}, token) =>
   async (dispatch) => {
     // let paramsObj = {
     //   order_type: orderType,
@@ -40,7 +40,7 @@ export const getLatestOrders =
       payload: true,
     });
 
-    const result = await getOrders(pageNumber, filters);
+    const result = await getOrders(pageNumber, filters, token);
 
     dispatch({
       type: SET_ORDER_LOADING,

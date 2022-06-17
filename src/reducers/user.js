@@ -1,9 +1,9 @@
-import { LOAD_USER, SIGN_MESSAGE } from "../actions/types";
+import { LOAD_USER } from "../actions/types";
 
 const initalState = {
   jwtToken: null,
-  sign_message: null,
-  user: null,
+  account: null,
+  userId: null,
 };
 
 export default function (state = initalState, action) {
@@ -14,12 +14,6 @@ export default function (state = initalState, action) {
         ...state,
         ...action.payload,
       };
-    case SIGN_MESSAGE:
-      return {
-        ...state,
-        sign_message: action.payload,
-      };
-
     default:
       return state;
   }
