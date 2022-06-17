@@ -54,8 +54,7 @@ const useStyles = makeStyles((theme) => ({
   submitButton: {
     borderRadius: 10,
     backgroundColor: theme.palette.primary.main,
-    padding: "7px 15px 7px 15px",
-    marginRight: 7,
+    padding: "8px 30px 8px 30px",
     color: "white",
     border: "none",
   },
@@ -95,7 +94,7 @@ function ProfilePayments() {
         square={true}
         disableGutters={true}
         style={{
-          backgroundColor: expanded === "panel1" ? "#ffffff" : "#eeeeee",
+          backgroundColor: expanded === "panel1" ? "#ffffff" : "#f5f5f5",
         }}
         expanded={expanded === "panel1"}
         onChange={handleChange("panel1")}
@@ -195,7 +194,7 @@ function ProfilePayments() {
         square={true}
         disableGutters={true}
         style={{
-          backgroundColor: expanded === "panel2" ? "#ffffff" : "#eeeeee",
+          backgroundColor: expanded === "panel2" ? "#ffffff" : "#f5f5f5",
         }}
         expanded={expanded === "panel2"}
         onChange={handleChange("panel2")}
@@ -227,7 +226,7 @@ function ProfilePayments() {
                 value={upi}
                 type="text"
                 class="form-control input-p2p"
-                placeholder="Enter paytm number"
+                placeholder="Enter upi id"
               />
             </div>
           </div>
@@ -240,7 +239,7 @@ function ProfilePayments() {
         square={true}
         disableGutters={true}
         style={{
-          backgroundColor: expanded === "panel3" ? "#ffffff" : "#eeeeee",
+          backgroundColor: expanded === "panel3" ? "#ffffff" : "#f5f5f5",
         }}
         expanded={expanded === "panel3"}
         onChange={handleChange("panel3")}
