@@ -37,8 +37,7 @@ const useStyles = makeStyles((theme) => ({
   submitButton: {
     borderRadius: 10,
     backgroundColor: theme.palette.primary.main,
-    padding: "7px 15px 7px 15px",
-    marginRight: 7,
+    padding: "8px 30px 8px 30px",
     color: "white",
     border: "none",
   },

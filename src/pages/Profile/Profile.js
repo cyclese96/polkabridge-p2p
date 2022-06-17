@@ -6,6 +6,7 @@ import PopupLayout from "../../common/popups/PopupLayout";
 import TxPopup from "../../common/popups/TxPopup";
 import ProfileCurrency from "./ProfileComponents/ProfileCurrency";
 import ProfileInfo from "./ProfileComponents/ProfileInfo";
+import ProfileLogout from "./ProfileComponents/ProfileLogout";
 import ProfilePayments from "./ProfileComponents/ProfilePayments";
 import ProfileReferrals from "./ProfileComponents/ProfileReferrals";
 import ProfileSettings from "./ProfileComponents/ProfileSettings";
@@ -78,6 +79,7 @@ function Profile() {
             {tab === 2 && <ProfilePayments />}
             {tab === 3 && <ProfileSettings />}
             {tab === 4 && <ProfileReferrals />}
+            {tab === 5 && <ProfileLogout />}
           </Grid>
         </Grid>{" "}
         {/* <PopupLayout popupActive={true}>
