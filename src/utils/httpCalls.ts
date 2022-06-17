@@ -1,9 +1,8 @@
 import axios from "axios";
 
-let headers = {
+let globalHeaders = {
   "Content-Type": "application/json;charset=UTF-8",
   "Access-Control-Allow-Origin": "*",
-  "x-auth-token": localStorage.user,
 };
 
 const baseUrl =
@@ -14,7 +13,7 @@ const baseUrl =
 export const getUser = async () => {
   try {
     const result = await axios.get(`${baseUrl}/auth-apis/v1/user`, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -30,7 +29,7 @@ export const getUser = async () => {
 export const updateProfile = async (updateData: any) => {
   try {
     const result = await axios.put(`${baseUrl}/auth-apis/v1/user`, updateData, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -48,7 +47,7 @@ export const updatePayments = async (updateData: any) => {
     const result = await axios.post(
       `${baseUrl}/auth-apis/v1/user/payment-option`,
       updateData,
-      { headers: headers }
+      { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
     );
 
     return { status: result?.status, data: result?.data?.payment_options };
@@ -66,7 +65,7 @@ export const updateDefaultCurrency = async (updateData: any) => {
     const result = await axios.post(
       `${baseUrl}/auth-apis/v1/user/payment-option`,
       updateData,
-      { headers: headers }
+      { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
     );
 
     return { status: result?.status, data: result?.data?.fiat };
@@ -81,17 +80,22 @@ export const updateDefaultCurrency = async (updateData: any) => {
 
 // order calls
 
-export const getOrders = async (page: number, params: any) => {
+export const getOrders = async (page: number, params: any, token: string) => {
   try {
     const result = await axios.get(
       `${baseUrl}/order-apis/v1/orders/${page || 1}`,
-      { params: params, headers: headers }
+      { params: params, headers: { ...globalHeaders, "x-auth-token": token } }
     );
 
-    console.log("orders fetched ", result.data);
+    console.log("orders fetched ", {
+      result: result.data,
+      params,
+      token,
+      page,
+    });
     return { status: result?.status, data: result?.data };
   } catch (error: any) {
-    console.log("getOrders ", error);
+    console.log("getOrders ", { error, params, token, page });
     return {
       status: error?.response?.status,
       message: error?.response?.data?.message,
@@ -102,7 +106,7 @@ export const getOrders = async (page: number, params: any) => {
 export const getOrderById = async (id: string) => {
   try {
     const result = await axios.get(`${baseUrl}/order-apis/v1/order/${id}`, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -118,7 +122,7 @@ export const getOrderById = async (id: string) => {
 export const getTokens = async () => {
   try {
     const result = await axios.get(`${baseUrl}/order-apis/v1/order-tokens`, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -134,7 +138,7 @@ export const getTokens = async () => {
 export const getFiats = async () => {
   try {
     const result = await axios.get(`${baseUrl}/order-apis/v1/fiats`, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -150,7 +154,7 @@ export const getFiats = async () => {
 export const getGlobalPaymentOptions = async () => {
   try {
     const result = await axios.get(`${baseUrl}/order-apis/v1/payment_options`, {
-      headers: headers,
+      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
     });
 
     return { status: result?.status, data: result?.data };
@@ -172,7 +176,7 @@ export const createOrder = async (orderType: string, payload: any) => {
         `${baseUrl}/order-apis/v1/sell-order`,
         payload,
         {
-          headers: headers,
+          headers: { ...globalHeaders, "x-auth-token": localStorage.user },
         }
       );
     } else {
@@ -180,7 +184,7 @@ export const createOrder = async (orderType: string, payload: any) => {
         `${baseUrl}/order-apis/v1/buy-order`,
         payload,
         {
-          headers: headers,
+          headers: { ...globalHeaders, "x-auth-token": localStorage.user },
         }
       );
     }
@@ -205,7 +209,7 @@ export const verifyDeposit = async (orderId: string) => {
       `${baseUrl}/order-apis/v1/verify-deposit/${orderId}`,
       {},
       {
-        headers: headers,
+        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
       }
     );
 

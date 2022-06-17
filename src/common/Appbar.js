@@ -102,7 +102,7 @@ const useStyles = makeStyles((theme) => ({
 const Appbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [authStatus, connectWallet] = useUserAuthentication();
+  const [authStatus, connectWallet, verifyUserWallet] = useUserAuthentication();
 
   const handleConnectWallet = useCallback(() => {
     connectWallet(CONNECTOR_TYPE.injected);
@@ -134,7 +134,7 @@ const Appbar = () => {
     } else if (!cachedChain) {
       localStorage.setItem("cachedChain", chainId?.toString());
     }
-  }, [chainId, account]);
+  }, [chainId, account, authStatus]);
 
   useEffect(() => {
     if (!account) {
@@ -150,7 +150,7 @@ const Appbar = () => {
     } else if (!cachedAccount) {
       localStorage.setItem("cachedAccount", account?.toString());
     }
-  }, [account]);
+  }, [account, authStatus]);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>

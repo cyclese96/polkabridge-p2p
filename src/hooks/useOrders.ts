@@ -16,6 +16,7 @@ export function useGlobalOrders(
   const dispatch = useDispatch();
   const [orderFilters, setFilters] = useState({ order_type: orderType });
   const [pageNumber, setPageNumber] = useState(1);
+  const userAuth = useSelector((state: any) => state?.user);
 
   const applyFilter = useCallback(
     (filter: any) => {
@@ -35,8 +36,8 @@ export function useGlobalOrders(
     if (!chainId) {
       return;
     }
-    dispatch(getLatestOrders(pageNumber, orderFilters));
-  }, [account, chainId, orderFilters, pageNumber]);
+    dispatch(getLatestOrders(pageNumber, orderFilters, userAuth?.jwtToken));
+  }, [account, chainId, orderFilters, pageNumber, userAuth]);
 
   return useMemo(() => {
     return [orders, orderLoading, updatePageNumber, applyFilter];
@@ -53,6 +54,8 @@ export function useUserOrders(
   const [orderFilters, setFilters] = useState({});
   const [pageNumber, setPageNumber] = useState(1);
 
+  const userAuth = useSelector((state: any) => state?.user);
+
   const applyFilter = useCallback(
     (filter: any) => {
       setFilters(filter);
@@ -67,22 +70,18 @@ export function useUserOrders(
     [setPageNumber]
   );
 
-  const [authStatus, connectWallet] = useUserAuthentication();
-
   useEffect(() => {
-    console.log("auth status", authStatus);
-  }, [authStatus]);
-
-  useEffect(() => {
-    if (!authStatus?.authenticated) {
+    if (!user || !userAuth?.jwtToken) {
       return;
     }
-    console.log("fetching orders on auth status update", authStatus);
+    console.log("fetching orders on auth status update", userAuth);
     // console.log("fetching user orders ", { pageNumber, orderFilters });
-    dispatch(getLatestOrders(pageNumber, { ...orderFilters, user }));
-  }, [orderFilters, pageNumber, authStatus, user]);
+    dispatch(
+      getLatestOrders(pageNumber, { ...orderFilters, user }, userAuth?.jwtToken)
+    );
+  }, [orderFilters, pageNumber, userAuth, user]);
 
   return useMemo(() => {
     return [orders, orderLoading, updatePageNumber, applyFilter];
-  }, [orders, orderLoading, updatePageNumber, applyFilter]);
+  }, [orders, orderLoading, updatePageNumber, applyFilter, userAuth]);
 }
