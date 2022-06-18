@@ -51,13 +51,13 @@ const useStyles = makeStyles((theme) => ({
   title: {
     color: "#212121",
     fontWeight: 600,
-    fontSize: 28,
+    fontSize: 22,
     letterSpacing: "0.02em",
   },
   subtitle: {
     color: "#414141",
     fontWeight: 400,
-    fontSize: 16,
+    fontSize: 14,
   },
   cardTitle: {
     textAlign: "center",
@@ -211,236 +211,279 @@ function OrderSummary() {
       <Container>
         <Box>
           <Box>
-            <Typography
-              variant="h3"
-              color="textSecondary"
-              className={classes.title}
-            >
+            <h4 variant="h4" color="textSecondary" className={classes.title}>
               Order Summary
-            </Typography>
-            <Typography
-              variant="body1"
-              color="textSecondary"
-              className={classes.subtitle}
-            >
-              Choose you desired amount and proceed
-            </Typography>
+            </h4>
           </Box>
           <div className={classes.infoCard}>
-            <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Proceed {order?.order_type} order
+            <Typography
+              variant="body2"
+              color={"#212121"}
+              fontSize={16}
+              fontWeight={500}
+            >
+              Buy PBR with USDT
             </Typography>
-
             {order ? (
-              <div>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="container row mt-5">
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Amount{" "}
-                            {order?.order_type === "sell"
-                              ? "on sell"
-                              : "to buy"}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
+              <Grid container spacing={2} p={2}>
+                <Grid item md={7} style={{ borderRight: "1px solid #e5e5e5" }}>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Price:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#04A56D",
+                              paddingLeft: 5,
+                            }}
+                          >
+                            {order?.order_unit_price} {order?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </Box>
+
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Payment Time Limit:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              paddingLeft: 5,
+                              color: "#212121",
+                            }}
+                          >
+                            13:30-19:30 IST
+                          </span>
+                        </Typography>
+                      </Box>
+                    </div>
+                    <div className="col-md-6">
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Available:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              paddingLeft: 5,
+                              color: "#212121",
+                            }}
                           >
                             {fromWei(
                               order?.order_amount,
                               order?.token?.decimals
                             )}
                             {" " + order?.token?.symbol}
-                          </Typography>
-                        </Box>
-                      </div>
-                      <div className="col-md-6">
-                        {" "}
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Price({order?.fiat?.fiat})
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {order?.order_unit_price} per {order?.token?.symbol}
-                          </Typography>
-                        </Box>
-                      </div>
-                    </div>
-                    <div className="container row mt-3">
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Payment Type
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
+                          </span>
+                        </Typography>
+                      </Box>
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Seller’s payment method:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              paddingLeft: 5,
+                              color: "#212121",
+                            }}
                           >
                             {order?.payment_options?.toString()?.toUpperCase()}
-                          </Typography>
-                        </Box>
-                      </div>
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography
-                            display="flex"
-                            textAlign="left"
-                            variant="body2"
-                          >
-                            Activity Time
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            13:30-19:30 IST
-                          </Typography>
-                        </Box>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className=" mt-5">
-                      <Box mt={2} style={{ width: "100%" }}>
-                        <Typography
-                          display="flex"
-                          textAlign="left"
-                          variant="body1"
-                          style={{ fontWeight: 600 }}
-                        >
-                          Remarks:
+                          </span>
                         </Typography>
-                        <Box
-                          style={{
-                            border: "1px solid #e5e5e5",
-                            borderRadius: 10,
-                            padding: 10,
-                            width: "100%",
-                            minHeight: 150,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            textAlign="left"
-                            style={{ fontWeight: 400 }}
-                          >
-                            {order?.description}
-                          </Typography>
-                        </Box>
-                      </Box>
+                      </Box>{" "}
                     </div>
                   </div>
-                </div>
-                <div className="d-flex justify-content-center align-items-center mt-5">
-                  <Grid
-                    container
-                    mt={2}
-                    display="flex"
-                    justifyContent={"center"}
-                    style={{ width: "70%" }}
-                  >
-                    <Grid item md={3} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
+                  <div className="mt-5">
+                    <Box mt={2}>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
                       >
-                        <Input
-                          type="number"
-                          value={amount}
-                          onChange={(e) =>
-                            handleAmountChange(
-                              e.target.value,
-                              fromWei(
-                                order?.order_amount,
-                                order?.token?.decimals
-                              )
-                            )
-                          }
-                          disableUnderline={true}
-                        />
-                        {order?.fiat?.fiat}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid
-                    container
-                    mt={2}
-                    display="flex"
-                    justifyContent={"center"}
-                    style={{ width: "70%" }}
-                  >
-                    <Grid item md={3} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
+                        Seller's Message:
                       </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={13}
+                        pt={1}
+                        color={"#778090"}
                       >
-                        <Input
-                          type="number"
-                          value={total}
-                          onChange={(e) =>
-                            handleTotalChange(
-                              e.target.value,
-                              fromWei(
-                                order?.order_amount?.toString(),
-                                order?.token?.decimals
-                              )
-                            )
-                          }
-                          disableUnderline={true}
-                        />
-                        INR
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </div>
-                <div className="text-center mt-4">
-                  <Link to={`/order-payments/${order?._id}`}>
-                    <Button
+                        Please mark your payment withing time limit by only
+                        given payments method.
+                        {order && order.description
+                          ? order.description
+                          : "No message"}
+                      </Typography>
+                    </Box>
+                  </div>
+                  <div className="mt-5">
+                    <Box mt={2}>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                      >
+                        Terms and conditions:
+                      </Typography>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={13}
+                        pt={1}
+                        color={"#778090"}
+                      >
+                        DO NOT SEND PAYMENTS THROUGH THIRD PARTY ACCOUNTS, all
+                        such payments will have to go to dispute and will be
+                        refunded/cancelled. Please do not include crypto related
+                        words such as P2P, Binance, USDT, ETH, BTC, etc. Send
+                        INR through registered bank account only.
+                      </Typography>
+                    </Box>
+                  </div>
+                </Grid>
+                <Grid item md={5}>
+                  <Box mt={3}>
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      I want to buy for:
+                    </Typography>
+                    <Box
+                      display={"flex"}
+                      justifyContent="space-between"
+                      alignItems={"center"}
+                      mt={1}
                       style={{
-                        borderRadius: 10,
-                        background: "#6A55EA",
-                        padding: "9px 35px 9px 35px",
-                        color: "white",
+                        border: "1px solid #bdbdbd",
+                        borderRadius: 4,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        paddingTop: 5,
+                        paddingBottom: 5,
                       }}
                     >
-                      Confirm Buy
+                      <Input
+                        fullWidth
+                        disableUnderline
+                        placeholder="1,000 - 21,483"
+                        type="number"
+                        value={amount}
+                        onChange={(e) =>
+                          handleAmountChange(
+                            e.target.value,
+                            fromWei(order?.order_amount, order?.token?.decimals)
+                          )
+                        }
+                      />
+                      <span style={{ color: "#212121", fontWeight: 600 }}>
+                        {order?.fiat?.fiat}
+                      </span>
+                    </Box>
+                  </Box>
+                  <Box mt={3}>
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      I will get:
+                    </Typography>
+                    <Box
+                      display={"flex"}
+                      justifyContent="space-between"
+                      alignItems={"center"}
+                      mt={1}
+                      style={{
+                        border: "1px solid #bdbdbd",
+                        borderRadius: 4,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        paddingTop: 5,
+                        paddingBottom: 5,
+                      }}
+                    >
+                      <Input
+                        fullWidth
+                        type="text"
+                        disableUnderline
+                        placeholder="0.00"
+                      />
+                      <span
+                        style={{
+                          color: "#212121",
+                          fontWeight: 500,
+                        }}
+                      >
+                        PBR
+                      </span>
+                    </Box>
+                  </Box>
+                  <div className="d-flex justify-content-center mt-4">
+                    <Button
+                      style={{
+                        borderRadius: 7,
+                        background: "#F5F5F5",
+
+                        color: "black",
+                        fontWeight: 600,
+                        minWidth: 150,
+                        marginRight: 5,
+                      }}
+                    >
+                      Cancel
                     </Button>
-                  </Link>
-                </div>
-              </div>
+                    <Button
+                      style={{
+                        borderRadius: 7,
+                        background: "#6A55EA",
+
+                        color: "white",
+                        minWidth: 200,
+                        fontWeight: 600,
+                        width: "100%",
+                        marginLeft: 5,
+                      }}
+                    >
+                      Buy PBR
+                    </Button>
+                    <Link to={`/order-payments/${order?._id}`}></Link>
+                  </div>
+                </Grid>
+              </Grid>
             ) : (
               "Loading"
             )}
