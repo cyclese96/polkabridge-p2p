@@ -185,10 +185,12 @@ router.put(
       const paymentOptionObject = req.body;
       paymentOptionObject.user_id = req.user.id;
 
-      const optionDoc = await new PaymentOption(paymentOptionObject).save();
+      const optionDoc = await (
+        await new PaymentOption(paymentOptionObject).save()
+      ).id;
 
       await User.findByIdAndUpdate(userId, {
-        $push: { payment_options: optionDoc._id },
+        $push: { payment_options: optionDoc },
       });
 
       const user = await User.findById(userId)

@@ -1,7 +1,8 @@
-import { GET_PROFILE } from "../actions/types";
+import { GET_PROFILE, SET_PROFILE_LOADING } from "../actions/types";
 
 const initalState = {
   profile: null,
+  loading: false,
 };
 
 export default function Orders(state = initalState, action) {
@@ -11,7 +12,11 @@ export default function Orders(state = initalState, action) {
         ...state,
         profile: action.payload,
       };
-
+    case SET_PROFILE_LOADING:
+      return {
+        ...state,
+        loading: action.payload,
+      };
     default:
       return state;
   }

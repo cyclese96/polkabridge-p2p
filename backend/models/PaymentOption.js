@@ -7,7 +7,10 @@ const PaymentOptionSchema = new Schema({
     ref: "users",
   },
   payment_mode: {
-    // upi(All UPI apps )  / neft (Bank Transfer) / imps (Bank Transfer)
+    // upi(All UPI apps )  / neft (Bank Transfer) / imps (Bank Transfer) // paytm (Paytm transfer)
+    type: String,
+  },
+  paytm_number: {
     type: String,
   },
   upi_provider: {
@@ -24,6 +27,9 @@ const PaymentOptionSchema = new Schema({
     type: String,
   },
   bank_name: {
+    type: String,
+  },
+  ac_holder_name: {
     type: String,
   },
   fiat_currency: {
