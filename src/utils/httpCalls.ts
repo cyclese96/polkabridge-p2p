@@ -44,13 +44,27 @@ export const updateProfile = async (updateData: any) => {
 
 export const updatePayments = async (updateData: any) => {
   try {
-    const result = await axios.post(
-      `${baseUrl}/auth-apis/v1/user/payment-option`,
-      updateData,
-      { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
-    );
+    let result;
 
-    return { status: result?.status, data: result?.data?.payment_options };
+    if (!updateData?._id) {
+      console.log("adding new payment option");
+      result = await axios.put(
+        `${baseUrl}/auth-apis/v1/user/payment-option`,
+        updateData,
+        { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
+      );
+    } else {
+      console.log("updating  existing payment option");
+      result = await axios.put(
+        `${baseUrl}/auth-apis/v1/user/payment-option/${updateData?._id}`,
+        updateData,
+        { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
+      );
+    }
+
+    console.log("payment method updated", result);
+
+    return { status: result?.status, data: result?.data };
   } catch (error: any) {
     console.log("updatePayments ", error);
     return {

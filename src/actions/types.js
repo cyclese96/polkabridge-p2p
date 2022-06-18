@@ -16,6 +16,7 @@ export const GET_PAYMENTS = "GET_PAYMENTS";
 export const GET_PROFILE = "GET_PROFILE";
 export const UPDATE_PAYMENTS = "UPDATE_PAYMENTS";
 export const UPDATE_CURRENCY = "UPDATE_CURRENCY";
+export const SET_PROFILE_LOADING = "SET_PROFILE_LOADING";
 
 // User reducers
 export const ERROR = "ERROR";

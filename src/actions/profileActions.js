@@ -3,6 +3,7 @@ import {
   UPDATE_PAYMENTS,
   UPDATE_CURRENCY,
   GET_ERRORS,
+  SET_PROFILE_LOADING,
 } from "./types";
 import {
   getUser,
@@ -57,8 +58,9 @@ export const updateUserPaymentPreferences = (data) => async (dispatch) => {
     });
     return;
   }
+
   dispatch({
-    type: UPDATE_PAYMENTS,
+    type: GET_PROFILE,
     payload: result.data,
   });
 };

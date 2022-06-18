@@ -31,14 +31,13 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
   },
   label: {
-    color: "#c4c4c4",
+    color: "#919191",
     fontWeight: 500,
   },
   submitButton: {
     borderRadius: 10,
     backgroundColor: theme.palette.primary.main,
-    padding: "7px 15px 7px 15px",
-    marginRight: 7,
+    padding: "8px 30px 8px 30px",
     color: "white",
     border: "none",
   },
@@ -92,7 +91,7 @@ function ProfileInfo() {
             className={classes.username}
             fontWeight={600}
           >
-            {profile?.name}
+            {profile && profile.name ? profile.name : "PolkaBridge User"}
           </Typography>
           <Typography
             variant="body2"
@@ -101,57 +100,73 @@ function ProfileInfo() {
             fontWeight={400}
             fontSize={14}
           >
-            {profile?.wallet_address}
+            {profile && profile.wallet_address
+              ? profile.wallet_address
+              : "wallet unavailable"}
           </Typography>
         </Box>
       </Box>
       <Box pt={3}>
         <div class="row mt-3">
-          <div class="col-md-12">
+          <div class="col-md-2">
             <label for="inputEmail4" className={classes.label}>
-              Full Name
+              Full Name:
             </label>
+          </div>
+          <div class="col-md-10">
             <input
               onChange={(e) => {
                 setName(e.target.value);
               }}
               type="text"
               value={name}
-              class="form-control"
+              class="input-p2p"
               id="inputEmail4"
-              placeholder="Full Name"
+              placeholder="Enter your name"
             />
           </div>
         </div>
         <div class="row mt-3">
           <div class="col-md-6">
-            <label for="inputEmail4" className={classes.label}>
-              Email
-            </label>
-            <input
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-              type="email"
-              class="form-control"
-              id="inputEmail4"
-              placeholder="Email"
-            />
+            <div class="row mt-3">
+              <div class="col-md-4">
+                <label for="inputEmail4" className={classes.label}>
+                  Email:
+                </label>
+              </div>
+              <div class="col-md-7">
+                <input
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                  }}
+                  value={email}
+                  type="email"
+                  class="input-p2p"
+                  id="inputEmail4"
+                  placeholder="Email"
+                />
+              </div>
+            </div>
           </div>
           <div class="col-md-6">
-            <label for="inputPassword4" className={classes.label}>
-              Mobile
-            </label>
-            <input
-              onChange={(e) => {
-                setMobile(e.target.value);
-              }}
-              value={mobile}
-              type="text"
-              class="form-control"
-              placeholder="Mobile"
-            />
+            <div className="row mt-3">
+              <div class="col-md-4">
+                <label for="inputPassword4" className={classes.label}>
+                  Mobile:
+                </label>
+              </div>
+              <div class="col-md-7">
+                <input
+                  onChange={(e) => {
+                    setMobile(e.target.value);
+                  }}
+                  value={mobile}
+                  type="text"
+                  class="input-p2p"
+                  placeholder="Mobile"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div class="text-center mt-4">

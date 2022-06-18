@@ -21,3 +21,13 @@ td {
   padding-top: 12px;
   padding-bottom: 12px;
 }
+
+/* Custome CSS */
+.input-p2p {
+  border: none;
+  border-bottom: 1px solid #919191;
+  border-radius: 0%;
+  font-weight: 500;
+  padding-bottom: 8px;
+  width: 100%;
+}

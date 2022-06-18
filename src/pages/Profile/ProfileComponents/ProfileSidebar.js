@@ -17,8 +17,8 @@ const useStyles = makeStyles((theme) => ({
   singleTab: {
     paddingRight: 20,
     paddingLeft: 15,
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingTop: 15,
+    paddingBottom: 15,
     borderBottom: "1px solid rgba(145, 145, 145, 0.2)",
     color: "#333333",
     fontWeight: 600,
@@ -79,7 +79,7 @@ function ProfileSidebar({ tab, setTab }) {
           fontWeight: tab === 3 ? 600 : 400,
         }}
       >
-        Security
+        Settings
       </Typography>
       <Typography
         variant="body2"
@@ -91,7 +91,7 @@ function ProfileSidebar({ tab, setTab }) {
           fontWeight: tab === 4 ? 600 : 400,
         }}
       >
-        Settings
+        Referral
       </Typography>
       <Typography
         variant="body2"
@@ -101,19 +101,7 @@ function ProfileSidebar({ tab, setTab }) {
         style={{
           color: tab === 5 ? theme.palette.primary.main : "#333333",
           fontWeight: tab === 5 ? 600 : 400,
-        }}
-      >
-        Referral
-      </Typography>
-      <Typography
-        variant="body2"
-        color="textSecondary"
-        className={classes.singleTab}
-        onClick={() => setTab(6)}
-        style={{
-          color: tab === 6 ? theme.palette.primary.main : "#333333",
-          fontWeight: tab === 6 ? 600 : 400,
-          fontWeight: tab === 6 ? 600 : 400,
+          fontWeight: tab === 5 ? 600 : 400,
         }}
       >
         Logout
