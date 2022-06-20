@@ -22,3 +22,11 @@ export const SET_PROFILE_LOADING = "SET_PROFILE_LOADING";
 export const ERROR = "ERROR";
 export const LOAD_USER = "LOAD_USER";
 export const SIGN_MESSAGE = "";
+
+// trade reduces for buy/sell order transactions
+export const TRADE_ERROR = "TRADE_ERROR";
+export const CREATE_TRADE_LOADING = "CREATE_TRADE_LOADING";
+export const FETCH_TRADE_LOADING = "FETCH_TRADE_LOADING";
+export const CREATE_TRADE = "CREATE_TRADE";
+export const GET_TRADES = "GET_TRADES";
+export const GET_TRADE = "GET_TRADE";

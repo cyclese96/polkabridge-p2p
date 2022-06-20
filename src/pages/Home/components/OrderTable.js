@@ -121,7 +121,7 @@ export default function OrderTable({ orders }) {
                       <td className={classes.otherText}>
                         {order?.order_type === "sell" ? (
                           <Link
-                            to={`/order/${order?._id}`}
+                            to={`/order/${order?._id}?tradeType=buy`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
@@ -130,7 +130,7 @@ export default function OrderTable({ orders }) {
                           </Link>
                         ) : (
                           <Link
-                            to={`/order/${order._id}`}
+                            to={`/order/${order._id}?tradeType=sell`}
                             style={{ textDecoration: "none" }}
                           >
                             <Button className={classes.buttonAction}>
