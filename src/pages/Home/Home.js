@@ -15,7 +15,6 @@ import {
 import OrderTable from "./components/OrderTable";
 import HowItWorks from "../../common/HowItWorks";
 import { useDispatch, useSelector } from "react-redux";
-import useActiveWeb3React from "../../hooks/useActiveWeb3React";
 import { useGlobalOrders } from "../../hooks/useOrders";
 import Pusher from "pusher-js";
 

@@ -36,12 +36,14 @@ router.post(
   "/buy-order",
   [check("order_id", "Order is should be valid Object id").isMongoId()],
   [check("token_amount", "Invalid order amount").not().isEmpty()],
+  [check("fiat_amount", "Invalid order amount").not().isEmpty()],
   auth,
   async (req, res) => {
     try {
       const errors = validationResult(req);
 
       const tokenAmountToBuy = req.body.token_amount;
+      const fiatAmoount = req.body.fiat_amount;
       const orderId = req.body.order_id;
 
       if (!errors.isEmpty()) {
@@ -114,17 +116,18 @@ router.post(
         order: order._id,
         seller: order?.user,
         buyer: userId,
-        order_amount: tokenAmountToBuy,
+        token_amount: tokenAmountToBuy,
+        fiat_amount: fiatAmoount,
         transaction_status: 1,
       };
 
-      console.log("order", order);
-      console.log("status", {
-        orderTransactionObject,
-        orderRemainingAmount,
-        orderStatus,
-        tokenAmountToBuy,
-      });
+      // console.log("order", order);
+      // console.log("status", {
+      //   orderTransactionObject,
+      //   orderRemainingAmount,
+      //   orderStatus,
+      //   tokenAmountToBuy,
+      // });
 
       const orderTrx = await new Transaction(orderTransactionObject).save();
 
@@ -163,13 +166,14 @@ router.post(
   "/sell-order",
   [check("order_id", "Order is should be valid Object id").isMongoId()],
   [check("token_amount", "Invalid token amount").not().isEmpty()],
+  [check("fiat_amount", "Invalid fiat amount").not().isEmpty()],
   auth,
   async (req, res) => {
     try {
       const errors = validationResult(req);
 
       const tokenAmountToSell = req.body.token_amount;
-      // const fiatAmountForSellOrder = req.body.fiat_amount;
+      const fiatAmountForSellOrder = req.body.fiat_amount;
       const orderId = req.body.order_id;
 
       if (!errors.isEmpty()) {
@@ -242,6 +246,8 @@ router.post(
         order: order._id,
         seller: userId,
         buyer: order?.user,
+        token_amount: tokenAmountToSell,
+        fiat_amount: fiatAmountForSellOrder,
         transaction_status: 0,
       };
 
@@ -288,21 +294,21 @@ router.get("/order-transactions", auth, async (req, res) => {
     const itemsToSkip = (page - 1) * 10;
 
     const query = {};
-    const filterBy = req.query.params?.filterBy;
+    const transaction_status = req.query.params?.transaction_status;
 
-    if (filterBy === "pending") {
+    if (transaction_status === "pending") {
       query.transaction_status = { $gte: 0, $lte: 2 };
-    } else if (filterBy === "completed") {
+    } else if (transaction_status === "completed") {
       query.transaction_status = { $in: [3, 5] };
-    } else if (filterBy === "cancelled") {
+    } else if (transaction_status === "cancelled") {
       query.transaction_status = { $in: [6, 7] };
-    } else if (filterBy === "resolving") {
+    } else if (transaction_status === "resolving") {
       // issue raised
       query.transaction_status = 4;
     }
 
     // user filter
-    if (req.query.params?.orderType === "buy") {
+    if (req.query.params?.order_type === "buy") {
       query.buyer = userId;
     } else {
       query.seller = userId;

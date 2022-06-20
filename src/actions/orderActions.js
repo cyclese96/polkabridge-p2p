@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   createOrder,
   getFiats,
@@ -7,6 +6,7 @@ import {
   getOrders,
   getTokens,
 } from "../utils/httpCalls";
+import { createTrade } from "../utils/httpCalls/orderTradeCalls";
 import {
   GET_ORDERS,
   GET_ORDER,
@@ -20,21 +20,10 @@ import {
   SET_ORDER_LOADING,
 } from "./types";
 
-// GET
 // Latest orders in the market
 export const getLatestOrders =
   (pageNumber, filters = {}, token) =>
   async (dispatch) => {
-    // let paramsObj = {
-    //   order_type: orderType,
-    //   order_by: "order_amount",
-    //   order_direction: "desc",
-    //   payment_option: paymentOption === "all" ? null : paymentOption,
-    //   order_status: "active",
-    //   // fiat: fiat,
-    //   // token: "6263a3e538fd8c30a7c4d8b5",
-    // };
-
     dispatch({
       type: SET_ORDER_LOADING,
       payload: true,
@@ -69,8 +58,6 @@ export const getLatestOrders =
     }
   };
 
-// GET
-// All Tokens
 export const getAllTokens = () => async (dispatch) => {
   const result = await getTokens();
 
@@ -88,8 +75,6 @@ export const getAllTokens = () => async (dispatch) => {
   });
 };
 
-// GET
-// All Fiat
 export const getAllFiats = () => async (dispatch) => {
   const result = await getFiats();
 

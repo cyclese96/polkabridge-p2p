@@ -14,7 +14,11 @@ const TransactionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  order_amount: {
+  token_amount: {
+    type: String,
+    require: true,
+  },
+  fiat_amount: {
     type: String,
     require: true,
   },

@@ -1,35 +1,13 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Container, Grid, Input, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link, useParams } from "react-router-dom";
-import {
-  AccountBalanceWallet,
-  AccountBalanceWalletOutlined,
-  AttachMoney,
-  CreditCard,
-  History,
-  List,
-  ListOutlined,
-  Money,
-  MoneyOutlined,
-  PriceChange,
-} from "@mui/icons-material";
+import { Link, useLocation, useParams } from "react-router-dom";
 import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import Web3 from "web3";
-import { fromWei } from "../../utils/helper";
+import { fromWei, toWei } from "../../utils/helper";
+import BigNumber from "bignumber.js";
+import { startOrderTrade } from "../../actions/tradeActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -160,23 +138,28 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 400,
     textAlign: "center",
   },
+  buttonAction: {
+    backgroundColor: "green",
+    border: `1px solid #6A55EA`,
+    borderRadius: 14,
+    marginRight: 5,
+  },
 }));
 
 function OrderSummary() {
   const classes = useStyles();
-  const store = useSelector((state) => state);
-
-  const theme = useTheme();
   const { order_id } = useParams();
+  const search = useLocation().search;
+  const tradeType = new URLSearchParams(search).get("tradeType");
   const dispatch = useDispatch();
 
-  const { order } = store.order;
+  const order = useSelector((state) => state?.order?.order);
 
-  //States
-  const [amount, setAmount] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const [fiatInput, setFiatInput] = useState("");
+  const [tokenInput, setTokenInput] = useState("");
+  const [isExactIn, setIsExactIn] = useState(true);
+
+  const currentUserAuth = useSelector((state) => state?.user?.jwtToken);
 
   useEffect(() => {
     async function asyncFn() {
@@ -188,23 +171,93 @@ function OrderSummary() {
     asyncFn();
   }, [order_id]);
 
+  const onFiatInputChange = useCallback(
+    (value) => {
+      if (!isExactIn) {
+        setIsExactIn(true);
+      }
+
+      setFiatInput(value);
+    },
+    [setFiatInput, tokenInput, isExactIn, setIsExactIn]
+  );
+
+  const onTokenInputChange = useCallback(
+    (value) => {
+      if (isExactIn) {
+        setIsExactIn(false);
+      }
+      setTokenInput(value);
+    },
+    [setTokenInput, isExactIn, order, setIsExactIn]
+  );
+
+  const handleMax = useCallback(() => {
+    if (isExactIn) {
+      setIsExactIn(false);
+    }
+
+    setTokenInput(fromWei(order?.pending_amount, order?.token?.decimals));
+  }, [setTokenInput, tokenInput, setIsExactIn, order]);
+
+  const parsedFiatInput = useMemo(() => {
+    if (isExactIn) {
+      return fiatInput;
+    }
+
+    return new BigNumber(tokenInput)
+      .multipliedBy(order?.order_unit_price)
+      ?.toString();
+  }, [isExactIn, fiatInput, tokenInput, order]);
+
+  const parsedTokenInput = useMemo(() => {
+    if (isExactIn && fiatInput) {
+      return new BigNumber(fiatInput)
+        .div(order?.order_unit_price)
+        .toFixed(4)
+        .toString();
+    }
+
+    return tokenInput;
+  }, [isExactIn, order, tokenInput, fiatInput]);
+
+  const tokenInputError = useMemo(() => {
+    if (
+      new BigNumber(parsedTokenInput).gt(
+        fromWei(order?.pending_amount, order?.token?.decimals)
+      )
+    ) {
+      return { status: true, message: "Invalid token amounts" };
+    } else {
+      return { status: false, message: "" };
+    }
+  }, [parsedTokenInput, order]);
+
+  const createTradeLoading = useSelector(
+    (state) => state?.userTrade?.createTradeLoading
+  );
+
+  const handleTrade = useCallback(() => {
+    if (!tradeType) {
+      return;
+    }
+
+    const tradeInput = {
+      orderId: order_id,
+      tokenAmount: toWei(parsedTokenInput, order?.token?.decimals),
+      fiatAmount: parsedFiatInput,
+    };
+
+    dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
+  }, [currentUserAuth, tradeType, order, parsedTokenInput, parsedFiatInput]);
+
+  const handleOnCancelTrade = useCallback(() => {
+    setFiatInput("");
+  }, [tradeType, setFiatInput]);
+
   useEffect(() => {
-    console.log("order by id fetched", { order_id, order });
-  }, [order]);
-
-  const handleAmountChange = (value, price) => {
-    setAmount(value);
-
-    let totalAmount = parseInt(price) * value;
-    setTotal(totalAmount);
-  };
-
-  const handleTotalChange = (value, price) => {
-    setTotal(value);
-
-    let orderAmount = parseInt(price) / value;
-    setAmount(orderAmount);
-  };
+    console.log("tradetype", tradeType);
+  }, [tradeType]);
 
   return (
     <Box className={classes.background}>
@@ -222,7 +275,7 @@ function OrderSummary() {
               fontSize={16}
               fontWeight={500}
             >
-              Buy PBR with USDT
+              Buy PBR with {order?.fiat?.fiat}
             </Typography>
             {order ? (
               <Grid container spacing={2} p={2}>
@@ -289,7 +342,7 @@ function OrderSummary() {
                             }}
                           >
                             {fromWei(
-                              order?.order_amount,
+                              order?.pending_amount,
                               order?.token?.decimals
                             )}
                             {" " + order?.token?.symbol}
@@ -304,16 +357,18 @@ function OrderSummary() {
                           color={"#778090"}
                         >
                           Seller’s payment method:
-                          <span
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 500,
-                              paddingLeft: 5,
-                              color: "#212121",
-                            }}
-                          >
-                            {order?.payment_options?.toString()?.toUpperCase()}
-                          </span>
+                          {order?.payment_options?.map((paymentOption) => (
+                            <span
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 500,
+                                paddingLeft: 5,
+                                color: "#212121",
+                              }}
+                            >
+                              {paymentOption?.toString()?.toUpperCase()}
+                            </span>
+                          ))}
                         </Typography>
                       </Box>{" "}
                     </div>
@@ -335,8 +390,8 @@ function OrderSummary() {
                         pt={1}
                         color={"#778090"}
                       >
-                        Please mark your payment withing time limit by only
-                        given payments method.
+                        {/* Please mark your payment withing time limit by only
+                        given payments method. */}
                         {order && order.description
                           ? order.description
                           : "No message"}
@@ -399,14 +454,15 @@ function OrderSummary() {
                         disableUnderline
                         placeholder="1,000 - 21,483"
                         type="number"
-                        value={amount}
-                        onChange={(e) =>
-                          handleAmountChange(
-                            e.target.value,
-                            fromWei(order?.order_amount, order?.token?.decimals)
-                          )
-                        }
+                        value={parsedFiatInput}
+                        onChange={(e) => onFiatInputChange(e.target.value)}
                       />
+                      <Button
+                        className={classes.buttonAction}
+                        onClick={handleMax}
+                      >
+                        All
+                      </Button>
                       <span style={{ color: "#212121", fontWeight: 600 }}>
                         {order?.fiat?.fiat}
                       </span>
@@ -439,8 +495,11 @@ function OrderSummary() {
                       <Input
                         fullWidth
                         type="text"
-                        disableUnderline
+                        error={tokenInputError.status}
+                        // disableUnderline
                         placeholder="0.00"
+                        value={parsedTokenInput}
+                        onChange={(e) => onTokenInputChange(e.target.value)}
                       />
                       <span
                         style={{
@@ -451,6 +510,9 @@ function OrderSummary() {
                         PBR
                       </span>
                     </Box>
+                    {tokenInputError?.status && (
+                      <div>{tokenInputError.message}</div>
+                    )}
                   </Box>
                   <div className="d-flex justify-content-center mt-4">
                     <Button
@@ -463,6 +525,7 @@ function OrderSummary() {
                         minWidth: 150,
                         marginRight: 5,
                       }}
+                      onClick={handleOnCancelTrade}
                     >
                       Cancel
                     </Button>
@@ -477,8 +540,10 @@ function OrderSummary() {
                         width: "100%",
                         marginLeft: 5,
                       }}
+                      disabled={tokenInputError?.status || createTradeLoading}
+                      onClick={handleTrade}
                     >
-                      Buy PBR
+                      {tradeType} {order?.token?.symbol}
                     </Button>
                     <Link to={`/order-payments/${order?._id}`}></Link>
                   </div>
