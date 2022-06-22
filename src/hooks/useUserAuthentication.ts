@@ -5,6 +5,7 @@ import Web3 from "web3";
 import { LOAD_USER } from "../actions/types";
 import connectors from "../connections/connectors";
 import { CONNECTOR_TYPE } from "../constants";
+import { ALL_SUPPORTED_CHAIN_IDS } from "../constants/chains";
 import { getUser } from "../utils/httpCalls";
 import { AuthStatus } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
@@ -53,14 +54,25 @@ export function useUserAuthentication(): [
     let messageHash: string | null;
     let signature: string | null;
     try {
-      const user = await getUser();
+      if (
+        !active ||
+        !account ||
+        !ALL_SUPPORTED_CHAIN_IDS.includes(chainId ? chainId : 1)
+      ) {
+        return;
+      }
+
+      // check cached user status logged in before
+      const user: any = await getUser(account, undefined);
 
       if (user?.status === 200 && user?.data?.wallet_address === account) {
         setAuthStatus({ authenticated: true, pending: false });
-
+        console.log("loading existing user", {
+          jwt: localStorage.getItem(account),
+        });
         dispatch({
           type: LOAD_USER,
-          payload: { jwtToken: localStorage.user, account },
+          payload: { jwtToken: localStorage.getItem(account), account },
         });
 
         return;
@@ -86,21 +98,22 @@ export function useUserAuthentication(): [
       // verify user wallet from server and authenticate
       if (verify?.data?.verified === true) {
         setAuthStatus({ authenticated: true, pending: false });
+        console.log("loading new user", verify);
         dispatch({
           type: LOAD_USER,
           payload: { jwtToken: verify?.data?.jwtToken, account },
         });
-        localStorage.user = verify?.data?.jwtToken;
+        localStorage.setItem(account, verify?.data?.jwtToken);
       }
     } catch (error) {
       setAuthStatus({ authenticated: false, pending: false });
       console.log("signed message error ", error);
     }
-  }, [account]);
+  }, [account, active, chainId]);
 
   const logout = useCallback(() => {
     deactivate();
-    localStorage.removeItem("user");
+    account && localStorage.removeItem(account);
     setAuthStatus({ ...authStatus, authenticated: false });
   }, [setAuthStatus]);
 

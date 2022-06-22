@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { createOrder, verifyDeposit } from "../utils/httpCalls";
 import { CreateOrderStatus, CreateStatus } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
@@ -26,10 +27,12 @@ export function useCreateOrderCallback(): [
   };
   const [orderStatus, setStatus] = useState<CreateOrderStatus>(initialState);
 
+  const userAuth = useSelector((state: any) => state?.user);
+
   const createSellOrder = useCallback(
     async (payload: any) => {
       setStatus({ ...initialState, type: "sell", loading: true });
-      const response = await createOrder("sell", payload);
+      const response = await createOrder("sell", payload, userAuth?.jwtToken);
       console.log("sell order submitted ", response?.data);
       if (response.status === 201) {
         setStatus({
@@ -47,13 +50,13 @@ export function useCreateOrderCallback(): [
         });
       }
     },
-    [chainId]
+    [chainId, userAuth]
   );
 
   const validateSellOrder = useCallback(
     async (id: string) => {
       setStatus({ ...orderStatus, type: "sell", loading: true });
-      const response = await verifyDeposit(id);
+      const response = await verifyDeposit(id, userAuth?.jwtToken);
       console.log("sell order validated ", response);
       if (response.status === 200) {
         setStatus({
@@ -71,13 +74,13 @@ export function useCreateOrderCallback(): [
         });
       }
     },
-    [chainId]
+    [chainId, userAuth]
   );
 
   const createBuyOrder = useCallback(
     async (payload: any) => {
       setStatus({ ...initialState, type: "buy", loading: true });
-      const response = await createOrder("buy", payload);
+      const response = await createOrder("buy", payload, userAuth?.jwtToken);
       console.log("buy order created ", response);
       if (response.status === 201) {
         setStatus({
@@ -95,7 +98,7 @@ export function useCreateOrderCallback(): [
         });
       }
     },
-    [chainId, setStatus]
+    [chainId, setStatus, userAuth]
   );
 
   //   const resetCreateState = useCallback(() => {

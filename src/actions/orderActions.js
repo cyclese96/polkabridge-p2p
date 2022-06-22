@@ -22,14 +22,14 @@ import {
 
 // Latest orders in the market
 export const getLatestOrders =
-  (pageNumber, filters = {}, token) =>
+  (pageNumber, filters = {}, authToken) =>
   async (dispatch) => {
     dispatch({
       type: SET_ORDER_LOADING,
       payload: true,
     });
 
-    const result = await getOrders(pageNumber, filters, token);
+    const result = await getOrders(pageNumber, filters, authToken);
 
     dispatch({
       type: SET_ORDER_LOADING,
@@ -58,58 +58,58 @@ export const getLatestOrders =
     }
   };
 
-export const getAllTokens = () => async (dispatch) => {
-  const result = await getTokens();
+// export const getAllTokens = () => async (dispatch) => {
+//   const result = await getTokens();
 
-  if (result?.status !== 200) {
-    dispatch({
-      type: GET_ERRORS,
-      payload: result.message,
-    });
-    return;
-  }
+//   if (result?.status !== 200) {
+//     dispatch({
+//       type: GET_ERRORS,
+//       payload: result.message,
+//     });
+//     return;
+//   }
 
-  dispatch({
-    type: GET_TOKENS,
-    payload: result.data,
-  });
-};
+//   dispatch({
+//     type: GET_TOKENS,
+//     payload: result.data,
+//   });
+// };
 
-export const getAllFiats = () => async (dispatch) => {
-  const result = await getFiats();
+// export const getAllFiats = () => async (dispatch) => {
+//   const result = await getFiats();
 
-  if (result?.status !== 200) {
-    dispatch({
-      type: GET_ERRORS,
-      payload: result.message,
-    });
-    return;
-  }
+//   if (result?.status !== 200) {
+//     dispatch({
+//       type: GET_ERRORS,
+//       payload: result.message,
+//     });
+//     return;
+//   }
 
-  dispatch({
-    type: GET_FIATS,
-    payload: result.data,
-  });
-};
+//   dispatch({
+//     type: GET_FIATS,
+//     payload: result.data,
+//   });
+// };
 
 // GET
 // All Payment Options
-export const getAllPaymentOptions = () => async (dispatch) => {
-  const result = await getGlobalPaymentOptions();
+// export const getAllPaymentOptions = () => async (dispatch) => {
+//   const result = await getGlobalPaymentOptions();
 
-  if (result?.status !== 200) {
-    dispatch({
-      type: GET_ERRORS,
-      payload: result.message,
-    });
-    return;
-  }
+//   if (result?.status !== 200) {
+//     dispatch({
+//       type: GET_ERRORS,
+//       payload: result.message,
+//     });
+//     return;
+//   }
 
-  dispatch({
-    type: GET_PAYMENTS,
-    payload: result.data,
-  });
-};
+//   dispatch({
+//     type: GET_PAYMENTS,
+//     payload: result.data,
+//   });
+// };
 
 // POST
 // CREATE SELL ORDER

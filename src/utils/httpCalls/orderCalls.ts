@@ -27,12 +27,12 @@ export const getOrders = async (page: number, params: any, token: string) => {
   }
 };
 
-export const getOrderById = async (id: string) => {
+export const getOrderById = async (id: string, authToken: string) => {
   try {
     const result = await axios.get(
       `${BASE_API_ENDPOINT}/order-apis/v1/order/${id}`,
       {
-        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+        headers: { ...globalHeaders, "x-auth-token": authToken },
       }
     );
 
@@ -46,61 +46,65 @@ export const getOrderById = async (id: string) => {
   }
 };
 
-export const getTokens = async () => {
-  try {
-    const result = await axios.get(
-      `${BASE_API_ENDPOINT}/order-apis/v1/order-tokens`,
-      {
-        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
-      }
-    );
+// export const getTokens = async () => {
+//   try {
+//     const result = await axios.get(
+//       `${BASE_API_ENDPOINT}/order-apis/v1/order-tokens`,
+//       {
+//         headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+//       }
+//     );
 
-    return { status: result?.status, data: result?.data };
-  } catch (error: any) {
-    console.log("getTokens ", error);
-    return {
-      status: error?.response?.status,
-      message: error?.response?.data?.message,
-    };
-  }
-};
+//     return { status: result?.status, data: result?.data };
+//   } catch (error: any) {
+//     console.log("getTokens ", error);
+//     return {
+//       status: error?.response?.status,
+//       message: error?.response?.data?.message,
+//     };
+//   }
+// };
 
-export const getFiats = async () => {
-  try {
-    const result = await axios.get(`${BASE_API_ENDPOINT}/order-apis/v1/fiats`, {
-      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
-    });
+// export const getFiats = async () => {
+//   try {
+//     const result = await axios.get(`${BASE_API_ENDPOINT}/order-apis/v1/fiats`, {
+//       headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+//     });
 
-    return { status: result?.status, data: result?.data };
-  } catch (error: any) {
-    console.log("getFiats ", error);
-    return {
-      status: error?.response?.status,
-      message: error?.response?.data?.message,
-    };
-  }
-};
+//     return { status: result?.status, data: result?.data };
+//   } catch (error: any) {
+//     console.log("getFiats ", error);
+//     return {
+//       status: error?.response?.status,
+//       message: error?.response?.data?.message,
+//     };
+//   }
+// };
 
-export const getGlobalPaymentOptions = async () => {
-  try {
-    const result = await axios.get(
-      `${BASE_API_ENDPOINT}/order-apis/v1/payment_options`,
-      {
-        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
-      }
-    );
+// export const getGlobalPaymentOptions = async () => {
+//   try {
+//     const result = await axios.get(
+//       `${BASE_API_ENDPOINT}/order-apis/v1/payment_options`,
+//       {
+//         headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+//       }
+//     );
 
-    return { status: result?.status, data: result?.data };
-  } catch (error: any) {
-    console.log("getGlobalPaymentOptions ", error);
-    return {
-      status: error?.response?.status,
-      message: error?.response?.data?.message,
-    };
-  }
-};
+//     return { status: result?.status, data: result?.data };
+//   } catch (error: any) {
+//     console.log("getGlobalPaymentOptions ", error);
+//     return {
+//       status: error?.response?.status,
+//       message: error?.response?.data?.message,
+//     };
+//   }
+// };
 
-export const createOrder = async (orderType: string, payload: any) => {
+export const createOrder = async (
+  orderType: string,
+  payload: any,
+  authToken: string
+) => {
   try {
     let response;
 
@@ -109,7 +113,7 @@ export const createOrder = async (orderType: string, payload: any) => {
         `${BASE_API_ENDPOINT}/order-apis/v1/sell-order`,
         payload,
         {
-          headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+          headers: { ...globalHeaders, "x-auth-token": authToken },
         }
       );
     } else {
@@ -117,7 +121,7 @@ export const createOrder = async (orderType: string, payload: any) => {
         `${BASE_API_ENDPOINT}/order-apis/v1/buy-order`,
         payload,
         {
-          headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+          headers: { ...globalHeaders, "x-auth-token": authToken },
         }
       );
     }
@@ -132,7 +136,7 @@ export const createOrder = async (orderType: string, payload: any) => {
   }
 };
 
-export const verifyDeposit = async (orderId: string) => {
+export const verifyDeposit = async (orderId: string, authToken: string) => {
   try {
     if (!orderId) {
       return { status: false, data: null };
@@ -142,7 +146,7 @@ export const verifyDeposit = async (orderId: string) => {
       `${BASE_API_ENDPOINT}/order-apis/v1/verify-deposit/${orderId}`,
       {},
       {
-        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+        headers: { ...globalHeaders, "x-auth-token": authToken },
       }
     );
 
