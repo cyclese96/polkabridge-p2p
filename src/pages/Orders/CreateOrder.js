@@ -809,7 +809,7 @@ function CreateOrder() {
                                   border: "1px solid #E1DCFF",
                                 }}
                               >
-                                {value?.payment_mode}
+                                {value?.payment_mode.toUpperCase()}
                               </Box>
                             );
                           })}
