@@ -54,6 +54,34 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
   },
+  buttonWrapper: {
+    display: "flex",
+    justifyContent: "flex-start",
+  },
+  buttonFirst: {
+    width: "fit-content",
+    color: "#212121",
+    backgroundColor: "#eeeeee",
+    padding: "5px 25px 5px 25px",
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+    cursor: "pointer",
+    borderLeft: "4px solid #e5e5e5",
+    borderTop: "4px solid #e5e5e5",
+    borderBottom: "4px solid #e5e5e5",
+  },
+  buttonSecond: {
+    width: "fit-content",
+    color: "white",
+    backgroundColor: "#6A55EA",
+    padding: "5px 25px 5px 25px",
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+    cursor: "pointer",
+    borderRight: "4px solid #e5e5e5",
+    borderTop: "4px solid #e5e5e5",
+    borderBottom: "4px solid #e5e5e5",
+  },
   title: {
     color: "#212121",
     fontWeight: 600,
@@ -327,40 +355,182 @@ function CreateOrder() {
               >
                 Create Order
               </Typography>
-              <Typography
-                variant="body1"
-                color="textSecondary"
-                className={classes.subtitle}
-              >
-                Create your order and get matches in minutes
-              </Typography>
+              <Box display={"flex"} justifyContent="space-between">
+                <Box display={"flex"} justifyContent="start" mt={1}>
+                  <Box pr={1}>
+                    <div className="d-flex align-items-center">
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderRadius: "50%",
+                          backgroundColor: "#04A56D",
+                          color: "white",
+                          fontWeight: 500,
+                          fontSize: 12,
+                        }}
+                      >
+                        1.
+                      </div>{" "}
+                      <div
+                        style={{
+                          borderTop: "1px dotted #212121",
+                          width: "80%",
+                          height: 1,
+                          marginLeft: 5,
+                          minWidth: 170,
+                        }}
+                      ></div>
+                    </div>{" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={14}
+                      fontWeight={500}
+                      mt={1}
+                    >
+                      Set type and price
+                    </Typography>
+                  </Box>
+                  <Box pr={1}>
+                    <div className="d-flex align-items-center">
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderRadius: "50%",
+                          backgroundColor: "#bdbdbd",
+                          color: "black",
+                          fontWeight: 500,
+                          fontSize: 12,
+                        }}
+                      >
+                        2.
+                      </div>{" "}
+                      <div
+                        style={{
+                          borderTop: "1px dotted #212121",
+                          width: "80%",
+                          height: 1,
+                          marginLeft: 5,
+                          minWidth: 170,
+                        }}
+                      ></div>
+                    </div>{" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={14}
+                      fontWeight={500}
+                      mt={1}
+                      color={"#919191"}
+                    >
+                      Set amount and payments
+                    </Typography>
+                  </Box>
+                  <Box pr={1}>
+                    <div className="d-flex align-items-center">
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderRadius: "50%",
+                          backgroundColor: "#bdbdbd",
+                          color: "black",
+                          fontWeight: 500,
+                          fontSize: 12,
+                        }}
+                      >
+                        3.
+                      </div>{" "}
+                      <div
+                        style={{
+                          borderTop: "1px dotted #212121",
+                          width: "80%",
+                          height: 1,
+                          marginLeft: 5,
+                          minWidth: 170,
+                        }}
+                      ></div>
+                    </div>{" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={14}
+                      fontWeight={500}
+                      mt={1}
+                      color={"#919191"}
+                    >
+                      Submit
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
             </Box>
             <div className={classes.infoCard}>
-              <Typography
-                variant="h4"
-                classes={classes.cardTitle}
-                align="center"
-              >
-                Place new order into market
-              </Typography>
-              <div className="row align-items-center mt-5">
-                <div className="col-md-6">
-                  <Box>
+              <Grid container>
+                <Grid item md={6}>
+                  {" "}
+                  <Box style={{ width: "100%", maxWidth: 300 }}>
+                    <Typography
+                      variant="body2"
+                      color={"#212121"}
+                      fontSize={16}
+                      fontWeight={500}
+                    >
+                      Buy PBR with INR
+                    </Typography>
+                  </Box>
+                  <Box mt={4}>
                     <Grid container>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <ListOutlined
-                            style={{
-                              marginRight: 12,
-                              color: "#616161",
-                              fontSize: 20,
-                            }}
-                          />{" "}
-                          Order Type:
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          display="flex"
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          I want to:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
-                        <Box
+                        <Box className={classes.buttonWrapper}>
+                          <Box
+                            className={classes.buttonFirst}
+                            style={{
+                              backgroundColor:
+                                orderType === "buy" ? "#6A55EA" : "#eeeeee",
+                              color: orderType === "buy" ? "white" : "#212121",
+                            }}
+                            onClick={() => setOrderType("buy")}
+                          >
+                            Buy
+                          </Box>
+                          <Box
+                            className={classes.buttonSecond}
+                            style={{
+                              backgroundColor:
+                                orderType === "sell" ? "#6A55EA" : "#eeeeee",
+                              color: orderType === "sell" ? "white" : "#212121",
+                            }}
+                            onClick={() => setOrderType("sell")}
+                          >
+                            Sell
+                          </Box>
+                        </Box>
+                        {/* <Box
                           display="flex"
                           alignItems={"center"}
                           style={{
@@ -475,19 +645,19 @@ function CreateOrder() {
                             )}
                             Sell
                           </Box>
-                        </Box>
+                        </Box> */}
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <AttachMoney
-                            style={{
-                              marginRight: 12,
-                              color: "#616161",
-                              fontSize: 20,
-                            }}
-                          />{" "}
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
                           Price:
                         </Typography>
                       </Grid>
@@ -529,15 +699,15 @@ function CreateOrder() {
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <MoneyOutlined
-                            style={{
-                              marginRight: 12,
-                              color: "#616161",
-                              fontSize: 20,
-                            }}
-                          />{" "}
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
                           Amount:
                         </Typography>
                       </Grid>
@@ -582,15 +752,15 @@ function CreateOrder() {
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <CreditCard
-                            style={{
-                              marginRight: 12,
-                              color: "#616161",
-                              fontSize: 20,
-                            }}
-                          />{" "}
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
                           Total (INR):
                         </Typography>
                       </Grid>
@@ -610,15 +780,15 @@ function CreateOrder() {
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <AccountBalanceWalletOutlined
-                            style={{
-                              marginRight: 12,
-                              color: "#616161",
-                              fontSize: 20,
-                            }}
-                          />{" "}
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
                           Payment:
                         </Typography>
                       </Grid>
@@ -678,9 +848,63 @@ function CreateOrder() {
                       </Grid>
                     </Grid>
                   </Box>
-                </div>
-                <div className="col-md-6">
+                </Grid>
+                <Grid item md={6}>
+                  <Grid container>
+                    <Grid item md={3}>
+                      <Box>
+                        <Typography
+                          display="flex"
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Your Price
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          align="left"
+                          fontSize={22}
+                          style={{ fontWeight: 600 }}
+                          color={"#04A56D"}
+                        >
+                          82.21{" "}
+                          <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                            INR
+                          </span>
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid md={3}>
+                      <Box>
+                        <Typography
+                          display="flex"
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Highest Price
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          align="left"
+                          fontSize={22}
+                          style={{ fontWeight: 600 }}
+                        >
+                          89.21{" "}
+                          <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                            INR
+                          </span>
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
                   <Box
+                    mt={3}
                     style={{
                       width: "100%",
                     }}
@@ -706,8 +930,9 @@ function CreateOrder() {
                       }}
                     />
                   </Box>
-                </div>
-              </div>
+                </Grid>
+              </Grid>
+
               <div className="text-center mt-4 mb-2">
                 <Button
                   onClick={reviewOrderFn}
