@@ -355,130 +355,10 @@ function CreateOrder() {
               >
                 Create Order
               </Typography>
-              <Box display={"flex"} justifyContent="space-between">
-                <Box display={"flex"} justifyContent="start" mt={1}>
-                  <Box pr={1}>
-                    <div className="d-flex align-items-center">
-                      <div
-                        style={{
-                          width: 24,
-                          height: 24,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          borderRadius: "50%",
-                          backgroundColor: "#04A56D",
-                          color: "white",
-                          fontWeight: 500,
-                          fontSize: 12,
-                        }}
-                      >
-                        1.
-                      </div>{" "}
-                      <div
-                        style={{
-                          borderTop: "1px dotted #212121",
-                          width: "80%",
-                          height: 1,
-                          marginLeft: 5,
-                          minWidth: 170,
-                        }}
-                      ></div>
-                    </div>{" "}
-                    <Typography
-                      textAlign="left"
-                      variant="body2"
-                      fontSize={14}
-                      fontWeight={500}
-                      mt={1}
-                    >
-                      Set type and price
-                    </Typography>
-                  </Box>
-                  <Box pr={1}>
-                    <div className="d-flex align-items-center">
-                      <div
-                        style={{
-                          width: 24,
-                          height: 24,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          borderRadius: "50%",
-                          backgroundColor: "#bdbdbd",
-                          color: "black",
-                          fontWeight: 500,
-                          fontSize: 12,
-                        }}
-                      >
-                        2.
-                      </div>{" "}
-                      <div
-                        style={{
-                          borderTop: "1px dotted #212121",
-                          width: "80%",
-                          height: 1,
-                          marginLeft: 5,
-                          minWidth: 170,
-                        }}
-                      ></div>
-                    </div>{" "}
-                    <Typography
-                      textAlign="left"
-                      variant="body2"
-                      fontSize={14}
-                      fontWeight={500}
-                      mt={1}
-                      color={"#919191"}
-                    >
-                      Set amount and payments
-                    </Typography>
-                  </Box>
-                  <Box pr={1}>
-                    <div className="d-flex align-items-center">
-                      <div
-                        style={{
-                          width: 24,
-                          height: 24,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          borderRadius: "50%",
-                          backgroundColor: "#bdbdbd",
-                          color: "black",
-                          fontWeight: 500,
-                          fontSize: 12,
-                        }}
-                      >
-                        3.
-                      </div>{" "}
-                      <div
-                        style={{
-                          borderTop: "1px dotted #212121",
-                          width: "80%",
-                          height: 1,
-                          marginLeft: 5,
-                          minWidth: 170,
-                        }}
-                      ></div>
-                    </div>{" "}
-                    <Typography
-                      textAlign="left"
-                      variant="body2"
-                      fontSize={14}
-                      fontWeight={500}
-                      mt={1}
-                      color={"#919191"}
-                    >
-                      Submit
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
             </Box>
             <div className={classes.infoCard}>
               <Grid container>
-                <Grid item md={6}>
+                <Grid item md={7}>
                   {" "}
                   <Box style={{ width: "100%", maxWidth: 300 }}>
                     <Typography
@@ -487,10 +367,119 @@ function CreateOrder() {
                       fontSize={16}
                       fontWeight={500}
                     >
-                      Buy PBR with INR
+                      - Initiate New P2P Order
                     </Typography>
                   </Box>
-                  <Box mt={4}>
+                  <Box display={"flex"} justifyContent="start" mt={3}>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#04A56D",
+                            color: "white",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          1.
+                        </div>{" "}
+                        <div
+                          style={{
+                            borderTop: "1px dotted #212121",
+                            width: "80%",
+                            height: 1,
+                            marginLeft: 5,
+                            minWidth: 170,
+                          }}
+                        ></div>
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                      >
+                        Set type and price
+                      </Typography>
+                    </Box>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#bdbdbd",
+                            color: "black",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          2.
+                        </div>{" "}
+                        <div
+                          style={{
+                            borderTop: "1px dotted #212121",
+                            width: "80%",
+                            height: 1,
+                            marginLeft: 5,
+                            minWidth: 180,
+                          }}
+                        ></div>
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                        color={"#919191"}
+                      >
+                        Set amount and payments
+                      </Typography>
+                    </Box>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#bdbdbd",
+                            color: "black",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          3.
+                        </div>{" "}
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                        color={"#919191"}
+                      >
+                        Submit
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box mt={5}>
                     <Grid container>
                       <Grid item md={4} display="flex">
                         <Typography
@@ -779,7 +768,7 @@ function CreateOrder() {
                         </Box>
                       </Grid>
                     </Grid>
-                    <Grid container mt={2}>
+                    <Grid container mt={3}>
                       <Grid item md={4} display="flex">
                         <Typography
                           alignItems={"center"}
@@ -795,7 +784,6 @@ function CreateOrder() {
                       <Grid item md={7}>
                         <Box
                           display="flex"
-                          alignItems={"center"}
                           style={{
                             width: "fit-content",
                           }}
@@ -849,19 +837,19 @@ function CreateOrder() {
                     </Grid>
                   </Box>
                 </Grid>
-                <Grid item md={6}>
+                <Grid item md={5}>
                   <Grid container>
-                    <Grid item md={3}>
+                    <Grid item md={5}>
                       <Box>
                         <Typography
                           display="flex"
                           textAlign="left"
                           variant="body2"
-                          fontSize={14}
+                          fontSize={13}
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
                         >
-                          Your Price
+                          Current Market Price
                         </Typography>
                         <Typography
                           variant="body1"
@@ -877,17 +865,17 @@ function CreateOrder() {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid md={3}>
+                    <Grid md={5}>
                       <Box>
                         <Typography
                           display="flex"
                           textAlign="left"
                           variant="body2"
-                          fontSize={14}
+                          fontSize={13}
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
                         >
-                          Highest Price
+                          Highest Market Price
                         </Typography>
                         <Typography
                           variant="body1"
