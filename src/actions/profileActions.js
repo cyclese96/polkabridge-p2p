@@ -12,8 +12,12 @@ import {
   updateProfile,
 } from "../utils/httpCalls";
 
-export const getUserProfile = () => async (dispatch) => {
-  const result = await getUser();
+export const getUserProfile = (account, authToken) => async (dispatch) => {
+  if (!account) {
+    return;
+  }
+
+  const result = await getUser(account, authToken);
 
   if (result?.status !== 200) {
     dispatch({

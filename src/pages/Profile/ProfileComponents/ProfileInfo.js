@@ -1,11 +1,8 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Typography } from "@mui/material";
+import React, { useCallback, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getUserProfile,
-  updateUserProfile,
-} from "../../../actions/profileActions";
+import { updateUserProfile } from "../../../actions/profileActions";
 
 const useStyles = makeStyles((theme) => ({
   infoCard: {
@@ -48,134 +45,215 @@ function ProfileInfo() {
 
   const dispatch = useDispatch();
 
-  const [name, setName] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [email, setEmail] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [formFields, setFormField] = useState({});
 
   const profile = useSelector((state) => state?.profile?.profile);
 
-  useEffect(() => {
-    dispatch(getUserProfile());
-  }, []);
+  const submitProfile = useCallback(() => {
+    setEditMode(false);
 
-  useEffect(() => {
-    if (profile) {
-      console.log("profile fetched", profile);
-      setName(profile.name);
-      setEmail(profile.email);
-      setMobile(profile.phone);
-    }
-  }, [profile]);
+    dispatch(updateUserProfile(formFields));
+  }, [formFields, editMode, setEditMode]);
 
-  const submitProfile = () => {
-    let tempObj = {
-      name: name,
-      phone: mobile,
-      email: email,
-    };
-    dispatch(updateUserProfile(tempObj));
-  };
+  const onEdit = useCallback(() => {
+    setFormField({
+      name: profile?.name,
+      email: profile?.email,
+      phone: profile?.phone,
+    });
+    setEditMode(true);
+  }, [profile, editMode, setEditMode]);
+
   return (
-    <div className={classes.infoCard}>
-      <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
-        <Box>
-          <img
-            src="https://mui.com/static/images/avatar/2.jpg"
-            style={{ height: "65px", borderRadius: 50 }}
-          />
-        </Box>
-        <Box pl={2}>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            className={classes.username}
-            fontWeight={600}
-          >
-            {profile && profile.name ? profile.name : "PolkaBridge User"}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="#0C7ED0"
-            className={classes.address}
-            fontWeight={400}
-            fontSize={14}
-          >
-            {profile && profile.wallet_address
-              ? profile.wallet_address
-              : "wallet unavailable"}
-          </Typography>
-        </Box>
-      </Box>
-      <Box pt={3}>
-        <div class="row mt-3">
-          <div class="col-md-2">
-            <label for="inputEmail4" className={classes.label}>
-              Full Name:
-            </label>
-          </div>
-          <div class="col-md-10">
-            <input
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-              type="text"
-              value={name}
-              class="input-p2p"
-              id="inputEmail4"
-              placeholder="Enter your name"
-            />
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-md-6">
+    <>
+      {!editMode && (
+        <div className={classes.infoCard}>
+          <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
+            <Box>
+              <img
+                src="https://mui.com/static/images/avatar/2.jpg"
+                style={{ height: "65px", borderRadius: 50 }}
+              />
+            </Box>
+            <Box pl={2}>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                className={classes.username}
+                fontWeight={600}
+              >
+                {profile && profile.name ? profile.name : "PolkaBridge User"}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="#0C7ED0"
+                className={classes.address}
+                fontWeight={400}
+                fontSize={14}
+              >
+                {profile && profile.wallet_address
+                  ? profile.wallet_address
+                  : "wallet unavailable"}
+              </Typography>
+            </Box>
+          </Box>
+          <Box pt={3}>
             <div class="row mt-3">
-              <div class="col-md-4">
+              <div class="col-md-2">
                 <label for="inputEmail4" className={classes.label}>
-                  Email:
+                  Full Name:
                 </label>
               </div>
-              <div class="col-md-7">
+              <div class="col-md-10">
+                <Typography align="start" fontWeight={400}>
+                  {profile?.name}
+                </Typography>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <div class="row mt-3">
+                  <div class="col-md-4">
+                    <label for="inputEmail4" className={classes.label}>
+                      Email:
+                    </label>
+                  </div>
+                  <div class="col-md-7">
+                    <Typography align="start" fontWeight={400}>
+                      {profile?.email}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div className="row mt-3">
+                  <div class="col-md-4">
+                    <label for="inputPassword4" className={classes.label}>
+                      Mobile:
+                    </label>
+                  </div>
+                  <div class="col-md-7">
+                    <Typography align="start" fontWeight={400}>
+                      {profile?.phone}
+                    </Typography>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center mt-4">
+              <button className={classes.submitButton} onClick={onEdit}>
+                Edit profile
+              </button>
+            </div>
+          </Box>
+        </div>
+      )}
+      {editMode && (
+        <div className={classes.infoCard}>
+          <Box display="flex" justifyContent="start" alignItems="center" pl={3}>
+            <Box>
+              <img
+                src="https://mui.com/static/images/avatar/2.jpg"
+                style={{ height: "65px", borderRadius: 50 }}
+              />
+            </Box>
+            <Box pl={2}>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                className={classes.username}
+                fontWeight={600}
+              >
+                {profile && profile.name ? profile.name : "PolkaBridge User"}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="#0C7ED0"
+                className={classes.address}
+                fontWeight={400}
+                fontSize={14}
+              >
+                {profile && profile.wallet_address
+                  ? profile.wallet_address
+                  : "wallet unavailable"}
+              </Typography>
+            </Box>
+          </Box>
+          <Box pt={3}>
+            <div class="row mt-3">
+              <div class="col-md-2">
+                <label for="inputEmail4" className={classes.label}>
+                  Full Name:
+                </label>
+              </div>
+              <div class="col-md-10">
                 <input
                   onChange={(e) => {
-                    setEmail(e.target.value);
+                    setFormField({ ...formFields, name: e.target.value });
                   }}
-                  value={email}
-                  type="email"
+                  type="text"
+                  value={formFields?.name}
                   class="input-p2p"
                   id="inputEmail4"
-                  placeholder="Email"
+                  placeholder="Enter your name"
                 />
               </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div className="row mt-3">
-              <div class="col-md-4">
-                <label for="inputPassword4" className={classes.label}>
-                  Mobile:
-                </label>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <div class="row mt-3">
+                  <div class="col-md-4">
+                    <label for="inputEmail4" className={classes.label}>
+                      Email:
+                    </label>
+                  </div>
+                  <div class="col-md-7">
+                    <input
+                      onChange={(e) => {
+                        setFormField({ ...formFields, email: e.target.value });
+                      }}
+                      value={formFields?.email}
+                      type="email"
+                      class="input-p2p"
+                      id="inputEmail4"
+                      placeholder="Email"
+                      disabled={profile?.email_verified}
+                    />
+                  </div>
+                </div>
               </div>
-              <div class="col-md-7">
-                <input
-                  onChange={(e) => {
-                    setMobile(e.target.value);
-                  }}
-                  value={mobile}
-                  type="text"
-                  class="input-p2p"
-                  placeholder="Mobile"
-                />
+              <div class="col-md-6">
+                <div className="row mt-3">
+                  <div class="col-md-4">
+                    <label for="inputPassword4" className={classes.label}>
+                      Mobile:
+                    </label>
+                  </div>
+                  <div class="col-md-7">
+                    <input
+                      onChange={(e) => {
+                        setFormField({ ...formFields, phone: e.target.value });
+                      }}
+                      value={formFields?.phone}
+                      type="text"
+                      class="input-p2p"
+                      placeholder="Mobile"
+                      disabled={profile?.phone_verified}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+            <div class="text-center mt-4">
+              <button className={classes.submitButton} onClick={submitProfile}>
+                Update profile
+              </button>
+            </div>
+          </Box>
         </div>
-        <div class="text-center mt-4">
-          <button className={classes.submitButton} onClick={submitProfile}>
-            Update profile
-          </button>
-        </div>
-      </Box>
-    </div>
+      )}
+    </>
   );
 }
 

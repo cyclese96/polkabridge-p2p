@@ -1,29 +1,11 @@
 export enum SupportedChainId {
   MAINNET = 1,
-  ROPSTEN = 3,
   RINKEBY = 4,
-  GOERLI = 5,
-  KOVAN = 42,
-
-  BSC = 56,
-  BSC_TESTNET = 97,
-
-  ARBITRUM_ONE = 42161,
-  ARBITRUM_RINKEBY = 421611,
-
-  OPTIMISM = 10,
-  OPTIMISTIC_KOVAN = 69,
-
-  POLYGON = 137,
-  POLYGON_MUMBAI = 80001,
 }
 
 export const CHAIN_IDS_TO_NAMES = {
   [SupportedChainId.MAINNET]: "mainnet",
-  [SupportedChainId.ROPSTEN]: "ropsten",
   [SupportedChainId.RINKEBY]: "rinkeby",
-  [SupportedChainId.POLYGON]: "polygon",
-  [SupportedChainId.POLYGON_MUMBAI]: "polygon_mumbai",
 };
 
 export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
@@ -47,4 +29,24 @@ export const NATIVE_TOKEN: { [index: number]: string } = {
   80001: "MATIC",
   1666600000: "ONE",
   1666700000: "ONE",
+};
+
+export const CHAIN_IDS = {
+  MAINNET: 1,
+  RINKEBY: 4,
+  POLYGON: 137,
+  MUMBAI: 80001,
+};
+
+export const NETWORK_DETAILS = {
+  mainnet: {
+    chainId: `0x${CHAIN_IDS.MAINNET.toString(16)}`,
+    chainName: "Ethereum Mainnet",
+    chainRaw: CHAIN_IDS.MAINNET,
+  },
+  testnet: {
+    chainId: `0x${CHAIN_IDS.RINKEBY.toString(16)}`,
+    chainName: "Rinkeby Test Network",
+    chainRaw: CHAIN_IDS.RINKEBY,
+  },
 };

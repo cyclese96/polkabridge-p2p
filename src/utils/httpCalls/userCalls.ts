@@ -2,10 +2,16 @@ import axios from "axios";
 import { globalHeaders } from "./index";
 import { BASE_API_ENDPOINT } from "./index";
 
-export const getUser = async () => {
+export const getUser = async (
+  account: string,
+  authToken: string | undefined
+) => {
   try {
     const result = await axios.get(`${BASE_API_ENDPOINT}/auth-apis/v1/user`, {
-      headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+      headers: {
+        ...globalHeaders,
+        "x-auth-token": authToken ? authToken : localStorage.getItem(account),
+      },
     });
 
     return { status: result?.status, data: result?.data };

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getLatestOrders } from "../actions/orderActions";
 import useActiveWeb3React from "./useActiveWeb3React";
-import { useUserAuthentication } from "./useUserAuthentication";
 
 export function useGlobalOrders(
   orderType: string

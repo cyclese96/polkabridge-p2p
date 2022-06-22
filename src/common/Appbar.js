@@ -3,20 +3,24 @@ import { Link } from "react-router-dom";
 import React, { useCallback, useEffect } from "react";
 import { makeStyles } from "@mui/styles";
 
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 
 import { useUserAuthentication } from "../hooks/useUserAuthentication";
-import { CONNECTOR_TYPE, TOKENS } from "../constants";
 import {
-  getAllFiats,
-  getAllPaymentOptions,
-  getAllTokens,
-} from "../actions/orderActions";
+  CONNECTOR_TYPE,
+  GLOBAL_FIAT_LIST,
+  GLOBAL_PAYMENT_OPTIONS,
+  GLOBAL_TOKEN_LIST,
+  NETWORK_TYPE,
+  TOKENS,
+} from "../constants";
 import { useDispatch } from "react-redux";
-import { useCurrencyBalance, useETHBalances } from "../hooks/useBalance";
+import { useCurrencyBalance } from "../hooks/useBalance";
 import useActiveWeb3React from "../hooks/useActiveWeb3React";
-import { formatCurrency, fromWei } from "../utils/helper";
+import { formatCurrency, fromWei, setupNetwork } from "../utils/helper";
 import { getUserProfile } from "../actions/profileActions";
+import { ALL_SUPPORTED_CHAIN_IDS, NETWORK_DETAILS } from "../constants/chains";
+import { GET_FIATS, GET_PAYMENTS, GET_TOKENS } from "../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   linkItems: {
@@ -103,6 +107,7 @@ const Appbar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [authStatus, connectWallet, verifyUserWallet] = useUserAuthentication();
+  const loggedInUser = useSelector((state) => state?.user);
 
   const handleConnectWallet = useCallback(() => {
     connectWallet(CONNECTOR_TYPE.injected);
@@ -110,14 +115,28 @@ const Appbar = () => {
 
   // Common function calls required for frotend from backend
 
+  // load all init data
   useEffect(() => {
-    dispatch(getAllTokens());
-    dispatch(getAllFiats());
-    dispatch(getAllPaymentOptions());
-    dispatch(getUserProfile());
-  }, []);
+    dispatch({
+      type: GET_TOKENS,
+      payload: GLOBAL_TOKEN_LIST[4],
+    });
 
-  const { account, chainId } = useActiveWeb3React();
+    dispatch({
+      type: GET_FIATS,
+      payload: GLOBAL_FIAT_LIST,
+    });
+
+    dispatch({ type: GET_PAYMENTS, payload: GLOBAL_PAYMENT_OPTIONS });
+
+    if (!loggedInUser.account) {
+      return;
+    }
+
+    dispatch(getUserProfile(loggedInUser?.account, loggedInUser?.jwtToken));
+  }, [loggedInUser]);
+
+  const { account, chainId, active } = useActiveWeb3React();
   const balance = useCurrencyBalance(account, TOKENS[4].ETH);
 
   useEffect(() => {
@@ -151,6 +170,12 @@ const Appbar = () => {
       localStorage.setItem("cachedAccount", account?.toString());
     }
   }, [account, authStatus]);
+
+  const handleSwitchNetwork = useCallback(() => {
+    setupNetwork(
+      NETWORK_TYPE === 1 ? NETWORK_DETAILS.testnet : NETWORK_DETAILS.mainnet
+    );
+  }, [setupNetwork]);
 
   return (
     <Box style={{ position: "relative", zIndex: 10 }}>
@@ -265,18 +290,34 @@ const Appbar = () => {
                         formatCurrency(fromWei(balance?.toString(), 18)) +
                           "ETH"}
                     </span>{" "}
-                    <span className={classes.connectedAddress}>
-                      {[...account].splice(0, 7)} {"..."}
-                      {[...account].splice([...account].length - 7, 7)}
-                    </span>
+                    {account && (
+                      <span className={classes.connectedAddress}>
+                        {[...account].splice(0, 7)} {"..."}
+                        {[...account].splice([...account].length - 7, 7)}
+                      </span>
+                    )}
                   </button>
                 ) : (
-                  <button
-                    className={classes.navbarButton}
-                    onClick={handleConnectWallet}
-                  >
-                    {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
-                  </button>
+                  <>
+                    {active &&
+                    !ALL_SUPPORTED_CHAIN_IDS.includes(parseInt(chainId)) ? (
+                      <button
+                        className={classes.navbarButton}
+                        onClick={handleSwitchNetwork}
+                      >
+                        {window.innerWidth < 500
+                          ? "Switch network"
+                          : "Switch to mainnet"}
+                      </button>
+                    ) : (
+                      <button
+                        className={classes.navbarButton}
+                        onClick={handleConnectWallet}
+                      >
+                        {window.innerWidth < 500 ? "Connect" : "Connect Wallet"}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </Box>

@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { CHAIN_IDS } from "../constants/chains";
 
 export const fromWei = (tokens, decimals = 18) => {
   try {
@@ -115,33 +116,33 @@ export const formattedAddress = (address) => {
   return _formatted;
 };
 // //input  { chainId, chainName, currency: {name, symbol, decimals }, rpcUrls, blockExplorer }
-// export const setupNetwork = async (networkObject) => {
-//   const provider = window.ethereum;
-//   if (provider) {
-//     // const _chainId = parseInt(networkObject.chainId, 10)
-//     try {
-//       if (
-//         networkObject.chainId === `0x${config.chainId.toString(16)}` ||
-//         networkObject.chainId === `0x${config.chainIdTestnet.toString(16)}`
-//       ) {
-//         await provider.request({
-//           method: "wallet_switchEthereumChain",
-//           params: [{ chainId: networkObject.chainId }],
-//         });
-//       }
-//       await provider.request({
-//         method: "wallet_addEthereumChain",
-//         params: [networkObject],
-//       });
-//       return true;
-//     } catch (error) {
-//       console.error("Failed to setup the network in Metamask:", error);
-//       return false;
-//     }
-//   } else {
-//     console.error(
-//       "Can't setup the BSC network on metamask because window.ethereum is undefined"
-//     );
-//     return false;
-//   }
-// };
+export const setupNetwork = async (networkObject) => {
+  const provider = window.ethereum;
+  if (provider) {
+    // const _chainId = parseInt(networkObject.chainId, 10)
+    try {
+      if (
+        networkObject.chainId === `0x${CHAIN_IDS.MAINNET.toString(16)}` ||
+        networkObject.chainId === `0x${CHAIN_IDS.RINKEBY.toString(16)}`
+      ) {
+        await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: networkObject.chainId }],
+        });
+      }
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [networkObject],
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to setup the network in Metamask:", error);
+      return false;
+    }
+  } else {
+    console.error(
+      "Can't setup the BSC network on metamask because window.ethereum is undefined"
+    );
+    return false;
+  }
+};
