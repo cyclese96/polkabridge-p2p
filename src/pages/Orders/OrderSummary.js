@@ -1,35 +1,13 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Container, Grid, Input, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link, useParams } from "react-router-dom";
-import {
-  AccountBalanceWallet,
-  AccountBalanceWalletOutlined,
-  AttachMoney,
-  CreditCard,
-  History,
-  List,
-  ListOutlined,
-  Money,
-  MoneyOutlined,
-  PriceChange,
-} from "@mui/icons-material";
+import { Link, useLocation, useParams } from "react-router-dom";
 import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import Web3 from "web3";
-import { fromWei } from "../../utils/helper";
+import { fromWei, toWei } from "../../utils/helper";
+import BigNumber from "bignumber.js";
+import { startOrderTrade } from "../../actions/tradeActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -51,13 +29,13 @@ const useStyles = makeStyles((theme) => ({
   title: {
     color: "#212121",
     fontWeight: 600,
-    fontSize: 28,
+    fontSize: 22,
     letterSpacing: "0.02em",
   },
   subtitle: {
     color: "#414141",
     fontWeight: 400,
-    fontSize: 16,
+    fontSize: 14,
   },
   cardTitle: {
     textAlign: "center",
@@ -160,23 +138,28 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 400,
     textAlign: "center",
   },
+  buttonAction: {
+    backgroundColor: "green",
+    border: `1px solid #6A55EA`,
+    borderRadius: 14,
+    marginRight: 5,
+  },
 }));
 
 function OrderSummary() {
   const classes = useStyles();
-  const store = useSelector((state) => state);
-
-  const theme = useTheme();
   const { order_id } = useParams();
+  const search = useLocation().search;
+  const tradeType = new URLSearchParams(search).get("tradeType");
   const dispatch = useDispatch();
 
-  const { order } = store.order;
+  const order = useSelector((state) => state?.order?.order);
 
-  //States
-  const [amount, setAmount] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const [fiatInput, setFiatInput] = useState("");
+  const [tokenInput, setTokenInput] = useState("");
+  const [isExactIn, setIsExactIn] = useState(true);
+
+  const currentUserAuth = useSelector((state) => state?.user?.jwtToken);
 
   useEffect(() => {
     async function asyncFn() {
@@ -188,259 +171,384 @@ function OrderSummary() {
     asyncFn();
   }, [order_id]);
 
+  const onFiatInputChange = useCallback(
+    (value) => {
+      if (!isExactIn) {
+        setIsExactIn(true);
+      }
+
+      setFiatInput(value);
+    },
+    [setFiatInput, tokenInput, isExactIn, setIsExactIn]
+  );
+
+  const onTokenInputChange = useCallback(
+    (value) => {
+      if (isExactIn) {
+        setIsExactIn(false);
+      }
+      setTokenInput(value);
+    },
+    [setTokenInput, isExactIn, order, setIsExactIn]
+  );
+
+  const handleMax = useCallback(() => {
+    if (isExactIn) {
+      setIsExactIn(false);
+    }
+
+    setTokenInput(fromWei(order?.pending_amount, order?.token?.decimals));
+  }, [setTokenInput, tokenInput, setIsExactIn, order]);
+
+  const parsedFiatInput = useMemo(() => {
+    if (isExactIn) {
+      return fiatInput;
+    }
+
+    return new BigNumber(tokenInput)
+      .multipliedBy(order?.order_unit_price)
+      ?.toString();
+  }, [isExactIn, fiatInput, tokenInput, order]);
+
+  const parsedTokenInput = useMemo(() => {
+    if (isExactIn && fiatInput) {
+      return new BigNumber(fiatInput)
+        .div(order?.order_unit_price)
+        .toFixed(4)
+        .toString();
+    }
+
+    return tokenInput;
+  }, [isExactIn, order, tokenInput, fiatInput]);
+
+  const tokenInputError = useMemo(() => {
+    if (
+      new BigNumber(parsedTokenInput).gt(
+        fromWei(order?.pending_amount, order?.token?.decimals)
+      )
+    ) {
+      return { status: true, message: "Invalid token amounts" };
+    } else {
+      return { status: false, message: "" };
+    }
+  }, [parsedTokenInput, order]);
+
+  const createTradeLoading = useSelector(
+    (state) => state?.userTrade?.createTradeLoading
+  );
+
+  const handleTrade = useCallback(() => {
+    if (!tradeType) {
+      return;
+    }
+
+    const tradeInput = {
+      orderId: order_id,
+      tokenAmount: toWei(parsedTokenInput, order?.token?.decimals),
+      fiatAmount: parsedFiatInput,
+    };
+
+    dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
+  }, [currentUserAuth, tradeType, order, parsedTokenInput, parsedFiatInput]);
+
+  const handleOnCancelTrade = useCallback(() => {
+    setFiatInput("");
+  }, [tradeType, setFiatInput]);
+
   useEffect(() => {
-    console.log("order by id fetched", { order_id, order });
-  }, [order]);
-
-  const handleAmountChange = (value, price) => {
-    setAmount(value);
-
-    let totalAmount = parseInt(price) * value;
-    setTotal(totalAmount);
-  };
-
-  const handleTotalChange = (value, price) => {
-    setTotal(value);
-
-    let orderAmount = parseInt(price) / value;
-    setAmount(orderAmount);
-  };
+    console.log("tradetype", tradeType);
+  }, [tradeType]);
 
   return (
     <Box className={classes.background}>
       <Container>
         <Box>
           <Box>
-            <Typography
-              variant="h3"
-              color="textSecondary"
-              className={classes.title}
-            >
+            <h4 variant="h4" color="textSecondary" className={classes.title}>
               Order Summary
-            </Typography>
-            <Typography
-              variant="body1"
-              color="textSecondary"
-              className={classes.subtitle}
-            >
-              Choose you desired amount and proceed
-            </Typography>
+            </h4>
           </Box>
           <div className={classes.infoCard}>
-            <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Proceed {order?.order_type} order
+            <Typography
+              variant="body2"
+              color={"#212121"}
+              fontSize={16}
+              fontWeight={500}
+            >
+              Buy PBR with {order?.fiat?.fiat}
             </Typography>
-
             {order ? (
-              <div>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="container row mt-5">
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Amount{" "}
-                            {order?.order_type === "sell"
-                              ? "on sell"
-                              : "to buy"}
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
+              <Grid container spacing={2} p={2}>
+                <Grid item md={7} style={{ borderRight: "1px solid #e5e5e5" }}>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Price:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#04A56D",
+                              paddingLeft: 5,
+                            }}
+                          >
+                            {order?.order_unit_price} {order?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </Box>
+
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Payment Time Limit:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              paddingLeft: 5,
+                              color: "#212121",
+                            }}
+                          >
+                            13:30-19:30 IST
+                          </span>
+                        </Typography>
+                      </Box>
+                    </div>
+                    <div className="col-md-6">
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Available:
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              paddingLeft: 5,
+                              color: "#212121",
+                            }}
                           >
                             {fromWei(
-                              order?.order_amount,
+                              order?.pending_amount,
                               order?.token?.decimals
                             )}
                             {" " + order?.token?.symbol}
-                          </Typography>
-                        </Box>
-                      </div>
-                      <div className="col-md-6">
-                        {" "}
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Price({order?.fiat?.fiat})
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {order?.order_unit_price} per {order?.token?.symbol}
-                          </Typography>
-                        </Box>
-                      </div>
-                    </div>
-                    <div className="container row mt-3">
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography textAlign="left" variant="body2">
-                            Payment Type
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {order?.payment_options?.toString()?.toUpperCase()}
-                          </Typography>
-                        </Box>
-                      </div>
-                      <div className="col-md-6">
-                        <Box mt={2}>
-                          <Typography
-                            display="flex"
-                            textAlign="left"
-                            variant="body2"
-                          >
-                            Activity Time
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            13:30-19:30 IST
-                          </Typography>
-                        </Box>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className=" mt-5">
-                      <Box mt={2} style={{ width: "100%" }}>
-                        <Typography
-                          display="flex"
-                          textAlign="left"
-                          variant="body1"
-                          style={{ fontWeight: 600 }}
-                        >
-                          Remarks:
+                          </span>
                         </Typography>
-                        <Box
-                          style={{
-                            border: "1px solid #e5e5e5",
-                            borderRadius: 10,
-                            padding: 10,
-                            width: "100%",
-                            minHeight: 150,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            textAlign="left"
-                            style={{ fontWeight: 400 }}
-                          >
-                            {order?.description}
-                          </Typography>
-                        </Box>
                       </Box>
+                      <Box mt={2}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          color={"#778090"}
+                        >
+                          Seller’s payment method:
+                          {order?.payment_options?.map((paymentOption) => (
+                            <span
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 500,
+                                paddingLeft: 5,
+                                color: "#212121",
+                              }}
+                            >
+                              {paymentOption?.toString()?.toUpperCase()}
+                            </span>
+                          ))}
+                        </Typography>
+                      </Box>{" "}
                     </div>
                   </div>
-                </div>
-                <div className="d-flex justify-content-center align-items-center mt-5">
-                  <Grid
-                    container
-                    mt={2}
-                    display="flex"
-                    justifyContent={"center"}
-                    style={{ width: "70%" }}
-                  >
-                    <Grid item md={3} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <MoneyOutlined
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Amount:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
+                  <div className="mt-5">
+                    <Box mt={2}>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
                       >
-                        <Input
-                          type="number"
-                          value={amount}
-                          onChange={(e) =>
-                            handleAmountChange(
-                              e.target.value,
-                              fromWei(
-                                order?.order_amount,
-                                order?.token?.decimals
-                              )
-                            )
-                          }
-                          disableUnderline={true}
-                        />
-                        {order?.fiat?.fiat}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Grid
-                    container
-                    mt={2}
-                    display="flex"
-                    justifyContent={"center"}
-                    style={{ width: "70%" }}
-                  >
-                    <Grid item md={3} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <CreditCard
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Total:
+                        Seller's Message:
                       </Typography>
-                    </Grid>
-                    <Grid item md={7}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          borderBottom: "1px solid #212121",
-                          width: "fit-content",
-                        }}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={13}
+                        pt={1}
+                        color={"#778090"}
                       >
-                        <Input
-                          type="number"
-                          value={total}
-                          onChange={(e) =>
-                            handleTotalChange(
-                              e.target.value,
-                              fromWei(
-                                order?.order_amount?.toString(),
-                                order?.token?.decimals
-                              )
-                            )
-                          }
-                          disableUnderline={true}
-                        />
-                        INR
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </div>
-                <div className="text-center mt-4">
-                  <Link to={`/order-payments/${order?._id}`}>
-                    <Button
+                        {/* Please mark your payment withing time limit by only
+                        given payments method. */}
+                        {order && order.description
+                          ? order.description
+                          : "No message"}
+                      </Typography>
+                    </Box>
+                  </div>
+                  <div className="mt-5">
+                    <Box mt={2}>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                      >
+                        Terms and conditions:
+                      </Typography>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={13}
+                        pt={1}
+                        color={"#778090"}
+                      >
+                        DO NOT SEND PAYMENTS THROUGH THIRD PARTY ACCOUNTS, all
+                        such payments will have to go to dispute and will be
+                        refunded/cancelled. Please do not include crypto related
+                        words such as P2P, Binance, USDT, ETH, BTC, etc. Send
+                        INR through registered bank account only.
+                      </Typography>
+                    </Box>
+                  </div>
+                </Grid>
+                <Grid item md={5}>
+                  <Box mt={3}>
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      I want to buy for:
+                    </Typography>
+                    <Box
+                      display={"flex"}
+                      justifyContent="space-between"
+                      alignItems={"center"}
+                      mt={1}
                       style={{
-                        borderRadius: 10,
-                        background: "#6A55EA",
-                        padding: "9px 35px 9px 35px",
-                        color: "white",
+                        border: "1px solid #bdbdbd",
+                        borderRadius: 4,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        paddingTop: 5,
+                        paddingBottom: 5,
                       }}
                     >
-                      Confirm Buy
+                      <Input
+                        fullWidth
+                        disableUnderline
+                        placeholder="1,000 - 21,483"
+                        type="number"
+                        value={parsedFiatInput}
+                        onChange={(e) => onFiatInputChange(e.target.value)}
+                      />
+                      <Button
+                        className={classes.buttonAction}
+                        onClick={handleMax}
+                      >
+                        All
+                      </Button>
+                      <span style={{ color: "#212121", fontWeight: 600 }}>
+                        {order?.fiat?.fiat}
+                      </span>
+                    </Box>
+                  </Box>
+                  <Box mt={3}>
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      I will get:
+                    </Typography>
+                    <Box
+                      display={"flex"}
+                      justifyContent="space-between"
+                      alignItems={"center"}
+                      mt={1}
+                      style={{
+                        border: "1px solid #bdbdbd",
+                        borderRadius: 4,
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                        paddingTop: 5,
+                        paddingBottom: 5,
+                      }}
+                    >
+                      <Input
+                        fullWidth
+                        type="text"
+                        error={tokenInputError.status}
+                        // disableUnderline
+                        placeholder="0.00"
+                        value={parsedTokenInput}
+                        onChange={(e) => onTokenInputChange(e.target.value)}
+                      />
+                      <span
+                        style={{
+                          color: "#212121",
+                          fontWeight: 500,
+                        }}
+                      >
+                        PBR
+                      </span>
+                    </Box>
+                    {tokenInputError?.status && (
+                      <div>{tokenInputError.message}</div>
+                    )}
+                  </Box>
+                  <div className="d-flex justify-content-center mt-4">
+                    <Button
+                      style={{
+                        borderRadius: 7,
+                        background: "#F5F5F5",
+
+                        color: "black",
+                        fontWeight: 600,
+                        minWidth: 150,
+                        marginRight: 5,
+                      }}
+                      onClick={handleOnCancelTrade}
+                    >
+                      Cancel
                     </Button>
-                  </Link>
-                </div>
-              </div>
+                    <Button
+                      style={{
+                        borderRadius: 7,
+                        background: "#6A55EA",
+
+                        color: "white",
+                        minWidth: 200,
+                        fontWeight: 600,
+                        width: "100%",
+                        marginLeft: 5,
+                      }}
+                      disabled={tokenInputError?.status || createTradeLoading}
+                      onClick={handleTrade}
+                    >
+                      {tradeType} {order?.token?.symbol}
+                    </Button>
+                    <Link to={`/order-payments/${order?._id}`}></Link>
+                  </div>
+                </Grid>
+              </Grid>
             ) : (
               "Loading"
             )}

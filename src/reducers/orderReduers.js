@@ -20,7 +20,7 @@ const initalState = {
   payments: [],
 };
 
-export default function Orders(state = initalState, action) {
+export default function (state = initalState, action) {
   switch (action.type) {
     case GET_ORDERS:
       return {
