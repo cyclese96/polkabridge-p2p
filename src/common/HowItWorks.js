@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
   title: {
     fontWeight: 600,
-    fontSize: 20,
+    fontSize: 18,
     letterSpacing: "0.02em",
     color: "#212121",
     textAlign: "center",
@@ -111,11 +111,18 @@ export default function HowItWorks() {
           How P2P Works
         </h1>
         <div className="d-flex justify-content-center">
-          <p className={classes.para} style={{ width: "50%" }}>
+          <Typography
+            variant="body2"
+            textAlign="center"
+            fontSize={15}
+            pt={1}
+            color={"#778090"}
+            style={{ width: "50%" }}
+          >
             PolkaBridge P2P helps you convert your money to crypto instantly
             where PolkaBridge acts as an escrow for safekeeping of the
             transaction.
-          </p>
+          </Typography>
         </div>
 
         <Container style={{ marginTop: 30 }}>
@@ -135,16 +142,22 @@ export default function HowItWorks() {
                 alignItems="center"
                 width={200}
               >
-                <div style={{ height: 100 }}>
+                <div style={{ height: 90 }}>
                   <img
                     src="https://cdn3d.iconscout.com/3d/premium/thumb/finance-4996087-4159684.png"
-                    style={{ height: 80 }}
+                    style={{ height: 70 }}
                   />
                 </div>
                 <h1 variant="h1" className={classes.title}>
                   STEP 1
                 </h1>
-                <Typography variant="body2" className={classes.description}>
+                <Typography
+                  variant="body2"
+                  textAlign="center"
+                  fontSize={14}
+                  pt={1}
+                  color={"#778090"}
+                >
                   Create Order and Deposit Tokens
                 </Typography>
               </Box>
@@ -164,15 +177,21 @@ export default function HowItWorks() {
                 alignItems="center"
                 width={200}
               >
-                <div style={{ height: 100 }}>
-                  <img src="/images/bank.png" style={{ height: 80 }} />
+                <div style={{ height: 90 }}>
+                  <img src="/images/bank.png" style={{ height: 60 }} />
                 </div>
 
                 <h1 variant="h1" className={classes.title}>
                   STEP 2
                 </h1>
-                <Typography variant="body2" className={classes.description}>
-                  Pay directly to seller account
+                <Typography
+                  variant="body2"
+                  textAlign="center"
+                  fontSize={14}
+                  pt={1}
+                  color={"#778090"}
+                >
+                  Pay directly to seller's account
                 </Typography>
               </Box>
             </Box>
@@ -191,15 +210,21 @@ export default function HowItWorks() {
                 alignItems="center"
                 width={200}
               >
-                <div style={{ height: 100 }}>
-                  <img src="/images/wallet.png" style={{ height: 80 }} />
+                <div style={{ height: 90 }}>
+                  <img src="/images/wallet.png" style={{ height: 70 }} />
                 </div>
 
                 <h1 variant="h1" className={classes.title}>
                   STEP 3
                 </h1>
-                <Typography variant="body2" className={classes.description}>
-                  We will release tokens to buyer
+                <Typography
+                  variant="body2"
+                  textAlign="center"
+                  fontSize={14}
+                  pt={1}
+                  color={"#778090"}
+                >
+                  We will release tokens to buyer's account.
                 </Typography>
               </Box>
             </Box>
