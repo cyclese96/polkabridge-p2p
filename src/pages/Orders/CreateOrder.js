@@ -640,23 +640,30 @@ function CreateOrder() {
                     <Grid container mt={2}>
                       <Grid item md={4} display="flex">
                         <Typography
-                          alignItems={"center"}
                           textAlign="left"
                           variant="body2"
-                          fontSize={14}
-                          color={"#757575"}
-                          style={{ fontWeight: 500 }}
+                          fontSize={15}
+                          fontWeight={500}
+                          color={"#76808F"}
+                          display={"flex"}
+                          alignItems={"center"}
                         >
-                          Price:
+                          Crypto price:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
                         <Box
                           display="flex"
                           alignItems={"center"}
+                          justifyContent="space-between"
+                          mt={1}
                           style={{
-                            borderBottom: "1px solid #212121",
-                            width: "fit-content",
+                            border: "1px solid #bdbdbd",
+                            borderRadius: 4,
+                            paddingLeft: 10,
+                            paddingRight: 10,
+                            paddingTop: 5,
+                            paddingBottom: 5,
                           }}
                         >
                           <Input
@@ -665,6 +672,7 @@ function CreateOrder() {
                             placeholder="0"
                             onChange={(e) => setPrice(e.target.value)}
                             disableUnderline={true}
+                            style={{ width: "100%" }}
                           />
                           <Select
                             variant="standard"
@@ -690,23 +698,30 @@ function CreateOrder() {
                     <Grid container mt={2}>
                       <Grid item md={4} display="flex">
                         <Typography
-                          alignItems={"center"}
                           textAlign="left"
                           variant="body2"
                           fontSize={14}
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
+                          display={"flex"}
+                          alignItems={"center"}
                         >
-                          Amount:
+                          Crypto amount:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
                         <Box
                           display="flex"
                           alignItems={"center"}
+                          justifyContent="space-between"
+                          mt={1}
                           style={{
-                            borderBottom: "1px solid #212121",
-                            width: "fit-content",
+                            border: "1px solid #bdbdbd",
+                            borderRadius: 4,
+                            paddingLeft: 10,
+                            paddingRight: 10,
+                            paddingTop: 5,
+                            paddingBottom: 5,
                           }}
                         >
                           <Input
@@ -715,6 +730,7 @@ function CreateOrder() {
                             placeholder="0"
                             onChange={(e) => setTokenAmount(e.target.value)}
                             disableUnderline={true}
+                            style={{ width: "100%" }}
                           />
                           <Select
                             variant="standard"
@@ -740,7 +756,7 @@ function CreateOrder() {
                         </Box>
                       </Grid>
                     </Grid>
-                    <Grid container mt={2}>
+                    <Grid container mt={3}>
                       <Grid item md={4} display="flex">
                         <Typography
                           alignItems={"center"}
@@ -750,7 +766,7 @@ function CreateOrder() {
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
                         >
-                          Total (INR):
+                          Total fiat amount:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -762,23 +778,33 @@ function CreateOrder() {
                             fontWeight: 600,
                           }}
                         >
-                          <div style={{ marginRight: 10, fontWeight: 600 }}>
+                          <Typography
+                            textAlign="left"
+                            variant="body2"
+                            fontSize={18}
+                            style={{ fontWeight: 500 }}
+                            className={classes.otherText}
+                          >
                             {tokenAmount * price}
-                          </div>
+                            <span style={{ fontSize: 14, paddingLeft: 4 }}>
+                              INR
+                            </span>
+                          </Typography>
                         </Box>
                       </Grid>
                     </Grid>
                     <Grid container mt={3}>
                       <Grid item md={4} display="flex">
                         <Typography
-                          alignItems={"center"}
                           textAlign="left"
                           variant="body2"
                           fontSize={14}
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
+                          display={"flex"}
+                          alignItems={"center"}
                         >
-                          Payment:
+                          Payment Methods:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -809,7 +835,23 @@ function CreateOrder() {
                                   border: "1px solid #E1DCFF",
                                 }}
                               >
-                                {value?.payment_mode.toUpperCase()}
+                                <div className="d-flex justify-content-center align-items-center">
+                                  <img
+                                    src="https://cdn0.iconfinder.com/data/icons/elasto-online-store/26/00-ELASTOFONT-STORE-READY_bank-512.png"
+                                    height="15px"
+                                    style={{ marginRight: 5 }}
+                                  />
+                                  <Typography
+                                    alignItems={"center"}
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#313131"}
+                                    style={{ fontWeight: 500 }}
+                                  >
+                                    {value?.payment_mode.toUpperCase()}
+                                  </Typography>
+                                </div>
                               </Box>
                             );
                           })}
@@ -951,51 +993,226 @@ function CreateOrder() {
               >
                 Create Order
               </Typography>
-              <Typography
-                variant="body1"
-                color="textSecondary"
-                className={classes.subtitle}
-              >
-                Create your order and get users in minutes
-              </Typography>
             </Box>
             <div className={classes.infoCard}>
-              <Typography
-                variant="h4"
-                classes={classes.cardTitle}
-                align="center"
-              >
-                Verify details and confirm your order
-              </Typography>
-              <div className="row align-items-center mt-5">
-                <div className="col-md-6">
-                  <Box>
+              <Grid container>
+                <Grid item md={7}>
+                  {" "}
+                  <Box style={{ width: "100%", maxWidth: 300 }}>
+                    <Typography
+                      variant="body2"
+                      color={"#212121"}
+                      fontSize={16}
+                      fontWeight={500}
+                    >
+                      - Review New P2P Order
+                    </Typography>
+                  </Box>
+                  <Box display={"flex"} justifyContent="start" mt={3}>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#04A56D",
+                            color: "white",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          1.
+                        </div>{" "}
+                        <div
+                          style={{
+                            borderTop: "1px dotted #212121",
+                            width: "80%",
+                            height: 1,
+                            marginLeft: 5,
+                            minWidth: 170,
+                          }}
+                        ></div>
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                      >
+                        Set type and price
+                      </Typography>
+                    </Box>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#04A56D",
+                            color: "white",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          2.
+                        </div>{" "}
+                        <div
+                          style={{
+                            borderTop: "1px dotted #212121",
+                            width: "80%",
+                            height: 1,
+                            marginLeft: 5,
+                            minWidth: 180,
+                          }}
+                        ></div>
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                      >
+                        Review your order
+                      </Typography>
+                    </Box>
+                    <Box pr={1}>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 24,
+                            height: 24,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRadius: "50%",
+                            backgroundColor: "#bdbdbd",
+                            color: "black",
+                            fontWeight: 500,
+                            fontSize: 12,
+                          }}
+                        >
+                          3.
+                        </div>{" "}
+                      </div>{" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={14}
+                        fontWeight={500}
+                        mt={1}
+                        color={"#919191"}
+                      >
+                        Submit
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box mt={5}>
                     <Grid container>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <ListOutlined
-                            style={{ marginRight: 12, color: "#616161" }}
-                          />{" "}
-                          Order Type:
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          display="flex"
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Order type:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
                         <Typography
-                          variant="body1"
-                          align="left"
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          color={"#313131"}
                           style={{ fontWeight: 600 }}
                         >
-                          {orderType} Order
+                          {orderType.toUpperCase()}
                         </Typography>
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <AttachMoney
-                            style={{ marginRight: 12, color: "#616161" }}
-                          />{" "}
-                          Price:
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          fontWeight={500}
+                          color={"#76808F"}
+                          display={"flex"}
+                          alignItems={"center"}
+                        >
+                          Crypto price:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          color={"#212121"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          {price}
+                          <span style={{ fontSize: 12, paddingLeft: 5 }}>
+                            {fiat}
+                          </span>
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={2}>
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                          display={"flex"}
+                          alignItems={"center"}
+                        >
+                          Crypto amount:
+                        </Typography>
+                      </Grid>
+                      <Grid item md={7}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          color={"#212121"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          {tokenAmount}
+                          <span style={{ fontSize: 12, paddingLeft: 5 }}>
+                            {token}
+                          </span>
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid container mt={3}>
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          alignItems={"center"}
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Total fiat amount:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -1004,79 +1221,36 @@ function CreateOrder() {
                           alignItems={"center"}
                           style={{
                             width: "fit-content",
+                            fontWeight: 600,
                           }}
                         >
                           <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {price}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                    <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <MoneyOutlined
-                            style={{ marginRight: 12, color: "#616161" }}
-                          />{" "}
-                          Amount:
-                        </Typography>
-                      </Grid>
-                      <Grid item md={7}>
-                        <Box
-                          display="flex"
-                          alignItems={"center"}
-                          style={{
-                            width: "fit-content",
-                          }}
-                        >
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
-                          >
-                            {tokenAmount} {token}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                    <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <CreditCard
-                            style={{ marginRight: 12, color: "#616161" }}
-                          />{" "}
-                          Total (INR):
-                        </Typography>
-                      </Grid>
-                      <Grid item md={7}>
-                        <Box
-                          display="flex"
-                          alignItems={"center"}
-                          style={{
-                            width: "fit-content",
-                          }}
-                        >
-                          <Typography
-                            variant="body1"
-                            align="left"
-                            style={{ fontWeight: 600 }}
+                            textAlign="left"
+                            variant="body2"
+                            fontSize={18}
+                            style={{ fontWeight: 500 }}
+                            className={classes.otherText}
                           >
                             {price * tokenAmount}
+                            <span style={{ fontSize: 13, paddingLeft: 4 }}>
+                              {fiat}
+                            </span>
                           </Typography>
                         </Box>
                       </Grid>
                     </Grid>
-                    <Grid container mt={2}>
-                      <Grid item md={5} display="flex">
-                        <Typography display="flex" alignItems={"center"}>
-                          <AccountBalanceWalletOutlined
-                            style={{ marginRight: 12, color: "#616161" }}
-                          />{" "}
-                          Payment:
+                    <Grid container mt={3}>
+                      <Grid item md={4} display="flex">
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#757575"}
+                          style={{ fontWeight: 500 }}
+                          display={"flex"}
+                          alignItems={"center"}
+                        >
+                          Payment Methods:
                         </Typography>
                       </Grid>
                       <Grid item md={7}>
@@ -1105,7 +1279,23 @@ function CreateOrder() {
                                   border: "1px solid #E1DCFF",
                                 }}
                               >
-                                {value?.payment_mode}
+                                <div className="d-flex justify-content-center align-items-center">
+                                  <img
+                                    src="https://cdn0.iconfinder.com/data/icons/elasto-online-store/26/00-ELASTOFONT-STORE-READY_bank-512.png"
+                                    height="15px"
+                                    style={{ marginRight: 5 }}
+                                  />
+                                  <Typography
+                                    alignItems={"center"}
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#313131"}
+                                    style={{ fontWeight: 500 }}
+                                  >
+                                    {value?.payment_mode.toUpperCase()}
+                                  </Typography>
+                                </div>
                               </Box>
                             );
                           })}
@@ -1113,132 +1303,55 @@ function CreateOrder() {
                       </Grid>
                     </Grid>
                   </Box>
-                </div>
-                <div className="col-md-6">
-                  <Grid container mt={2}>
-                    <Grid item md={5} display="flex">
-                      <Typography display="flex" alignItems={"center"}>
-                        <History
-                          style={{ marginRight: 12, color: "#616161" }}
-                        />{" "}
-                        Activity Time:
-                      </Typography>
-                    </Grid>
-                    <Grid item md={5}>
-                      <Box
-                        display="flex"
-                        alignItems={"center"}
-                        style={{
-                          width: "100%",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          align="left"
-                          style={{ fontWeight: 600 }}
-                        >
-                          4 Hours
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
+                </Grid>
+                <Grid item md={5}>
                   <Box
+                    mt={3}
                     style={{
-                      width: "80%",
-                      marginTop: 30,
+                      width: "100%",
                     }}
                   >
                     <Typography
-                      variant="h5"
-                      align="left"
-                      style={{ marginBottom: 10 }}
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={18}
+                      fontWeight={500}
+                      mb={1}
                     >
-                      Remark:
+                      Remarks
                     </Typography>
                     <Typography
-                      variant="body1"
-                      align="left"
-                      style={{ marginBottom: 10, color: "#616161" }}
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={14}
+                      pt={1}
+                      color={"#778090"}
+                      lineHeight={1.8}
                     >
-                      Please only put this order at the given time otherwise I
-                      might be out and this order stuck.
+                      DO NOT SEND PAYMENTS THROUGH THIRD PARTY ACCOUNTS, all
+                      such payments will have to go to dispute and will be
+                      refunded/cancelled. Please do not include crypto related
+                      words such as P2P, Binance, USDT, ETH, BTC, etc. Send INR
+                      through registered bank account only.
                     </Typography>
                   </Box>
-                </div>
-              </div>
-              <div className="text-center mt-4">
-                {orderStatus.status === CreateStatus.PENDING &&
-                  orderType === "sell" && (
-                    <Button
-                      onClick={submitOrder}
-                      style={{
-                        borderRadius: 10,
-                        background: "#6A55EA",
-                        padding: "9px 35px 9px 35px",
-                        color: "white",
-                      }}
-                    >
-                      Create sell order
-                    </Button>
-                  )}
+                </Grid>
+              </Grid>
 
-                {orderStatus.status === CreateStatus.SUBMITTED &&
-                  !isPendingTrx &&
-                  orderType === "sell" && (
-                    <Button
-                      onClick={handleDeposit}
-                      style={{
-                        borderRadius: 10,
-                        background: "#6A55EA",
-                        padding: "9px 35px 9px 35px",
-                        color: "white",
-                      }}
-                    >
-                      {!allowance ? "Approve tokens" : "Deposit tokens"}
-                    </Button>
-                  )}
-                {isPendingTrx && (
-                  <Button
-                    disabled={isPendingTrx}
-                    style={{
-                      borderRadius: 10,
-                      background: "#6A55EA",
-                      padding: "9px 35px 9px 35px",
-                      color: "white",
-                    }}
-                  >
-                    Pending transaction...
-                  </Button>
-                )}
-
-                {/* {depositTrxStatus.status === "verified" &&
-                  orderType === "sell" && (
-                    <Button
-                      onClick={handleConfirm}
-                      style={{
-                        borderRadius: 10,
-                        background: "#6A55EA",
-                        padding: "9px 35px 9px 35px",
-                        color: "white",
-                      }}
-                    >
-                      Confirm place sell order
-                    </Button>
-                  )} */}
-                {orderType === "buy" && (
-                  <Button
-                    onClick={submitOrder}
-                    style={{
-                      borderRadius: 10,
-                      background: "#6A55EA",
-                      padding: "9px 35px 9px 35px",
-                      color: "white",
-                    }}
-                  >
-                    Confirm place buy order
-                  </Button>
-                )}
+              <div className="text-center mt-4 mb-2">
+                <Button
+                  onClick={reviewOrderFn}
+                  style={{
+                    borderRadius: 10,
+                    background: "#6A55EA",
+                    padding: "9px 35px 9px 35px",
+                    color: "white",
+                  }}
+                >
+                  Submit Order
+                </Button>
               </div>
+              <div style={{ color: "red", textAlign: "center" }}>{error}</div>
             </div>
             <HowItWorks />
           </Box>
