@@ -15,7 +15,8 @@ code {
     monospace;
 }
 thead {
-  height: 30px;
+  height: 40px;
+  border-bottom: 1px solid #e5e5e5;
 }
 td {
   padding-top: 12px;

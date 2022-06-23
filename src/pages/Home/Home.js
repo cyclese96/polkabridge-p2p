@@ -20,17 +20,19 @@ import Pusher from "pusher-js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
-    backgroundImage: 'url("images/network.png"), url(images/tokens.png)',
+    backgroundImage: `url("images/tokens.png"), linear-gradient(180deg, #ffffff 0%, #d9e8fc 100%)`,
+    // backgroundImage: 'url("images/network.png"), url(images/tokens.png)',
+    // backgroundImage: " url(images/tokens.png)",
     backgroundPosition: "center center,center center",
     backgroundRepeat: "no-repeat,no-repeat",
-    backgroundSize: "cover,contain",
-    height: "100%",
+    backgroundSize: "contain",
+    height: "100vh",
     width: "100%",
     paddingTop: "5%",
   },
   mainHeading: {
     fontWeight: 600,
-    fontSize: 48,
+    fontSize: 28,
     letterSpacing: "0.02em",
     color: "#212121",
     textAlign: "center",
@@ -149,17 +151,27 @@ export default function Home() {
   }, [orderType]);
 
   return (
-    <Box>
-      <Box className={classes.background}>
-        {/* <h1 variant="h1" className={classes.mainHeading}>
-          Trade Tokens <br />
-          With Decentralized P2P
-        </h1> */}
-        <Typography variant="body2" className={classes.para}>
+    <Box className={classes.background}>
+      <Box>
+        <Typography
+          variant="body2"
+          fontSize={24}
+          textAlign="center"
+          fontWeight={600}
+          color={"#414141"}
+        >
+          Decentalized P2P Exchange
+        </Typography>
+        <Typography
+          variant="body2"
+          fontSize={14}
+          textAlign="center"
+          fontWeight={400}
+          color={"#757575"}
+        >
           Experience first decentralized P2P trading with PolkaBridge
         </Typography>
-
-        <Container style={{ marginTop: 10 }}>
+        <Container style={{ marginTop: 40 }}>
           <Box className={classes.buttonWrapper}>
             <Box
               className={classes.buttonFirst}
@@ -284,7 +296,7 @@ export default function Home() {
                       color: "white",
                     }}
                   >
-                    Find Orders
+                    Filter Orders
                   </Button>
                 </Box>
               </Box>
