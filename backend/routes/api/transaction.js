@@ -119,6 +119,7 @@ router.post(
         token_amount: tokenAmountToBuy,
         fiat_amount: fiatAmoount,
         transaction_status: 1,
+        transaction_type: "buy",
       };
 
       // console.log("order", order);
@@ -249,6 +250,7 @@ router.post(
         token_amount: tokenAmountToSell,
         fiat_amount: fiatAmountForSellOrder,
         transaction_status: 0,
+        transaction_type: "sell",
       };
 
       const orderTrx = await new Transaction(orderTransactionObject).save();
@@ -294,7 +296,7 @@ router.get("/order-transactions", auth, async (req, res) => {
     const itemsToSkip = (page - 1) * 10;
 
     const query = {};
-    const transaction_status = req.query.params?.transaction_status;
+    const transaction_status = req.query?.trx_status;
 
     if (transaction_status === "pending") {
       query.transaction_status = { $gte: 0, $lte: 2 };
@@ -305,23 +307,35 @@ router.get("/order-transactions", auth, async (req, res) => {
     } else if (transaction_status === "resolving") {
       // issue raised
       query.transaction_status = 4;
-    }
-
-    // user filter
-    if (req.query.params?.order_type === "buy") {
-      query.buyer = userId;
     } else {
-      query.seller = userId;
+      query.transaction_status = { $gte: 0, $lte: 7 };
     }
 
-    console.log("final query ", query);
-    console.log("user", userId);
-    const transactions = await Transaction.find(query)
+    const finalQuery = {
+      $or: [
+        {
+          ...query,
+          buyer: mongoose.Types.ObjectId(userId),
+        },
+        {
+          ...query,
+          seller: mongoose.Types.ObjectId(userId),
+        },
+      ],
+    };
+
+    console.log("final query ", finalQuery);
+
+    const transactions = await Transaction.find(finalQuery)
       .populate("buyer")
       .populate("seller")
-      .populate("order")
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      })
       .limit(itemsToShow)
-      .skip(itemsToSkip);
+      .skip(itemsToSkip)
+      .sort({ created_at: -1 });
 
     return res.status(200).json(transactions);
   } catch (error) {
@@ -332,6 +346,12 @@ router.get("/order-transactions", auth, async (req, res) => {
 
 router.get("/order-transaction/:trx_id", auth, async (req, res) => {
   try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const transactionId = req.params.trx_id;
 
     if (!mongoose.isValidObjectId(transactionId)) {
@@ -352,6 +372,60 @@ router.get("/order-transaction/:trx_id", auth, async (req, res) => {
       .populate("order");
 
     return res.status(200).json(finalTrx);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.user.id;
+    const orderId = req.params.order_id;
+
+    if (!mongoose.isValidObjectId(orderId)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid transaction id" }] });
+    }
+
+    // fetch pending transactions
+
+    const pendingOrderQuery = {
+      $or: [
+        {
+          transaction_status: { $gte: 0, $lte: 2 },
+          buyer: mongoose.Types.ObjectId(userId),
+        },
+        {
+          transaction_status: { $gte: 0, $lte: 2 },
+          seller: mongoose.Types.ObjectId(userId),
+        },
+      ],
+    };
+
+    console.log("pending query ", pendingOrderQuery);
+    const transaction = await Transaction.findOne(pendingOrderQuery)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
+
+    if (!transaction) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Order transaction not found" }] });
+    }
+
+    return res.status(200).json(transaction);
   } catch (error) {
     console.log(error);
     res.status(401).json({ errors: [{ msg: "Server error" }] });
