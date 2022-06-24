@@ -1,8 +1,9 @@
 import React from "react";
 import { makeStyles } from "@mui/styles";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { formattedAddress, fromWei } from "../../../utils/helper";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -82,49 +83,175 @@ export default function OrderTable({ orders }) {
         <Box className={classes.tableCard}>
           <table className={classes.table}>
             <thead>
-              <th className={classes.tableHeading}>Seller</th>
-              <th className={classes.tableHeading}>Order Amount</th>
-              <th className={classes.tableHeading}>Price</th>
-              <th className={classes.tableHeading}>Payment Mode</th>
-              <th className={classes.tableHeading}>Date</th>
-              <th className={classes.tableHeading}>Action</th>
+              <th style={{ width: "20%" }}>
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  pl={1}
+                  style={{ fontWeight: 500 }}
+                >
+                  Advertisers
+                </Typography>
+              </th>
+              <th style={{ width: "20%" }}>
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  style={{ fontWeight: 500 }}
+                >
+                  Price
+                </Typography>
+              </th>
+              <th style={{ width: "20%" }}>
+                {" "}
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  style={{ fontWeight: 500 }}
+                >
+                  Crypto Amount
+                </Typography>
+              </th>
+              <th style={{ width: "15%" }}>
+                {" "}
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  style={{ fontWeight: 500 }}
+                >
+                  Total Fiat Amount
+                </Typography>
+              </th>
+              <th style={{ width: "15%" }}>
+                {" "}
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  style={{ fontWeight: 500 }}
+                >
+                  Payment
+                </Typography>
+              </th>
+
+              <th>
+                {" "}
+                <Typography
+                  textAlign="left"
+                  variant="body2"
+                  color={"#616161"}
+                  fontSize={12}
+                  style={{ fontWeight: 500 }}
+                >
+                  Trade
+                </Typography>
+              </th>
             </thead>
             {orders?.map((order, index) => {
               return (
                 <>
                   {
-                    <tr className={classes.trHighlight}>
+                    <tr
+                      className={
+                        index % 2 === 0 ? classes.trHighlight : classes.tr
+                      }
+                    >
                       <td
                         className={classes.userText}
                         style={{ paddingLeft: 10 }}
                       >
-                        {order?.user?.name ||
-                          formattedAddress(order?.user?.wallet_address)}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          style={{ fontWeight: 500 }}
+                          className={classes.userText}
+                        >
+                          {order?.user?.name ||
+                            formattedAddress(order?.user?.wallet_address)}
+                        </Typography>
                       </td>
-                      <td className={classes.otherText}>
-                        {fromWei(
-                          order?.pending_amount,
-                          order?.token?.decimals
-                        ) +
-                          " " +
-                          order?.token?.symbol}
+                      <td>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {order?.order_unit_price}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {order?.fiat?.fiat}
+                          </span>
+                        </Typography>
                       </td>
-                      <td className={classes.otherText}>
-                        {order?.order_unit_price + " " + order?.fiat?.fiat}
+                      <td>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#212121"}
+                          style={{ fontWeight: 500 }}
+                        >
+                          {fromWei(
+                            order?.pending_amount,
+                            order?.token?.decimals
+                          )}
+                          <span style={{ paddingLeft: 5 }}>
+                            {order?.token?.symbol}
+                          </span>
+                        </Typography>
                       </td>
-
+                      <td>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          color={"#212121"}
+                          style={{ fontWeight: 500, paddingTop: 7 }}
+                        >
+                          {order?.order_unit_price *
+                            fromWei(
+                              order?.pending_amount,
+                              order?.token?.decimals
+                            )}
+                          <span style={{ paddingLeft: 5 }}>
+                            {order?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </td>
                       <td className={classes.otherText}>
                         {" "}
                         {order?.payment_options?.join(", ").toUpperCase()}
                       </td>
-                      <td className={classes.otherText}>07, May 2022</td>
+                      <td className={classes.otherText}>
+                        {moment(order?.created_at).format("hh:mm A MM-DD-YYYY")}
+                      </td>
                       <td className={classes.otherText}>
                         {order?.order_type === "sell" ? (
                           <Link
                             to={`/order/${order?._id}?tradeType=buy`}
                             style={{ textDecoration: "none" }}
                           >
-                            <Button className={classes.buttonAction}>
+                            <Button
+                              style={{
+                                backgroundColor: "white",
+                                border: `1px solid #6A55EA`,
+                                borderRadius: 14,
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                fontSize: 12,
+                              }}
+                            >
                               BUY {order?.token?.symbol}
                             </Button>
                           </Link>
@@ -133,7 +260,16 @@ export default function OrderTable({ orders }) {
                             to={`/order/${order._id}?tradeType=sell`}
                             style={{ textDecoration: "none" }}
                           >
-                            <Button className={classes.buttonAction}>
+                            <Button
+                              style={{
+                                backgroundColor: "white",
+                                border: `1px solid #6A55EA`,
+                                borderRadius: 14,
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                fontSize: 12,
+                              }}
+                            >
                               SELL {order?.token?.symbol}
                             </Button>
                           </Link>
@@ -141,49 +277,6 @@ export default function OrderTable({ orders }) {
                       </td>
                     </tr>
                   }
-                  {/* <tr className={classes.tr}>
-                      <td
-                        className={classes.userText}
-                        style={{ paddingLeft: 10 }}
-                      >
-                        
-                      </td>
-                      <td className={classes.otherText}>
-                        {order?.order_unit_price}
-                      </td>
-                      <td className={classes.otherText}>
-                        {order?.type === "sell"
-                          ? fromWei(order?.amount)
-                          : order?.order_amount}
-                      </td>
-
-                      <td className={classes.otherText}>
-                        {" "}
-                        {order?.payment_options?.join(", ").toUpperCase()}
-                      </td>
-                      <td className={classes.otherText}>04, May 2022</td>
-                      <td className={classes.otherText}>
-                        {order?.order_type === "buy" ? (
-                          <Link
-                            to={`/order/${order._id}`}
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Button className={classes.buttonAction}>
-                              SELL
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Link
-                            to={`/order/${order?._id}`}
-                            style={{ textDecoration: "none" }}
-                          >
-                            <Button className={classes.buttonAction}>
-                              BUY
-                            </Button>
-                          </Link>
-                        )}
-                      </td>
-                    </tr> */}
                 </>
               );
             })}

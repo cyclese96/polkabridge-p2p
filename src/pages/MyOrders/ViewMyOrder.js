@@ -178,21 +178,55 @@ function ViewMyOrder() {
     <Box className={classes.background}>
       <Container>
         <Box>
-          <Box>
-            <Typography
-              variant="h3"
-              color="textSecondary"
-              className={classes.title}
-            >
-              Order Details
-            </Typography>
-            <Typography
-              variant="body1"
-              color="textSecondary"
-              className={classes.subtitle}
-            >
-              You have successfully executed this order
-            </Typography>
+          <Box display={"flex"} justifyContent="space-between">
+            <Box>
+              <Typography
+                variant="h3"
+                color="textSecondary"
+                className={classes.title}
+              >
+                Order Details
+              </Typography>
+            </Box>
+            <Box>
+              <Typography
+                textAlign="left"
+                variant="body2"
+                fontSize={13}
+                color={"#778090"}
+              >
+                Order Number:
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#212121",
+                    paddingLeft: 5,
+                  }}
+                >
+                  27832332
+                </span>
+              </Typography>
+              <Typography
+                textAlign="left"
+                variant="body2"
+                fontSize={13}
+                color={"#778090"}
+                mt={1}
+              >
+                Time created:
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#212121",
+                    paddingLeft: 5,
+                  }}
+                >
+                  21 June 2022 11:30PM
+                </span>
+              </Typography>
+            </Box>
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
@@ -214,55 +248,141 @@ function ViewMyOrder() {
 
             <div className="d-flex justify-content-center">
               <div
-                className="row justify-content-evenly mt-1"
+                className="row justify-content-start mt-1"
                 style={{ maxWidth: 800, width: "100%" }}
               >
-                <div className="col-md-3 mt-3">
-                  <Typography display="flex" alignItems={"center"}>
-                    Order Amount:
+                <div className="col-md-4 mt-3">
+                  <Box>
+                    <Typography
+                      display="flex"
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={13}
+                      color={"#757575"}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Total Fiat Amount
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      align="left"
+                      fontSize={22}
+                      style={{ fontWeight: 600 }}
+                      color={"#212121"}
+                    >
+                      33,434
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                    </Typography>
+                  </Box>
+                </div>
+
+                <div className="col-md-4 mt-3">
+                  <Typography
+                    display="flex"
+                    textAlign="left"
+                    variant="body2"
+                    fontSize={13}
+                    color={"#757575"}
+                    style={{ fontWeight: 500 }}
+                  >
+                    Crypto price
                   </Typography>
                   <Typography
                     variant="body1"
                     align="left"
+                    fontSize={20}
                     style={{ fontWeight: 600 }}
+                    color={"#212121"}
                   >
-                    2132
+                    21
+                    <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
                   </Typography>
                 </div>
-                <div className="col-md-3 mt-3">
-                  <Typography display="flex" alignItems={"center"}>
-                    Offer Price:
+                <div className="col-md-4 mt-3">
+                  <Box>
+                    <Typography
+                      display="flex"
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={13}
+                      color={"#757575"}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Crypto Amount
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      align="left"
+                      fontSize={20}
+                      style={{ fontWeight: 600 }}
+                      color={"#212121"}
+                    >
+                      210
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                    </Typography>
+                  </Box>
+                </div>
+                <div className="col-md-4 mt-4">
+                  <Typography
+                    display="flex"
+                    textAlign="left"
+                    variant="body2"
+                    fontSize={13}
+                    color={"#757575"}
+                    style={{ fontWeight: 500 }}
+                  >
+                    Trade between
                   </Typography>
                   <Typography
                     variant="body1"
                     align="left"
+                    fontSize={20}
                     style={{ fontWeight: 600 }}
+                    color={"#212121"}
                   >
-                    1.56 INR
+                    PBR - INR
                   </Typography>
                 </div>
-                <div className="col-md-3 mt-3">
-                  <Typography display="flex" alignItems={"center"}>
-                    Fiat Amount:
+                <div className="col-md-4 mt-4">
+                  <Typography
+                    display="flex"
+                    textAlign="left"
+                    variant="body2"
+                    fontSize={13}
+                    color={"#757575"}
+                    style={{ fontWeight: 500 }}
+                  >
+                    Payment
                   </Typography>
                   <Typography
                     variant="body1"
                     align="left"
+                    fontSize={20}
                     style={{ fontWeight: 600 }}
+                    color={"#212121"}
                   >
-                    50,000
+                    IMPS, UPI
                   </Typography>
                 </div>
-                <div className="col-md-3 mt-3">
-                  <Typography display="flex" alignItems={"center"}>
-                    Payment Type:
+                <div className="col-md-4 mt-4">
+                  <Typography
+                    display="flex"
+                    textAlign="left"
+                    variant="body2"
+                    fontSize={13}
+                    color={"#757575"}
+                    style={{ fontWeight: 500 }}
+                  >
+                    Status
                   </Typography>
                   <Typography
                     variant="body1"
                     align="left"
+                    fontSize={20}
                     style={{ fontWeight: 600 }}
+                    color={"#212121"}
                   >
-                    UPI
+                    Completed
                   </Typography>
                 </div>
               </div>

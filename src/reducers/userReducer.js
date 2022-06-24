@@ -3,7 +3,7 @@ import { LOAD_USER } from "../actions/types";
 const initalState = {
   jwtToken: null,
   account: null,
-  userId: null,
+  id: null,
 };
 
 export default function (state = initalState, action) {
@@ -11,8 +11,9 @@ export default function (state = initalState, action) {
   switch (action.type) {
     case LOAD_USER:
       return {
-        ...state,
-        ...action.payload,
+        jwtToken: action?.payload?.jwtToken,
+        account: action?.payload?.account,
+        id: action?.payload?.id,
       };
     default:
       return state;
