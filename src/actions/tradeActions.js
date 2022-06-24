@@ -1,6 +1,7 @@
 import {
   createTrade,
   fetchUserTradeById,
+  fetchUserTradeByOrderId,
   fetchUserTrades,
 } from "../utils/httpCalls/orderTradeCalls";
 import {
@@ -17,7 +18,7 @@ export const startOrderTrade =
     const requestBody = {
       order_id: tradeInput?.orderId,
       token_amount: tradeInput?.tokenAmount,
-      fiat_amount: tradeInput?.fiatAmoount,
+      fiat_amount: tradeInput?.fiatAmount,
     };
 
     const result = await createTrade(tradeType, requestBody, authToken);
@@ -81,3 +82,23 @@ export const getUserTradeById = (authToken, tradeId) => async (dispatch) => {
     payload: result.data,
   });
 };
+
+export const getUserTradeByOrderId =
+  (authToken, orderId) => async (dispatch) => {
+    dispatch({ type: FETCH_TRADE_LOADING, payload: true });
+
+    const result = await fetchUserTradeByOrderId(orderId, authToken);
+
+    dispatch({ type: FETCH_TRADE_LOADING, payload: false });
+    if (result?.status !== 200) {
+      dispatch({
+        type: TRADE_ERROR,
+        payload: result.message,
+      });
+      return;
+    }
+    dispatch({
+      type: GET_TRADE,
+      payload: result.data,
+    });
+  };

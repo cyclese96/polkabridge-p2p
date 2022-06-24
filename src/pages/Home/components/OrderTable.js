@@ -3,6 +3,7 @@ import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { formattedAddress, fromWei } from "../../../utils/helper";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -232,8 +233,10 @@ export default function OrderTable({ orders }) {
                         {" "}
                         {order?.payment_options?.join(", ").toUpperCase()}
                       </td>
-
-                      <td>
+                      <td className={classes.otherText}>
+                        {moment(order?.created_at).format("hh:mm A MM-DD-YYYY")}
+                      </td>
+                      <td className={classes.otherText}>
                         {order?.order_type === "sell" ? (
                           <Link
                             to={`/order/${order?._id}?tradeType=buy`}

@@ -1,22 +1,17 @@
 import {
   Box,
-  Button,
+  CircularProgress,
   Container,
   Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
   Typography,
-  useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link, useParams } from "react-router-dom";
-import HowItWorks from "../../../common/HowItWorks";
-import { getOrderDetailsById } from "../../../actions/orderActions";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fromWei } from "../../../utils/helper";
+import { getUserTradeByOrderId } from "../../../actions/tradeActions";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -174,47 +169,62 @@ const useStyles = makeStyles((theme) => ({
 
 function OrderWaiting() {
   const classes = useStyles();
-  const store = useSelector((state) => state);
-
-  const theme = useTheme();
+  const navigate = useNavigate();
   const { order_id } = useParams();
   const dispatch = useDispatch();
 
-  const { order } = store.order;
+  const createLoading = useSelector(
+    (state) => state?.userTrade?.createTradeLoading
+  );
+  const fetchLoading = useSelector(
+    (state) => state?.userTrade?.fetchTradeLoading
+  );
+  const authenticatedUser = useSelector((state) => state?.user);
 
-  //States
-  const [amount, setAmount] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [token, setToken] = useState("BTC");
-  const [payment, setPayment] = useState("Google Pay");
+  const order = useSelector((state) => state?.order?.order);
+  const pendingTrade = useSelector((state) => state?.userTrade?.trade); // current order trade
 
+  // load current order transaction with orderId and userId
+  // if userId is buyer: load buy order waiting page
+  // if userId is seller: load sell order waiting page
   useEffect(() => {
     async function asyncFn() {
-      if (order_id) {
-        console.log(order_id);
-        await dispatch(getOrderDetailsById(order_id));
+      if (order_id && !order?._id && authenticatedUser?.jwtToken) {
+        dispatch(getUserTradeByOrderId(authenticatedUser?.jwtToken, order_id));
       }
     }
     asyncFn();
-  }, [order_id]);
+  }, [order_id, order, authenticatedUser]);
 
-  useEffect(() => {
-    console.log("order by id fetched", { order_id, order });
-  }, [order]);
+  const tradeType = useMemo(() => {
+    if (
+      authenticatedUser?.id?.toString() === pendingTrade?.buyer?._id?.toString()
+    ) {
+      return "buy";
+    } else {
+      return "sell";
+    }
+  }, [pendingTrade, authenticatedUser]);
 
-  const handleAmountChange = (value, price) => {
-    setAmount(value);
+  // selected payment option index
+  const [selectedPaymentModeIndex, setSelectedMode] = useState(0);
+  const sellerPaymentOptions = useMemo(() => {
+    // if (!pendingTrade?._id) {
+    //   return [];
+    // }
+    return pendingTrade?.seller?.payment_options;
+  }, [pendingTrade]);
 
-    let totalAmount = parseInt(price) * value;
-    setTotal(totalAmount);
-  };
+  const selectedPaymentOption = useMemo(() => {
+    if (!sellerPaymentOptions) {
+      return {};
+    }
+    if (sellerPaymentOptions?.length === 0) {
+      return {};
+    }
 
-  const handleTotalChange = (value, price) => {
-    setTotal(value);
-
-    let orderAmount = parseInt(price) / value;
-    setAmount(orderAmount);
-  };
+    return sellerPaymentOptions?.[selectedPaymentModeIndex];
+  }, [sellerPaymentOptions, selectedPaymentModeIndex]);
 
   return (
     <Box className={classes.background}>
@@ -222,9 +232,10 @@ function OrderWaiting() {
         <Box>
           <Box>
             <h4 variant="h4" color="textSecondary" className={classes.title}>
-              Order Processing
+              {tradeType?.toUpperCase()} Order Processing
             </h4>
           </Box>
+
           <Box display={"flex"} justifyContent="space-between">
             <Box display={"flex"} justifyContent="start" mt={1}>
               <Box pr={1}>
@@ -243,7 +254,11 @@ function OrderWaiting() {
                       fontSize: 12,
                     }}
                   >
-                    1.
+                    {createLoading || fetchLoading ? (
+                      <CircularProgress size="1rem" />
+                    ) : (
+                      1
+                    )}
                   </div>{" "}
                   <div
                     style={{
@@ -262,7 +277,11 @@ function OrderWaiting() {
                   fontWeight={500}
                   mt={1}
                 >
-                  Transfer Payment to seller
+                  {createLoading
+                    ? "Creating order..."
+                    : fetchLoading
+                    ? "Fetching order..."
+                    : "Transfer Payment to seller"}
                 </Typography>
               </Box>
               <Box pr={1}>
@@ -359,7 +378,7 @@ function OrderWaiting() {
                     paddingLeft: 5,
                   }}
                 >
-                  27832332
+                  {pendingTrade?.order?.order_id}
                 </span>
               </Typography>
               <Typography
@@ -378,212 +397,90 @@ function OrderWaiting() {
                     paddingLeft: 5,
                   }}
                 >
-                  21 June 2022 11:30PM
+                  {moment(pendingTrade?.created_at).format(
+                    "hh:mm A MM-DD-YYYY"
+                  )}
                 </span>
               </Typography>
             </Box>
           </Box>
-          <div className={classes.infoCard}>
-            <Typography
-              variant="body2"
-              color={"#212121"}
-              fontSize={16}
-              fontWeight={500}
-            >
-              Buy PBR with USDT
-            </Typography>
 
-            <Grid container>
-              <Grid item md={8}>
-                <Box mt={1}>
-                  <Box>
-                    <div className="d-flex align-items-center">
-                      <div
-                        style={{
-                          width: 8,
-                          height: 8,
+          {!(createLoading || fetchLoading) && tradeType === "buy" && (
+            <div className={classes.infoCard}>
+              <Typography
+                variant="body2"
+                color={"#212121"}
+                fontSize={16}
+                fontWeight={500}
+              >
+                Buy {pendingTrade?.order?.token?.symbol} with{" "}
+                {pendingTrade?.order?.fiat?.fiat}
+              </Typography>
 
-                          borderRadius: "50%",
-                          backgroundColor: "#c8e6c9",
-                          color: "white",
-                          border: "3px solid #04A56D",
-                          padding: 3,
-                        }}
-                      ></div>{" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={16}
-                        fontWeight={600}
-                        pl={1}
-                      >
-                        Confirm Order Info
-                      </Typography>
-                    </div>{" "}
-                    <div className="d-flex justify-content-start">
-                      <div
-                        style={{
-                          borderLeft: "1px dotted #212121",
-                          width: 1,
-                          minHeight: 120,
-                          height: "100%",
-                          marginLeft: 5,
-                          width: 20,
-                        }}
-                      ></div>
-                      <div className="row w-100" style={{ maxWidth: 600 }}>
-                        <div className="col-md-4">
-                          <Box mt={2}>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={14}
-                              fontWeight={500}
-                              color={"#778090"}
-                            >
-                              Amount
-                            </Typography>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={18}
-                              color={"#04A56D"}
-                              fontWeight={600}
-                              letterSpacing={1.1}
-                            >
-                              $120
-                            </Typography>
-                          </Box>
-                        </div>
-                        <div className="col-md-4">
-                          <Box mt={2}>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={14}
-                              fontWeight={500}
-                              color={"#778090"}
-                            >
-                              Price
-                            </Typography>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={18}
-                              color={"#212121"}
-                              fontWeight={600}
-                              letterSpacing={1.1}
-                            >
-                              82.67
-                            </Typography>
-                          </Box>
-                        </div>
-                        <div className="col-md-4">
-                          <Box mt={2}>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={14}
-                              fontWeight={500}
-                              color={"#778090"}
-                            >
-                              Quantity
-                            </Typography>
-                            <Typography
-                              textAlign="left"
-                              variant="body2"
-                              fontSize={18}
-                              color={"#212121"}
-                              fontWeight={600}
-                              letterSpacing={1.1}
-                            >
-                              548 USDT
-                            </Typography>
-                          </Box>
-                        </div>
-                      </div>
-                    </div>
-                  </Box>
-                  <Box>
-                    <div className="d-flex align-items-center">
-                      <div
-                        style={{
-                          width: 8,
-                          height: 8,
+              <Grid container>
+                <Grid item md={8}>
+                  <Box mt={1}>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
 
-                          borderRadius: "50%",
-                          backgroundColor: "#f9f9f9",
-                          color: "white",
-                          border: "3px solid #bdbdbd",
-                          padding: 3,
-                        }}
-                      ></div>{" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={16}
-                        fontWeight={600}
-                        pl={1}
-                      >
-                        Transfer the funds to seller account provided below:
-                      </Typography>
-                    </div>{" "}
-                    <div className="d-flex justify-content-start h-100">
-                      <div
-                        style={{
-                          borderLeft: "1px dotted #212121",
-                          width: 1,
-                          height: "100%",
-                          minHeight: 340,
-                          marginLeft: 5,
-                          width: 20,
-                        }}
-                      ></div>
-                      <div className={classes.paymentCard}>
+                            borderRadius: "50%",
+                            backgroundColor: "#c8e6c9",
+                            color: "white",
+                            border: "3px solid #04A56D",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Confirm Order Info
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            minHeight: 120,
+                            height: "100%",
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
                         <div className="row w-100" style={{ maxWidth: 600 }}>
                           <div className="col-md-4">
-                            <Box my={1} style={{ backgroundColor: "#eeeeee" }}>
+                            <Box mt={2}>
                               <Typography
                                 textAlign="left"
                                 variant="body2"
-                                fontSize={15}
-                                color={"#212121"}
-                                fontWeight={600}
-                                pl={2}
-                                p={1}
-                                style={{ borderLeft: "3px solid #6A55EA" }}
+                                fontSize={14}
+                                fontWeight={500}
+                                color={"#778090"}
                               >
-                                IMPS
+                                Amount
                               </Typography>
-                            </Box>
-                            <Box my={1} style={{ backgroundColor: "#f9f9f9" }}>
                               <Typography
                                 textAlign="left"
                                 variant="body2"
-                                fontSize={15}
-                                color={"#212121"}
+                                fontSize={18}
+                                color={"#04A56D"}
                                 fontWeight={600}
-                                pl={2}
-                                p={1}
+                                letterSpacing={1.1}
                               >
-                                Paytm
-                              </Typography>
-                            </Box>
-                            <Box my={1} style={{ backgroundColor: "#f9f9f9" }}>
-                              <Typography
-                                textAlign="left"
-                                variant="body2"
-                                fontSize={15}
-                                color={"#212121"}
-                                fontWeight={600}
-                                pl={2}
-                                p={1}
-                              >
-                                UPI
+                                {pendingTrade?.fiat_amount}{" "}
+                                {pendingTrade?.order?.fiat?.fiat}
                               </Typography>
                             </Box>
                           </div>
-                          <div className="col-md-8">
+                          <div className="col-md-4">
                             <Box mt={2}>
                               <Typography
                                 textAlign="left"
@@ -592,19 +489,22 @@ function OrderWaiting() {
                                 fontWeight={500}
                                 color={"#778090"}
                               >
-                                Name
+                                Price
                               </Typography>
                               <Typography
                                 textAlign="left"
                                 variant="body2"
-                                fontSize={14}
-                                color={"#414141"}
+                                fontSize={18}
+                                color={"#212121"}
                                 fontWeight={600}
-                                style={{ paddingTop: 1 }}
+                                letterSpacing={1.1}
                               >
-                                Tahir Ahmad
+                                {pendingTrade?.order?.order_unit_price}{" "}
+                                {pendingTrade?.order?.fiat?.fiat}
                               </Typography>
                             </Box>
+                          </div>
+                          <div className="col-md-4">
                             <Box mt={2}>
                               <Typography
                                 textAlign="left"
@@ -613,169 +513,347 @@ function OrderWaiting() {
                                 fontWeight={500}
                                 color={"#778090"}
                               >
-                                Bank Account Number:
+                                Quantity
                               </Typography>
                               <Typography
                                 textAlign="left"
                                 variant="body2"
-                                fontSize={14}
-                                color={"#414141"}
+                                fontSize={18}
+                                color={"#212121"}
                                 fontWeight={600}
-                                style={{ paddingTop: 1 }}
+                                letterSpacing={1.1}
                               >
-                                342382674638
-                              </Typography>
-                            </Box>
-                            <Box mt={2}>
-                              <Typography
-                                textAlign="left"
-                                variant="body2"
-                                fontSize={14}
-                                fontWeight={500}
-                                color={"#778090"}
-                              >
-                                IFSC Code:
-                              </Typography>
-                              <Typography
-                                textAlign="left"
-                                variant="body2"
-                                fontSize={14}
-                                color={"#414141"}
-                                fontWeight={600}
-                                style={{ paddingTop: 1 }}
-                              >
-                                SBIN0003570
-                              </Typography>
-                            </Box>
-                            <Box mt={2}>
-                              <Typography
-                                textAlign="left"
-                                variant="body2"
-                                fontSize={14}
-                                fontWeight={500}
-                                color={"#778090"}
-                              >
-                                Bank Name:
-                              </Typography>
-                              <Typography
-                                textAlign="left"
-                                variant="body2"
-                                fontSize={14}
-                                color={"#414141"}
-                                fontWeight={600}
-                                style={{ paddingTop: 1 }}
-                              >
-                                SBI India
+                                {fromWei(
+                                  pendingTrade?.token_amount,
+                                  pendingTrade?.order?.token?.decimals
+                                )}{" "}
+                                {pendingTrade?.order?.token?.symbol}
                               </Typography>
                             </Box>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Box>
-                  <Box>
-                    <div className="d-flex align-items-center">
+                    </Box>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#f9f9f9",
+                            color: "white",
+                            border: "3px solid #bdbdbd",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Transfer the funds to seller account provided below:
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start h-100">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            height: "100%",
+                            minHeight: 340,
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
+                        <div className={classes.paymentCard}>
+                          <div className="row w-100" style={{ maxWidth: 600 }}>
+                            <div className="col-md-4">
+                              {pendingTrade?.seller?.payment_options?.map(
+                                (paymentOption, index) => (
+                                  <Box
+                                    my={1}
+                                    style={{
+                                      backgroundColor:
+                                        selectedPaymentOption?.payment_mode ===
+                                        paymentOption?.payment_mode
+                                          ? "#eeeeee"
+                                          : "#f9f9f9",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={() => setSelectedMode(index)}
+                                  >
+                                    <Typography
+                                      textAlign="left"
+                                      variant="body2"
+                                      fontSize={15}
+                                      color={"#212121"}
+                                      fontWeight={600}
+                                      pl={2}
+                                      p={1}
+                                      style={{
+                                        borderLeft:
+                                          selectedPaymentOption?.payment_mode ===
+                                          paymentOption?.payment_mode
+                                            ? "3px solid #6A55EA"
+                                            : "none",
+                                      }}
+                                    >
+                                      {paymentOption?.payment_mode}
+                                    </Typography>
+                                  </Box>
+                                )
+                              )}
+                            </div>
+                            {selectedPaymentOption?.payment_mode === "imps" && (
+                              <div className="col-md-8">
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    Name
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.ac_holder_name}
+                                  </Typography>
+                                </Box>
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    Bank Account Number:
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.account_number}
+                                  </Typography>
+                                </Box>
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    IFSC Code:
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.ifsc_code}
+                                  </Typography>
+                                </Box>
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    Bank Name:
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.bank_name}
+                                  </Typography>
+                                </Box>
+                              </div>
+                            )}
+                            {selectedPaymentOption?.payment_mode ===
+                              "paytm" && (
+                              <div className="col-md-8">
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    Name
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.ac_holder_name}
+                                  </Typography>
+                                </Box>
+                                <Box mt={2}>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    fontWeight={500}
+                                    color={"#778090"}
+                                  >
+                                    Paytm Number:
+                                  </Typography>
+                                  <Typography
+                                    textAlign="left"
+                                    variant="body2"
+                                    fontSize={14}
+                                    color={"#414141"}
+                                    fontWeight={600}
+                                    style={{ paddingTop: 1 }}
+                                  >
+                                    {selectedPaymentOption?.paytm_number}
+                                  </Typography>
+                                </Box>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Box>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#c8e6c9",
+                            color: "white",
+                            border: "3px solid #04A56D",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Completed
+                        </Typography>
+                      </div>{" "}
                       <div
                         style={{
-                          width: 8,
-                          height: 8,
-
-                          borderRadius: "50%",
-                          backgroundColor: "#c8e6c9",
-                          color: "white",
-                          border: "3px solid #04A56D",
-                          padding: 3,
+                          borderLeft: "1px dotted #212121",
+                          width: 1,
+                          height: 0,
+                          marginLeft: 5,
+                          minWidth: 170,
                         }}
-                      ></div>{" "}
+                      ></div>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item md={4}>
+                  <Box
+                    mt={2}
+                    style={{ width: "100%" }}
+                    className={classes.chatCard}
+                  >
+                    <Box
+                      py={3}
+                      style={{
+                        backgroundColor: "#6A55EA",
+                        borderTopLeftRadius: 10,
+                        borderTopRightRadius: 10,
+                      }}
+                    >
+                      <Typography
+                        display="flex"
+                        textAlign="left"
+                        variant="body1"
+                        color={"white"}
+                        p={2}
+                        style={{ fontWeight: 600 }}
+                      >
+                        Chat with seller:
+                      </Typography>
+                    </Box>
+                    <Box p={2} style={{ width: "100%" }}>
+                      <Typography
+                        textAlign="right"
+                        variant="body1"
+                        color={"black"}
+                        p={2}
+                        style={{ fontWeight: 600 }}
+                      >
+                        Did receive?
+                      </Typography>
                       <Typography
                         textAlign="left"
-                        variant="body2"
-                        fontSize={16}
-                        fontWeight={600}
-                        pl={1}
+                        variant="body1"
+                        color={"black"}
+                        p={2}
+                        style={{ fontWeight: 600 }}
                       >
-                        Completed
+                        Let me check
                       </Typography>
-                    </div>{" "}
-                    <div
-                      style={{
-                        borderLeft: "1px dotted #212121",
-                        width: 1,
-                        height: 0,
-                        marginLeft: 5,
-                        minWidth: 170,
-                      }}
-                    ></div>
+                      <Typography
+                        textAlign="right"
+                        variant="body1"
+                        color={"black"}
+                        p={2}
+                        style={{ fontWeight: 600 }}
+                      >
+                        Sure
+                      </Typography>
+                      <Typography
+                        textAlign="left"
+                        variant="body1"
+                        color={"black"}
+                        p={2}
+                        style={{ fontWeight: 600 }}
+                      >
+                        Yes, Received!
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
+                </Grid>
               </Grid>
-              <Grid item md={4}>
-                <Box
-                  mt={2}
-                  style={{ width: "100%" }}
-                  className={classes.chatCard}
-                >
-                  <Box
-                    py={3}
-                    style={{
-                      backgroundColor: "#6A55EA",
-                      borderTopLeftRadius: 10,
-                      borderTopRightRadius: 10,
-                    }}
-                  >
-                    <Typography
-                      display="flex"
-                      textAlign="left"
-                      variant="body1"
-                      color={"white"}
-                      p={2}
-                      style={{ fontWeight: 600 }}
-                    >
-                      Chat with seller:
-                    </Typography>
-                  </Box>
-                  <Box p={2} style={{ width: "100%" }}>
-                    <Typography
-                      textAlign="right"
-                      variant="body1"
-                      color={"black"}
-                      p={2}
-                      style={{ fontWeight: 600 }}
-                    >
-                      Did receive?
-                    </Typography>
-                    <Typography
-                      textAlign="left"
-                      variant="body1"
-                      color={"black"}
-                      p={2}
-                      style={{ fontWeight: 600 }}
-                    >
-                      Let me check
-                    </Typography>
-                    <Typography
-                      textAlign="right"
-                      variant="body1"
-                      color={"black"}
-                      p={2}
-                      style={{ fontWeight: 600 }}
-                    >
-                      Sure
-                    </Typography>
-                    <Typography
-                      textAlign="left"
-                      variant="body1"
-                      color={"black"}
-                      p={2}
-                      style={{ fontWeight: 600 }}
-                    >
-                      Yes, Received!
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          </div>
+            </div>
+          )}
+          {!(createLoading || fetchLoading) && tradeType === "sell" && (
+            <div>Todo</div>
+          )}
         </Box>
       </Container>
     </Box>

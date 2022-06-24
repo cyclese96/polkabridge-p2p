@@ -1,7 +1,7 @@
 import { Box, Button, Container, Grid, Input, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -158,18 +158,19 @@ function OrderSummary() {
   const [fiatInput, setFiatInput] = useState("");
   const [tokenInput, setTokenInput] = useState("");
   const [isExactIn, setIsExactIn] = useState(true);
+  const navigate = useNavigate();
 
   const currentUserAuth = useSelector((state) => state?.user?.jwtToken);
 
   useEffect(() => {
     async function asyncFn() {
-      if (order_id) {
+      if (order_id && currentUserAuth) {
         console.log(order_id);
-        await dispatch(getOrderDetailsById(order_id));
+        await dispatch(getOrderDetailsById(order_id, currentUserAuth));
       }
     }
     asyncFn();
-  }, [order_id]);
+  }, [order_id, currentUserAuth]);
 
   const onFiatInputChange = useCallback(
     (value) => {
@@ -198,7 +199,7 @@ function OrderSummary() {
     }
 
     setTokenInput(fromWei(order?.pending_amount, order?.token?.decimals));
-  }, [setTokenInput, tokenInput, setIsExactIn, order]);
+  }, [setTokenInput, tokenInput, isExactIn, setIsExactIn, order]);
 
   const parsedFiatInput = useMemo(() => {
     if (isExactIn) {
@@ -227,7 +228,7 @@ function OrderSummary() {
         fromWei(order?.pending_amount, order?.token?.decimals)
       )
     ) {
-      return { status: true, message: "Invalid token amounts" };
+      return { status: true, message: "Insufficient tokens" };
     } else {
       return { status: false, message: "" };
     }
@@ -249,6 +250,8 @@ function OrderSummary() {
     };
 
     dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
+
+    navigate(`/order-waiting/${order_id}`);
   }, [currentUserAuth, tradeType, order, parsedTokenInput, parsedFiatInput]);
 
   const handleOnCancelTrade = useCallback(() => {
@@ -460,6 +463,14 @@ function OrderSummary() {
                       <Button
                         className={classes.buttonAction}
                         onClick={handleMax}
+                        disabled={
+                          !order?._id ||
+                          parsedTokenInput ===
+                            fromWei(
+                              order?.pending_amount,
+                              order?.token?.decimals
+                            )
+                        }
                       >
                         All
                       </Button>
@@ -507,7 +518,7 @@ function OrderSummary() {
                           fontWeight: 500,
                         }}
                       >
-                        PBR
+                        {order?.token?.symbol}
                       </span>
                     </Box>
                     {tokenInputError?.status && (
@@ -540,7 +551,11 @@ function OrderSummary() {
                         width: "100%",
                         marginLeft: 5,
                       }}
-                      disabled={tokenInputError?.status || createTradeLoading}
+                      disabled={
+                        tokenInputError?.status ||
+                        createTradeLoading ||
+                        !order?._id
+                      }
                       onClick={handleTrade}
                     >
                       {tradeType} {order?.token?.symbol}

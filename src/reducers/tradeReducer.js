@@ -24,7 +24,7 @@ export default function (state = initalState, action) {
     case GET_TRADE:
       return {
         ...state,
-        trade: [...action.payload],
+        trade: action.payload,
       };
     case CREATE_TRADE_LOADING:
       return {

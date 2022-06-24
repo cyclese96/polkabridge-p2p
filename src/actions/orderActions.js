@@ -157,8 +157,8 @@ export const createBuyOrder = (orderObject) => async (dispatch) => {
   dispatch({ type: RESET_NEW_ORDER });
 };
 
-export const getOrderDetailsById = (id) => async (dispatch) => {
-  const result = await getOrderById(id);
+export const getOrderDetailsById = (id, authToken) => async (dispatch) => {
+  const result = await getOrderById(id, authToken);
 
   if (result?.status !== 200) {
     dispatch({

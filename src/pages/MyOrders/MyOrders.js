@@ -14,9 +14,11 @@ import {
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { useSelector } from "react-redux";
-import { useUserOrders } from "../../hooks/useOrders";
+import { useDispatch, useSelector } from "react-redux";
+// import { useUserOrders } from "../../hooks/useOrders";
 import { fromWei } from "../../utils/helper";
+import { getUserTrades } from "../../actions/tradeActions";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -120,13 +122,25 @@ function MyOrders() {
   const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("all");
   const [token, setToken] = useState("All");
-  const [orderStatus, setorderStatus] = useState("all");
+  const [orderStatus, setorderStatus] = useState("pending");
   const [tabValue, setTabValue] = React.useState(0);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const profile = useSelector((state) => state?.profile?.profile);
+  // const profile = useSelector((state) => state?.profile?.profile);
+  const authenticatedUser = useSelector((state) => state?.user);
+  const loading = useSelector((state) => state?.userTrade?.fetchTradeLoading);
+  const pendingTrades = useSelector((state) => state?.userTrade?.trades);
 
-  const [userOrders, ordersLoading, updatePageNumber, updateFilters] =
-    useUserOrders(profile?._id);
+  useEffect(() => {
+    if (!authenticatedUser) {
+      return;
+    }
+
+    dispatch(
+      getUserTrades(authenticatedUser?.jwtToken, orderType, orderStatus)
+    );
+  }, [authenticatedUser, orderType, orderStatus]);
 
   const selectedToken = useMemo(() => {
     const tokenObject = tokens?.find((item) => item?.symbol === token);
@@ -136,24 +150,24 @@ function MyOrders() {
     return tokenObject;
   }, [tokens, token]);
 
-  // useEffect(() => {
-  //   console.log("my orders ", { userOrders, profile, authStatus });
-  // }, [userOrders, profile, authStatus]);
-
   const handleTabChange = (event, newValue) => {
+    if (newValue === 1) {
+      setorderStatus("all");
+    } else {
+      setorderStatus("pending");
+    }
     setTabValue(newValue);
   };
 
   const handleApplyFilters = () => {
     // prepare filter object based on current selection
-    const filter = {
-      order_type:
-        orderType === "all" ? null : orderType === "sell" ? "buy" : "sell",
-      token: selectedToken?._id,
-      order_status: orderStatus,
-    };
-
-    updateFilters(filter);
+    // const filter = {
+    //   order_type:
+    //     orderType === "all" ? null : orderType === "sell" ? "buy" : "sell",
+    //   token: selectedToken?._id,
+    //   order_status: orderStatus,
+    // };
+    // updateFilters(filter);
   };
 
   useEffect(() => {
@@ -185,447 +199,230 @@ function MyOrders() {
             </Tabs>
           </Box>
 
-          {tabValue === 0 && (
-            <Box>
-              <Box className={classes.tableCard}>
-                <table className={classes.table}>
+          <Box>
+            <Box className={classes.tableCard}>
+              <table className={classes.table}>
+                <tr className={classes.tr}>
+                  <th>
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Type/Coin
+                    </Typography>
+                  </th>
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Fiat Amount
+                    </Typography>
+                  </th>
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Price
+                    </Typography>
+                  </th>
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Crypto amount
+                    </Typography>
+                  </th>
+
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Order type
+                    </Typography>
+                  </th>
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Status
+                    </Typography>
+                  </th>
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Time
+                    </Typography>
+                  </th>
+
+                  <th>
+                    {" "}
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      color={"#616161"}
+                      fontSize={12}
+                      style={{ fontWeight: 500 }}
+                    >
+                      Operation
+                    </Typography>
+                  </th>
+                </tr>
+
+                {pendingTrades?.map((item) => (
                   <tr className={classes.tr}>
-                    <th>
+                    <td style={{ width: "12%" }}>
                       <Typography
                         textAlign="left"
                         variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
+                        fontSize={15}
                         style={{ fontWeight: 500 }}
+                        className={classes.userText}
                       >
-                        Type/Coin
+                        {item?.order?.token?.symbol}
                       </Typography>
-                    </th>
-                    <th>
-                      {" "}
+                    </td>
+                    <td style={{ width: "12%" }}>
                       <Typography
                         textAlign="left"
                         variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
+                        fontSize={15}
                         style={{ fontWeight: 500 }}
-                      >
-                        Fiat Amount
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Price
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Crypto amount
-                      </Typography>
-                    </th>
-
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Order type
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Status
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Time
-                      </Typography>
-                    </th>
-
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Operation
-                      </Typography>
-                    </th>
-                  </tr>
-
-                  {userOrders?.map((item) => (
-                    <tr className={classes.tr}>
-                      <td style={{ width: "12%" }}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.userText}
-                        >
-                          {item?.token?.symbol}
-                        </Typography>
-                      </td>
-                      <td style={{ width: "12%" }}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_unit_price *
-                            fromWei(
-                              item?.pending_amount,
-                              item?.token?.decimals
-                            )}
-                        </Typography>
-                      </td>
-                      <td
                         className={classes.otherText}
-                        style={{ width: "10%" }}
                       >
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {fromWei(item?.pending_amount, item?.token?.decimals)}
-                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                            INR
-                          </span>
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_unit_price}
-                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                            {item?.token?.symbol}
-                          </span>
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_type.toUpperCase()}
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                          color={"#313131"}
-                        >
-                          Waiting...
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          11:30PM
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        <Button
-                          style={{
-                            borderRadius: 10,
-                            backgroundColor: theme.palette.primary.main,
-                            padding: "5px 20px 5px 20px",
-                            color: "white",
-                          }}
-                        >
-                          View
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </table>
-                <div className="text-center">
-                  {ordersLoading && <CircularProgress />}
-                </div>
-              </Box>
-            </Box>
-          )}
-          {tabValue === 1 && (
-            <Box>
-              <Box className={classes.tableCard}>
-                <table className={classes.table}>
-                  <tr className={classes.tr}>
-                    <th>
+                        {item?.fiat_amount}{" "}
+                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                          {item?.order?.fiat?.fiat}
+                        </span>
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText} style={{ width: "10%" }}>
                       <Typography
                         textAlign="left"
                         variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
+                        fontSize={15}
                         style={{ fontWeight: 500 }}
-                      >
-                        Type/Coin
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Fiat Amount
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Price
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Crypto amount
-                      </Typography>
-                    </th>
-
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Order type
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Status
-                      </Typography>
-                    </th>
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Time
-                      </Typography>
-                    </th>
-
-                    <th>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        color={"#616161"}
-                        fontSize={12}
-                        style={{ fontWeight: 500 }}
-                      >
-                        Operation
-                      </Typography>
-                    </th>
-                  </tr>
-
-                  {userOrders?.map((item) => (
-                    <tr className={classes.tr}>
-                      <td style={{ width: "12%" }}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.userText}
-                        >
-                          {item?.token?.symbol}
-                        </Typography>
-                      </td>
-                      <td style={{ width: "12%" }}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_unit_price *
-                            fromWei(
-                              item?.pending_amount,
-                              item?.token?.decimals
-                            )}
-                        </Typography>
-                      </td>
-                      <td
                         className={classes.otherText}
-                        style={{ width: "10%" }}
                       >
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {fromWei(item?.pending_amount, item?.token?.decimals)}
-                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                            INR
-                          </span>
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_unit_price}
-                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                            {item?.token?.symbol}
-                          </span>
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          {item?.order_type.toUpperCase()}
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          Completed
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        {" "}
-                        <Typography
-                          textAlign="left"
-                          variant="body2"
-                          fontSize={15}
-                          style={{ fontWeight: 500 }}
-                          className={classes.otherText}
-                        >
-                          11:30
-                        </Typography>
-                      </td>
-                      <td className={classes.otherText}>
-                        <Button
-                          style={{
-                            borderRadius: 10,
-                            backgroundColor: theme.palette.primary.main,
-                            padding: "5px 20px 5px 20px",
-                            color: "white",
-                          }}
-                        >
-                          View
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </table>
-                <div className="text-center">
-                  {ordersLoading && <CircularProgress />}
-                </div>
-              </Box>
+                        {item?.order?.order_unit_price}
+                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                          {item?.order?.fiat?.fiat}
+                        </span>
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText}>
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        style={{ fontWeight: 500 }}
+                        className={classes.otherText}
+                      >
+                        {fromWei(
+                          item?.token_amount,
+                          item?.order?.token?.decimals
+                        )}
+                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                          {item?.order?.token?.symbol}
+                        </span>
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText}>
+                      {" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        style={{ fontWeight: 500 }}
+                        className={classes.otherText}
+                      >
+                        {item?.buyer?._id?.toString() === authenticatedUser?.id
+                          ? "Buy"
+                          : "Sell"}
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText}>
+                      {" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        style={{ fontWeight: 500 }}
+                        className={classes.otherText}
+                        color={"#313131"}
+                      >
+                        {item?.transaction_status < 3 && "Pending"}
+                        {item?.transaction_status === 3 && "Completed"}
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText}>
+                      {" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        style={{ fontWeight: 500 }}
+                        className={classes.otherText}
+                      >
+                        11:30PM
+                      </Typography>
+                    </td>
+                    <td className={classes.otherText}>
+                      <Button
+                        style={{
+                          borderRadius: 10,
+                          backgroundColor: theme.palette.primary.main,
+                          padding: "5px 20px 5px 20px",
+                          color: "white",
+                        }}
+                        onClick={() =>
+                          navigate(`/order-waiting/${item?.order?._id}`)
+                        }
+                      >
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </table>
+              <div className="text-center">
+                {loading && <CircularProgress />}
+              </div>
             </Box>
-          )}
+          </Box>
         </Box>
       </Container>
     </Box>

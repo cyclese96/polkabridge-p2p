@@ -69,10 +69,15 @@ export function useUserAuthentication(): [
         setAuthStatus({ authenticated: true, pending: false });
         console.log("loading existing user", {
           jwt: localStorage.getItem(account),
+          user,
         });
         dispatch({
           type: LOAD_USER,
-          payload: { jwtToken: localStorage.getItem(account), account },
+          payload: {
+            jwtToken: localStorage.getItem(account),
+            account,
+            id: user?.data?._id,
+          },
         });
 
         return;
@@ -98,10 +103,15 @@ export function useUserAuthentication(): [
       // verify user wallet from server and authenticate
       if (verify?.data?.verified === true) {
         setAuthStatus({ authenticated: true, pending: false });
-        console.log("loading new user", verify);
+        const user: any = await getUser(account, verify?.data?.jwtToken);
+        console.log("loading new user", { verify, user });
         dispatch({
           type: LOAD_USER,
-          payload: { jwtToken: verify?.data?.jwtToken, account },
+          payload: {
+            jwtToken: verify?.data?.jwtToken,
+            account,
+            id: user?.data?._id,
+          },
         });
         localStorage.setItem(account, verify?.data?.jwtToken);
       }
