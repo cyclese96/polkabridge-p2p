@@ -217,9 +217,6 @@ function OrderWaiting() {
   // selected payment option index
   const [selectedPaymentModeIndex, setSelectedMode] = useState(0);
   const sellerPaymentOptions = useMemo(() => {
-    // if (!pendingTrade?._id) {
-    //   return [];
-    // }
     return pendingTrade?.seller?.payment_options;
   }, [pendingTrade]);
 

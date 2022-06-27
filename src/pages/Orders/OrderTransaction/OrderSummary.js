@@ -2,12 +2,12 @@ import { Box, Button, Container, Grid, Input, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import HowItWorks from "../../common/HowItWorks";
-import { getOrderDetailsById } from "../../actions/orderActions";
+import HowItWorks from "../../../common/HowItWorks";
+import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../utils/helper";
+import { fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
-import { startOrderTrade } from "../../actions/tradeActions";
+import { startOrderTrade } from "../../../actions/tradeActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -278,7 +278,7 @@ function OrderSummary() {
               fontSize={16}
               fontWeight={500}
             >
-              {tradeType.toUpperCase()} {order?.token?.symbol} with{" "}
+              {tradeType?.toUpperCase()} {order?.token?.symbol} with{" "}
               {order?.fiat?.fiat}
             </Typography>
             {order ? (

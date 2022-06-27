@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { makeStyles } from "@mui/styles";
 import {
   Box,
-  Button,
   CircularProgress,
   Container,
   FormControl,
@@ -15,8 +14,8 @@ import {
 import OrderTable from "./components/OrderTable";
 import HowItWorks from "../../common/HowItWorks";
 import { useDispatch, useSelector } from "react-redux";
-import { useGlobalOrders } from "../../hooks/useOrders";
 import Pusher from "pusher-js";
+import { getLatestOrders } from "../../actions/orderActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -98,15 +97,15 @@ export default function Home() {
 
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
-  const { fiats, tokens, payments } = store.order;
+  const { fiats, tokens, payments, orders } = store.order;
   const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("buy");
   const [fiat, setFiat] = useState("INR");
   const [token, setToken] = useState("All");
   const [payment, setPayment] = useState("All");
 
-  const [orders, ordersLoading, updatePageNumber, updateFilters] =
-    useGlobalOrders(orderType);
+  const authenticatedUser = useSelector((state) => state?.user);
+  const orderLoading = useSelector((state) => state?.order?.orderLoading);
 
   const selectedFiat = useMemo(() => {
     const fiatObject = fiats?.find((item) => item?.fiat === fiat);
@@ -124,31 +123,22 @@ export default function Home() {
     return tokenObject;
   }, [tokens, token]);
 
-  const handleApplyFilters = () => {
-    // prepare filter object based on current selection
-    const filter = {
+  const filter = useMemo(() => {
+    const filterObject = {
       order_type: orderType === "sell" ? "buy" : "sell",
       fiat: selectedFiat?._id,
       token: selectedToken?._id,
       payment_option: payment === "All" ? null : payment,
     };
-
-    updateFilters(filter);
-  };
+    return filterObject;
+  }, [orderType, selectedFiat, selectedToken, payment]);
 
   useEffect(() => {
-    handleApplyFilters();
-
-    // var pusher = new Pusher("2b6d4de7e6a194cb8aeb", {
-    //   cluster: "ap2",
-    // });
-
-    // var channel = pusher.subscribe("my-channel");
-    // channel.bind("my-event", function (data) {
-    //   console.log("event fired ", data);
-    //   alert(JSON.stringify(data));
-    // });
-  }, [orderType]);
+    if (!filter || !authenticatedUser?.jwtToken) {
+      return;
+    }
+    dispatch(getLatestOrders(pageNumber, filter, authenticatedUser?.jwtToken));
+  }, [filter, pageNumber, authenticatedUser]);
 
   return (
     <Box className={classes.background}>
@@ -287,7 +277,7 @@ export default function Home() {
                   style={{ borderLeft: "1px solid #EAECEE", height: 60 }}
                 ></div>
                 <Box px={2}>
-                  <Button
+                  {/* <Button
                     onClick={handleApplyFilters}
                     style={{
                       borderRadius: 10,
@@ -297,7 +287,7 @@ export default function Home() {
                     }}
                   >
                     Filter Orders
-                  </Button>
+                  </Button> */}
                 </Box>
               </Box>
             </div>
@@ -307,7 +297,7 @@ export default function Home() {
       <Container>
         <OrderTable orders={orders} />
         <div className="text-center">
-          {ordersLoading && <CircularProgress />}
+          {orderLoading && <CircularProgress />}
         </div>
       </Container>
       <Container>

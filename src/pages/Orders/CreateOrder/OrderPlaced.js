@@ -25,8 +25,8 @@ import {
   MoneyOutlined,
   PriceChange,
 } from "@mui/icons-material";
-import HowItWorks from "../../common/HowItWorks";
-import { getOrderDetailsById } from "../../actions/orderActions";
+import HowItWorks from "../../../common/HowItWorks";
+import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({

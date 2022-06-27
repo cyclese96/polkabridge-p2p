@@ -281,6 +281,10 @@ router.post(
   }
 );
 
+// @route GET /transaction-apis/v1/order-transactions"
+// @desc get buy user order transactions: pending, all
+// @access Authenticated
+// @params:  page, trx_status
 router.get("/order-transactions", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -324,7 +328,7 @@ router.get("/order-transactions", auth, async (req, res) => {
       ],
     };
 
-    console.log("final query ", finalQuery);
+    // console.log("final query ", finalQuery);
 
     const transactions = await Transaction.find(finalQuery)
       .populate("buyer")
@@ -344,6 +348,9 @@ router.get("/order-transactions", auth, async (req, res) => {
   }
 });
 
+// @route GET /transaction-apis/v1/order-transaction/:trx_id"
+// @desc get transaction by id
+// @access Authenticated
 router.get("/order-transaction/:trx_id", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -378,6 +385,9 @@ router.get("/order-transaction/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route GET /transaction-apis/v1/order/order-transaction/:order_id"
+// @desc get user pending transaction by order id
+// @access Authenticated
 router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -432,6 +442,9 @@ router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/update/:trx_id"
+// @desc update transaction status
+// @access Authenticated
 router.patch("/update/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -481,6 +494,9 @@ router.patch("/update/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/raise-issue/:trx_id"
+// @desc Raise transaction issue
+// @access Authenticated
 router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -530,6 +546,9 @@ router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/raise-issue/:trx_id"
+// @desc Raise transaction issue
+// @access Authenticated
 router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;

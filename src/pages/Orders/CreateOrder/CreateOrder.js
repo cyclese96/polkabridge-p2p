@@ -25,17 +25,17 @@ import {
   MoneyOutlined,
   PriceChange,
 } from "@mui/icons-material";
-import HowItWorks from "../../common/HowItWorks";
+import HowItWorks from "../../../common/HowItWorks";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { toWei } from "../../utils/helper";
-import { useDepositCallback } from "../../hooks/useDepositCallback";
-import { useTokenAllowance } from "../../hooks/useAllowance";
-import { ALLOWANCE_AMOUNT } from "../../constants/index";
-import { getUserProfile } from "../../actions/profileActions";
-import useActiveWeb3React from "../../hooks/useActiveWeb3React";
-import { useCreateOrderCallback } from "../../hooks/useCreateOrderCallback";
-import { CreateStatus, TransactionState } from "../../utils/interface";
+import { toWei } from "../../../utils/helper";
+import { useDepositCallback } from "../../../hooks/useDepositCallback";
+import { useTokenAllowance } from "../../../hooks/useAllowance";
+import { ALLOWANCE_AMOUNT } from "../../../constants/index";
+import { getUserProfile } from "../../../actions/profileActions";
+import useActiveWeb3React from "../../../hooks/useActiveWeb3React";
+import { useCreateOrderCallback } from "../../../hooks/useCreateOrderCallback";
+import { CreateStatus, TransactionState } from "../../../utils/interface";
 
 const useStyles = makeStyles((theme) => ({
   background: {
