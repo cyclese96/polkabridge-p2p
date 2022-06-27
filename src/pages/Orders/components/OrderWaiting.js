@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   CircularProgress,
   Container,
   Grid,
@@ -12,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fromWei } from "../../../utils/helper";
 import { getUserTradeByOrderId } from "../../../actions/tradeActions";
 import moment from "moment";
+import ChatBox from "../../../common/ChatBox";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -165,6 +167,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 400,
     textAlign: "center",
   },
+  buttonAction: {
+    backgroundColor: "green",
+    border: `1px solid #6A55EA`,
+    borderRadius: 14,
+    marginRight: 5,
+  },
 }));
 
 function OrderWaiting() {
@@ -263,10 +271,10 @@ function OrderWaiting() {
                   <div
                     style={{
                       borderTop: "1px dotted #212121",
-                      width: "80%",
+                      width: "90%",
                       height: 1,
                       marginLeft: 5,
-                      minWidth: 170,
+                      minWidth: 200,
                     }}
                   ></div>
                 </div>{" "}
@@ -281,7 +289,9 @@ function OrderWaiting() {
                     ? "Creating order..."
                     : fetchLoading
                     ? "Fetching order..."
-                    : "Transfer Payment to seller"}
+                    : tradeType === "buy"
+                    ? "Transfer Payment to seller"
+                    : "Deposit tokens to PBR's reserve"}
                 </Typography>
               </Box>
               <Box pr={1}>
@@ -320,7 +330,8 @@ function OrderWaiting() {
                   mt={1}
                   color={"#919191"}
                 >
-                  Pending seller confirmation
+                  Pending {tradeType === "buy" ? "seller" : "buyer"}{" "}
+                  confirmation
                 </Typography>
               </Box>
               <Box pr={1}>
@@ -784,75 +795,364 @@ function OrderWaiting() {
                   </Box>
                 </Grid>
                 <Grid item md={4}>
-                  <Box
-                    mt={2}
-                    style={{ width: "100%" }}
-                    className={classes.chatCard}
-                  >
-                    <Box
-                      py={3}
-                      style={{
-                        backgroundColor: "#6A55EA",
-                        borderTopLeftRadius: 10,
-                        borderTopRightRadius: 10,
-                      }}
-                    >
-                      <Typography
-                        display="flex"
-                        textAlign="left"
-                        variant="body1"
-                        color={"white"}
-                        p={2}
-                        style={{ fontWeight: 600 }}
-                      >
-                        Chat with seller:
-                      </Typography>
-                    </Box>
-                    <Box p={2} style={{ width: "100%" }}>
-                      <Typography
-                        textAlign="right"
-                        variant="body1"
-                        color={"black"}
-                        p={2}
-                        style={{ fontWeight: 600 }}
-                      >
-                        Did receive?
-                      </Typography>
-                      <Typography
-                        textAlign="left"
-                        variant="body1"
-                        color={"black"}
-                        p={2}
-                        style={{ fontWeight: 600 }}
-                      >
-                        Let me check
-                      </Typography>
-                      <Typography
-                        textAlign="right"
-                        variant="body1"
-                        color={"black"}
-                        p={2}
-                        style={{ fontWeight: 600 }}
-                      >
-                        Sure
-                      </Typography>
-                      <Typography
-                        textAlign="left"
-                        variant="body1"
-                        color={"black"}
-                        p={2}
-                        style={{ fontWeight: 600 }}
-                      >
-                        Yes, Received!
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <ChatBox />
                 </Grid>
               </Grid>
             </div>
           )}
           {!(createLoading || fetchLoading) && tradeType === "sell" && (
-            <div>Todo</div>
+            <div className={classes.infoCard}>
+              <Typography
+                variant="body2"
+                color={"#212121"}
+                fontSize={16}
+                fontWeight={500}
+              >
+                {tradeType.toUpperCase()} {pendingTrade?.order?.token?.symbol}{" "}
+                with {pendingTrade?.order?.fiat?.fiat}
+              </Typography>
+
+              <Grid container>
+                <Grid item md={8}>
+                  <Box mt={1}>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#c8e6c9",
+                            color: "white",
+                            border: "3px solid #04A56D",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Confirm Order Info
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            minHeight: 120,
+                            height: "100%",
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
+                        <div className="row w-100" style={{ maxWidth: 600 }}>
+                          <div className="col-md-4">
+                            <Box mt={2}>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={14}
+                                fontWeight={500}
+                                color={"#778090"}
+                              >
+                                Amount
+                              </Typography>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={18}
+                                color={"#ef5350"}
+                                fontWeight={600}
+                                letterSpacing={1.1}
+                              >
+                                {pendingTrade?.fiat_amount}{" "}
+                                {pendingTrade?.order?.fiat?.fiat}
+                              </Typography>
+                            </Box>
+                          </div>
+                          <div className="col-md-4">
+                            <Box mt={2}>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={14}
+                                fontWeight={500}
+                                color={"#778090"}
+                              >
+                                Price
+                              </Typography>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={18}
+                                color={"#212121"}
+                                fontWeight={600}
+                                letterSpacing={1.1}
+                              >
+                                {pendingTrade?.order?.order_unit_price}{" "}
+                                {pendingTrade?.order?.fiat?.fiat}
+                              </Typography>
+                            </Box>
+                          </div>
+                          <div className="col-md-4">
+                            <Box mt={2}>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={14}
+                                fontWeight={500}
+                                color={"#778090"}
+                              >
+                                Quantity
+                              </Typography>
+                              <Typography
+                                textAlign="left"
+                                variant="body2"
+                                fontSize={18}
+                                color={"#212121"}
+                                fontWeight={600}
+                                letterSpacing={1.1}
+                              >
+                                {fromWei(
+                                  pendingTrade?.token_amount,
+                                  pendingTrade?.order?.token?.decimals
+                                )}{" "}
+                                {pendingTrade?.order?.token?.symbol}
+                              </Typography>
+                            </Box>
+                          </div>
+                        </div>
+                      </div>
+                    </Box>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#f9f9f9",
+                            color: "white",
+                            border: "3px solid #bdbdbd",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Deposit{" "}
+                          {fromWei(
+                            pendingTrade?.token_amount,
+                            pendingTrade?.order?.token?.decimals
+                          )}{" "}
+                          {pendingTrade?.order?.token?.symbol} to PolkaBridge
+                          reserve for escrow:
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start h-100">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            height: "100%",
+                            minHeight: 340,
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
+                        <div className={classes.paymentCard}>
+                          <div className="d-flex justify-content-center align-items-center">
+                            <img
+                              src="https://cdn3d.iconscout.com/3d/premium/thumb/cryptocurrency-coin-4416139-3664000.png"
+                              height="100px"
+                              style={{ marginTop: 20 }}
+                            />{" "}
+                            ----------------
+                            <img
+                              src="https://cdn2.iconfinder.com/data/icons/cryptocurrency-24/64/bitcoin_coin_cryptocurrency_currency_digital_bank_money_finance_financial_business_-512.png"
+                              height="100px"
+                              style={{ marginTop: 20 }}
+                            />
+                          </div>
+                          <div className="text-center">
+                            <Button
+                              style={{
+                                borderRadius: 7,
+                                background: "#6A55EA",
+                                marginTop: 20,
+                                color: "white",
+                                minWidth: 200,
+                                maxWidth: 300,
+                                fontWeight: 600,
+                                width: "100%",
+                                marginLeft: 5,
+                              }}
+                            >
+                              Deposit Tokens
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Box>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#f9f9f9",
+                            color: "white",
+                            border: "3px solid #bdbdbd",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Waiting for buyer's confirmation
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start h-100">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            height: "100%",
+                            minHeight: 340,
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
+                        <div className={classes.paymentCard}>
+                          <div className="d-flex flex-column justify-content-center align-items-center">
+                            <div className="d-flex justify-content-center align-items-center">
+                              <img
+                                src="/loader.gif"
+                                height="100px"
+                                style={{ marginTop: 20 }}
+                              />{" "}
+                            </div>
+                            <Typography
+                              textAlign="left"
+                              variant="body2"
+                              fontSize={14}
+                              fontWeight={600}
+                              pt={2}
+                            >
+                              Waiting for confirmation
+                            </Typography>
+                            <div className="text-center mt-2">
+                              <Button
+                                style={{
+                                  backgroundColor: "white",
+                                  border: `1px solid #6A55EA`,
+                                  borderRadius: 14,
+                                  paddingLeft: 20,
+                                  paddingRight: 20,
+                                  fontSize: 12,
+                                }}
+                              >
+                                Raise dispute
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Box>
+                    <Box>
+                      <div className="d-flex align-items-center">
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+
+                            borderRadius: "50%",
+                            backgroundColor: "#f9f9f9",
+                            color: "white",
+                            border: "3px solid #bdbdbd",
+                            padding: 3,
+                          }}
+                        ></div>{" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={16}
+                          fontWeight={600}
+                          pl={1}
+                        >
+                          Completed
+                        </Typography>
+                      </div>{" "}
+                      <div className="d-flex justify-content-start h-100">
+                        <div
+                          style={{
+                            borderLeft: "1px dotted #212121",
+                            width: 1,
+                            height: "100%",
+                            minHeight: 340,
+                            marginLeft: 5,
+                            width: 20,
+                          }}
+                        ></div>
+                        <div className={classes.paymentCard}>
+                          <div className="d-flex flex-column justify-content-center align-items-center">
+                            <div className="d-flex justify-content-center align-items-center">
+                              <img
+                                src="https://cdn3d.iconscout.com/3d/premium/thumb/check-2872554-2389850.png"
+                                height="100px"
+                                style={{ marginTop: 20 }}
+                              />{" "}
+                            </div>
+                            <Typography
+                              textAlign="left"
+                              variant="body2"
+                              fontSize={16}
+                              fontWeight={600}
+                              pl={1}
+                            >
+                              Your order is executes successfully.
+                            </Typography>
+                            <div className="text-center mt-2">
+                              <Button
+                                style={{
+                                  backgroundColor: "white",
+                                  border: `1px solid #6A55EA`,
+                                  borderRadius: 14,
+                                  paddingLeft: 20,
+                                  paddingRight: 20,
+                                  fontSize: 12,
+                                }}
+                              >
+                                View your order
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item md={4}>
+                  <ChatBox />
+                </Grid>
+              </Grid>
+            </div>
           )}
         </Box>
       </Container>
