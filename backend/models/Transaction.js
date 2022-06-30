@@ -38,6 +38,10 @@ const TransactionSchema = new Schema({
   transaction_type: {
     type: String,
   },
+  transfered_mode: {
+    // selected transfer mode where buyer confirmed payment
+    type: String,
+  },
   created_at: {
     type: Date,
     default: Date.now(),

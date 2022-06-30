@@ -485,7 +485,13 @@ router.patch("/update/:trx_id", auth, async (req, res) => {
       });
     }
 
-    const finalTrx = await Transaction.findById(transactionId);
+    const finalTrx = await Transaction.findById(transactionId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     return res.status(200).json(finalTrx);
   } catch (error) {
@@ -537,7 +543,13 @@ router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
         .json({ errors: [{ msg: "Unauthorized access of cancel order" }] });
     }
 
-    const finalTrx = await Transaction.findById(transactionId);
+    const finalTrx = await Transaction.findById(transactionId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     return res.status(200).json(finalTrx);
   } catch (error) {
@@ -590,7 +602,13 @@ router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
     // revert deducted pending order amount
     const orderId = transaction?.order;
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     if (!order) {
       return res.status(400).json({
