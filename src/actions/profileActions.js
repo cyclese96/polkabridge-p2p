@@ -34,8 +34,8 @@ export const getUserProfile = (account, authToken) => async (dispatch) => {
 
 // POST
 // UPDATE USER PROFILE DATA
-export const updateUserProfile = (data) => async (dispatch) => {
-  const result = await updateProfile(data);
+export const updateUserProfile = (data, authToken) => async (dispatch) => {
+  const result = await updateProfile(data, authToken);
 
   if (result?.status !== 201) {
     dispatch({
@@ -52,27 +52,28 @@ export const updateUserProfile = (data) => async (dispatch) => {
 
 // POST
 // UPDATE USER PAYMENT PREFERENCES
-export const updateUserPaymentPreferences = (data) => async (dispatch) => {
-  const result = await updatePayments(data);
+export const updateUserPaymentPreferences =
+  (data, authToken) => async (dispatch) => {
+    const result = await updatePayments(data, authToken);
 
-  if (result?.status !== 201) {
+    if (result?.status !== 201) {
+      dispatch({
+        type: GET_ERRORS,
+        payload: result.message,
+      });
+      return;
+    }
+
     dispatch({
-      type: GET_ERRORS,
-      payload: result.message,
+      type: GET_PROFILE,
+      payload: result.data,
     });
-    return;
-  }
-
-  dispatch({
-    type: GET_PROFILE,
-    payload: result.data,
-  });
-};
+  };
 
 // POST
 // UPDATE USER PAYMENT PREFERENCES
-export const updateUserCurrency = (data) => async (dispatch) => {
-  const result = await updateDefaultCurrency(data);
+export const updateUserCurrency = (data, authToken) => async (dispatch) => {
+  const result = await updateDefaultCurrency(data, authToken);
 
   if (result?.status !== 201) {
     dispatch({
