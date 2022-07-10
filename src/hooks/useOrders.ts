@@ -1,6 +1,3 @@
-// useGlobalOrders, filters: { orderType, fiat, token, orderBy,  }
-// useUserOrders, filters: { active, ongoing, completed, cancelled }
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getLatestOrders } from "../actions/orderActions";
@@ -73,7 +70,7 @@ export function useUserOrders(
     if (!user || !userAuth?.jwtToken) {
       return;
     }
-    console.log("fetching orders on auth status update", userAuth);
+    // console.log("fetching orders on auth status update", userAuth);
     // console.log("fetching user orders ", { pageNumber, orderFilters });
     dispatch(
       getLatestOrders(pageNumber, { ...orderFilters, user }, userAuth?.jwtToken)

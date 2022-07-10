@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -10,6 +10,11 @@ import {
 import { fromWei } from "../../../utils/helper";
 import ChatBox from "./ChatBox";
 import CheckIcon from "@mui/icons-material/Check";
+import { TransactionState } from "../../../utils/interface";
+import { useTokenAllowance } from "../../../hooks/useAllowance";
+import { useDepositCallback } from "../../../hooks/useDepositCallback";
+import { useSelector } from "react-redux";
+import { ALLOWANCE_AMOUNT } from "../../../constants";
 
 export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
   // for sell order status
@@ -33,6 +38,55 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
     }
     return true;
   }, [pendingTrade]);
+
+  useEffect(() => {
+    console.log("sell trade", { pendingTrade, tradeType });
+  }, [pendingTrade]);
+
+  const tokens = useSelector((state) => state?.order?.tokens);
+
+  const selectedToken = useMemo(() => {
+    if (!pendingTrade?._id) {
+      return {};
+    }
+    return pendingTrade?.order?.token;
+  }, [pendingTrade]);
+
+  const [allowance, confirmAllowance, allowanceTrxStatus] =
+    useTokenAllowance(selectedToken);
+  const [depositTokens, withdrawTokens, depositTrxStatus] =
+    useDepositCallback(selectedToken);
+
+  // const handleDeposit = () => {
+  //   console.log("allowance ", allowance);
+  //   if (!allowance) {
+  //     confirmAllowance(ALLOWANCE_AMOUNT);
+  //   } else {
+  //     depositTokens(tokenAmount);
+  //   }
+  // };
+
+  const handleDeposit = useCallback(() => {
+    const tokenAmount = fromWei(
+      pendingTrade?.token_amount,
+      pendingTrade?.order?.token?.decimals
+    );
+
+    if (!allowance) {
+      confirmAllowance(ALLOWANCE_AMOUNT);
+    } else {
+      depositTokens(tokenAmount);
+    }
+  }, [pendingTrade, allowance]);
+
+  const isPendingTrx = useMemo(() => {
+    return (
+      allowanceTrxStatus?.status === TransactionState.PENDING ||
+      allowanceTrxStatus?.status === TransactionState.WAITING ||
+      depositTrxStatus.status === TransactionState.PENDING ||
+      depositTrxStatus.status === TransactionState.WAITING
+    );
+  }, [allowanceTrxStatus, depositTrxStatus]);
 
   return (
     <div className={classes.infoCard}>
@@ -233,6 +287,7 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
                         width: "100%",
                         marginLeft: 5,
                       }}
+                      onClick={() => handleDeposit()}
                     >
                       {isTokenDeposited ? (
                         <>
@@ -243,6 +298,8 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
                           />
                           Token deposited
                         </>
+                      ) : !allowance ? (
+                        "Allow token deposit"
                       ) : (
                         "Deposit tokens"
                       )}
@@ -277,63 +334,66 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
                   Waiting for buyer's confirmation
                 </Typography>
               </div>{" "}
-              <div className="d-flex justify-content-start h-100">
-                <div
-                  style={{
-                    borderLeft: "1px dotted #212121",
-                    width: 1,
-                    height: "100%",
-                    minHeight: 340,
-                    marginLeft: 5,
-                    width: 20,
-                  }}
-                ></div>
-                <div className={classes.paymentCard}>
-                  {isBuyerConfirmedPayment ? (
-                    <div className="d-flex  justify-content-center align-items-center">
-                      <CheckIcon
-                        color="success"
-                        fontSize="small"
-                        style={{ marginRight: 10 }}
-                      />{" "}
-                      Buyer confirmed payment
-                    </div>
-                  ) : (
-                    <div className="d-flex flex-column justify-content-center align-items-center">
-                      <div className="d-flex justify-content-center align-items-center">
-                        <img
-                          src="/loader.gif"
-                          height="100px"
-                          style={{ marginTop: 20 }}
+              {pendingTrade?.transaction_status >= 1 && (
+                <div className="d-flex justify-content-start h-100">
+                  <div
+                    style={{
+                      borderLeft: "1px dotted #212121",
+                      width: 1,
+                      height: "100%",
+                      minHeight: 340,
+                      marginLeft: 5,
+                      width: 20,
+                    }}
+                  ></div>
+
+                  <div className={classes.paymentCard}>
+                    {isBuyerConfirmedPayment ? (
+                      <div className="d-flex  justify-content-center align-items-center">
+                        <CheckIcon
+                          color="success"
+                          fontSize="small"
+                          style={{ marginRight: 10 }}
                         />{" "}
+                        Buyer confirmed payment
                       </div>
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={14}
-                        fontWeight={600}
-                        pt={2}
-                      >
-                        Waiting for confirmation
-                      </Typography>
-                      <div className="text-center mt-2">
-                        <Button
-                          style={{
-                            backgroundColor: "white",
-                            border: `1px solid #6A55EA`,
-                            borderRadius: 14,
-                            paddingLeft: 20,
-                            paddingRight: 20,
-                            fontSize: 12,
-                          }}
+                    ) : (
+                      <div className="d-flex flex-column justify-content-center align-items-center">
+                        <div className="d-flex justify-content-center align-items-center">
+                          <img
+                            src="/loader.gif"
+                            height="100px"
+                            style={{ marginTop: 20 }}
+                          />{" "}
+                        </div>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={14}
+                          fontWeight={600}
+                          pt={2}
                         >
-                          Raise dispute
-                        </Button>
+                          Waiting for confirmation
+                        </Typography>
+                        <div className="text-center mt-2">
+                          <Button
+                            style={{
+                              backgroundColor: "white",
+                              border: `1px solid #6A55EA`,
+                              borderRadius: 14,
+                              paddingLeft: 20,
+                              paddingRight: 20,
+                              fontSize: 12,
+                            }}
+                          >
+                            Raise dispute
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </Box>
             <Box>
               <div className="d-flex align-items-center">

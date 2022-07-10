@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import React from "react";
+import { IconButton } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Close } from "@mui/icons-material";
 
@@ -133,17 +133,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TxPopup = ({ popupActive, disablePopup, txCase }) => {
+const TxPopup = ({ txCase, hash, resetPopup }) => {
   const classes = useStyles();
 
-  const resetPopup = () => {
-    disablePopup();
-  };
   return (
     <div className={classes.background}>
       <div className={classes.container}>
         <div className="d-flex justify-content-end">
-          <IconButton>
+          <IconButton onClick={resetPopup}>
             <Close style={{ color: "#212121", fontSize: 28 }} />
           </IconButton>
         </div>

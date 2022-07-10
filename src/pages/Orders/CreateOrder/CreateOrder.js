@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -8,27 +9,14 @@ import {
   Select,
   TextareaAutosize,
   Typography,
-  useTheme,
 } from "@mui/material";
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { Link } from "react-router-dom";
-import {
-  AccountBalanceWallet,
-  AccountBalanceWalletOutlined,
-  AttachMoney,
-  CreditCard,
-  History,
-  List,
-  ListOutlined,
-  Money,
-  MoneyOutlined,
-  PriceChange,
-} from "@mui/icons-material";
+
 import HowItWorks from "../../../common/HowItWorks";
+import TxPopup from "../../../common/popups/TxPopup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { toWei } from "../../../utils/helper";
+import { fromWei, toWei } from "../../../utils/helper";
 import { useDepositCallback } from "../../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../../hooks/useAllowance";
 import { ALLOWANCE_AMOUNT } from "../../../constants/index";
@@ -36,6 +24,8 @@ import { getUserProfile } from "../../../actions/profileActions";
 import useActiveWeb3React from "../../../hooks/useActiveWeb3React";
 import { useCreateOrderCallback } from "../../../hooks/useCreateOrderCallback";
 import { CreateStatus, TransactionState } from "../../../utils/interface";
+import BigNumber from "bignumber.js";
+import { createOrder } from "../../../utils/httpCalls";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -202,8 +192,6 @@ function CreateOrder() {
   const dispatch = useDispatch();
   const { chainId } = useActiveWeb3React();
 
-  const theme = useTheme();
-
   //States
   const [step, setStep] = useState(0);
 
@@ -212,20 +200,19 @@ function CreateOrder() {
   const [price, setPrice] = useState("");
   const [token, setToken] = useState("PBR");
   const [tokenAmount, setTokenAmount] = useState("");
-  const [totalAmount, setTotalAmount] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [error, setError] = useState("");
-  const [depositStatus, setDepositState] = useState(0); //0 : not ready for deposit,1 ready for deposit, 2: deposit verified
 
   const fiats = useSelector((state) => state?.order?.fiats);
   const tokens = useSelector((state) => state?.order?.tokens);
+  const [isOpen, setOpen] = useState(false);
   const userPaymentOptions = useSelector(
     (state) => state?.profile?.profile?.payment_options
   );
+  const userAuth = useSelector((state) => state?.user);
 
   // const updateTotalAmount = (inputValue) => {};
   const updatePaymentMethods = (selectedValue) => {
-    console.log(selectedValue);
     if (paymentMethods.includes(selectedValue)) {
       const index = paymentMethods.indexOf(selectedValue);
       let tempArray = paymentMethods;
@@ -270,12 +257,50 @@ function CreateOrder() {
 
   const [allowance, confirmAllowance, allowanceTrxStatus] =
     useTokenAllowance(selectedToken);
-  const [depositTokens, withdrawTokens, depositTrxStatus] =
-    useDepositCallback(selectedToken);
+  const [
+    depositTokens,
+    withdrawTokens,
+    resetTrxState,
+    depositTrxStatus,
+    userDeposit,
+  ] = useDepositCallback(selectedToken);
   const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
     useCreateOrderCallback();
 
-  const submitOrder = () => {
+  const handleModalClose = useCallback(() => {
+    setOpen(false);
+    resetTrxState();
+  }, [isOpen, setOpen, resetTrxState]);
+
+  useEffect(() => {
+    console.log("user deposits", {
+      userDeposit,
+      // tokenAmount: toWei(tokenAmount, selectedToken?.decimals),
+    });
+  }, [userDeposit, tokenAmount]);
+
+  const isSufficientDeposits = useMemo(() => {
+    return new BigNumber(userDeposit).gte(
+      toWei(tokenAmount, selectedToken?.decimals)
+    );
+  }, [userDeposit, tokenAmount, selectedToken]);
+
+  const depositsNeeded = useMemo(() => {
+    return new BigNumber(toWei(tokenAmount, selectedToken?.decimals))
+      .minus(userDeposit)
+      ?.toString();
+  }, [userDeposit, tokenAmount, selectedToken]);
+
+  // sell order states
+  const isSubmitOrderDisabled = useMemo(() => {
+    if (orderType !== "sell") {
+      return false;
+    }
+
+    return new BigNumber(tokenAmount).lte(0) || !isSufficientDeposits;
+  }, [isSufficientDeposits, tokenAmount, orderType]);
+
+  const submitOrder = useCallback(async () => {
     if (orderType === "buy") {
       const payload = {
         order_amount: toWei(tokenAmount, selectedToken?.decimals),
@@ -285,7 +310,13 @@ function CreateOrder() {
         payment_options: paymentMethods,
       };
 
-      createBuyOrder(payload);
+      const response = await createOrder("buy", payload, userAuth?.jwtToken);
+      if (response?.status === 201) {
+        navigate(`/order-placed/${response?.data?._id}`);
+      } else {
+        //todo
+        //handle error alert
+      }
     } else {
       const payload = {
         order_amount: toWei(tokenAmount, selectedToken?.decimals),
@@ -295,43 +326,41 @@ function CreateOrder() {
         payment_options: paymentMethods,
       };
 
-      createSellOrder(payload);
+      const response = await createOrder("sell", payload, userAuth?.jwtToken);
+      if (response?.status === 201) {
+        navigate(`/order-placed/${response?.data?._id}`);
+      } else {
+        //todo
+        //handle error alert
+      }
     }
-  };
+  }, [
+    orderType,
+    tokenAmount,
+    selectedToken,
+    selectedFiat,
+    price,
+    paymentMethods,
+    userAuth,
+  ]);
 
-  const handleDeposit = () => {
-    console.log("allowance ", allowance);
+  // const handleDeposit = () => {
+  //   setOpen(true);
+  //   console.log("allowance ", allowance);
+  //   if (!allowance) {
+  //     confirmAllowance(ALLOWANCE_AMOUNT);
+  //   } else {
+  //     depositTokens(tokenAmount);
+  //   }
+  // };
+
+  const handleDeposit = useCallback(() => {
     if (!allowance) {
       confirmAllowance(ALLOWANCE_AMOUNT);
     } else {
-      depositTokens(tokenAmount);
+      depositTokens(depositsNeeded);
     }
-  };
-
-  useEffect(() => {
-    console.log("deposit trx", { orderStatus, depositTrxStatus });
-    if (orderStatus.status === CreateStatus.ACTIVE) {
-      // navigate to confirmation page
-      navigate(`/order-placed/${orderStatus.id}`);
-    }
-
-    if (
-      orderType === "sell" &&
-      orderStatus.status === CreateStatus.SUBMITTED &&
-      depositTrxStatus.status === TransactionState.COMPLETED
-    ) {
-      console.log("starting validation ... ", orderStatus.id);
-      validateSellOrder(orderStatus.id);
-    }
-  }, [depositTrxStatus, orderStatus, orderType]);
-
-  // const handleConfirm = async () => {
-  //   // call verify order deposit api
-  // };
-
-  useEffect(() => {
-    console.log("payment optios ", userPaymentOptions?.length === 0);
-  }, [userPaymentOptions]);
+  }, [depositsNeeded, depositTokens, confirmAllowance, allowance]);
 
   const isPendingTrx = useMemo(() => {
     return (
@@ -344,6 +373,11 @@ function CreateOrder() {
 
   return (
     <Box className={classes.background}>
+      {/* <TxPopup
+        txCase={depositTrxStatus?.state}
+        hash={depositTrxStatus?.hash}
+        resetPopup={resetTrxState}
+      /> */}
       {step === 0 && (
         <Container>
           <Box>
@@ -519,122 +553,6 @@ function CreateOrder() {
                             Sell
                           </Box>
                         </Box>
-                        {/* <Box
-                          display="flex"
-                          alignItems={"center"}
-                          style={{
-                            width: "fit-content",
-                          }}
-                        >
-                          <Box
-                            onClick={() => setOrderType("buy")}
-                            style={{
-                              backgroundColor:
-                                orderType === "buy" ? "#E1DCFF" : "transparent",
-                              border: "2px solid #E1DCFF",
-                              width: "fit-content",
-                              padding: "5px 20px 5px 20px",
-                              cursor: "pointer",
-                              borderRadius: 7,
-                              marginRight: 5,
-                              fontSize: 14,
-                              fontWeight: 500,
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            {orderType === "buy" ? (
-                              <Box
-                                style={{
-                                  height: 10,
-                                  width: 10,
-                                  borderRadius: "50%",
-                                  border: "1px solid #919191",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  marginRight: 5,
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    height: 8,
-                                    width: 8,
-                                    borderRadius: "50%",
-                                    border: "1px solid #919191",
-                                    backgroundColor: "#81c784",
-                                  }}
-                                ></div>
-                              </Box>
-                            ) : (
-                              <div
-                                style={{
-                                  height: 10,
-                                  width: 10,
-                                  borderRadius: "50%",
-                                  border: "1px solid #454545",
-                                  marginRight: 5,
-                                }}
-                              ></div>
-                            )}
-                            Buy
-                          </Box>
-                          <Box
-                            onClick={() => setOrderType("sell")}
-                            style={{
-                              border: "2px solid #E1DCFF",
-                              cursor: "pointer",
-                              backgroundColor:
-                                orderType === "sell"
-                                  ? "#E1DCFF"
-                                  : "transparent",
-                              width: "fit-content",
-                              padding: "5px 20px 5px 20px",
-                              borderRadius: 7,
-                              marginRight: 5,
-                              fontSize: 14,
-                              fontWeight: 500,
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            {orderType === "sell" ? (
-                              <Box
-                                style={{
-                                  height: 10,
-                                  width: 10,
-                                  borderRadius: "50%",
-                                  border: "1px solid #919191",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  marginRight: 5,
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    height: 8,
-                                    width: 8,
-                                    borderRadius: "50%",
-                                    border: "1px solid #919191",
-                                    backgroundColor: "#81c784",
-                                  }}
-                                ></div>
-                              </Box>
-                            ) : (
-                              <div
-                                style={{
-                                  height: 10,
-                                  width: 10,
-                                  borderRadius: "50%",
-                                  border: "1px solid #454545",
-                                  marginRight: 5,
-                                }}
-                              ></div>
-                            )}
-                            Sell
-                          </Box>
-                        </Box> */}
                       </Grid>
                     </Grid>
                     <Grid container mt={2}>
@@ -973,7 +891,7 @@ function CreateOrder() {
                     color: "white",
                   }}
                 >
-                  Submit Order
+                  Preview Order
                 </Button>
               </div>
               <div style={{ color: "red", textAlign: "center" }}>{error}</div>
@@ -1328,31 +1246,60 @@ function CreateOrder() {
                       color={"#778090"}
                       lineHeight={1.8}
                     >
-                      DO NOT SEND PAYMENTS THROUGH THIRD PARTY ACCOUNTS, all
-                      such payments will have to go to dispute and will be
-                      refunded/cancelled. Please do not include crypto related
-                      words such as P2P, Binance, USDT, ETH, BTC, etc. Send INR
-                      through registered bank account only.
+                      {""}
                     </Typography>
                   </Box>
                 </Grid>
               </Grid>
 
               <div className="text-center mt-4 mb-2">
+                {orderType === "sell" && (
+                  <>
+                    <div>
+                      Your deposits:{" "}
+                      {fromWei(userDeposit, selectedToken.decimals)}
+                    </div>
+                    {!isSufficientDeposits && (
+                      <Button
+                        onClick={handleDeposit}
+                        style={{
+                          borderRadius: 10,
+                          background: "#6A55EA",
+                          padding: "9px 35px 9px 35px",
+                          color: "white",
+                          marginRight: 20,
+                        }}
+                      >
+                        {!allowance
+                          ? `Approve ${selectedToken?.symbol}`
+                          : `Deposit ${selectedToken?.symbol}`}
+                      </Button>
+                    )}
+                  </>
+                )}
+
                 <Button
-                  onClick={reviewOrderFn}
+                  onClick={submitOrder}
                   style={{
                     borderRadius: 10,
-                    background: "#6A55EA",
+                    background: isSubmitOrderDisabled ? "#FFFFF" : "#6A55EA",
                     padding: "9px 35px 9px 35px",
-                    color: "white",
+                    color: isSubmitOrderDisabled ? "black" : "white",
                   }}
+                  disabled={isSubmitOrderDisabled}
                 >
                   Submit Order
                 </Button>
+                {!isSufficientDeposits &&
+                  orderType === "sell" &&
+                  `Deposit ${fromWei(
+                    depositsNeeded,
+                    selectedToken?.decimals
+                  )}  ${selectedToken?.symbol}  more   to create sell order`}
               </div>
               <div style={{ color: "red", textAlign: "center" }}>{error}</div>
             </div>
+
             <HowItWorks />
           </Box>
         </Container>

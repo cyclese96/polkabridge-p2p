@@ -3,27 +3,19 @@ import {
   Button,
   Container,
   Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link, useParams } from "react-router-dom";
 import {
-  AccountBalanceWallet,
   AccountBalanceWalletOutlined,
   AttachMoney,
   CreditCard,
   History,
-  List,
   ListOutlined,
-  Money,
   MoneyOutlined,
-  PriceChange,
 } from "@mui/icons-material";
 import HowItWorks from "../../../common/HowItWorks";
 import { getOrderDetailsById } from "../../../actions/orderActions";
@@ -162,7 +154,6 @@ const useStyles = makeStyles((theme) => ({
 
 function OrderPlaced() {
   const classes = useStyles();
-  const theme = useTheme();
 
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
@@ -170,9 +161,15 @@ function OrderPlaced() {
   // const { order } = store.order;
   const order = useSelector((state) => state?.order?.order);
 
+  const userAuth = useSelector((state) => state?.user);
+
   useEffect(async () => {
-    dispatch(getOrderDetailsById(order_id));
-  }, [order_id]);
+    if (!order_id || !userAuth?.jwtToken) {
+      return;
+    }
+
+    dispatch(getOrderDetailsById(order_id, userAuth?.jwtToken));
+  }, [order_id, userAuth]);
 
   return (
     <Box className={classes.background}>

@@ -28,6 +28,7 @@ export enum TransactionState {
 export interface TransactionStatus {
   status: TransactionState | null;
   hash: string | null;
+  state: number;
 }
 
 export interface AuthStatus {

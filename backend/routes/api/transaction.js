@@ -412,15 +412,16 @@ router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
         {
           transaction_status: { $gte: 0, $lte: 2 },
           buyer: mongoose.Types.ObjectId(userId),
+          order: mongoose.Types.ObjectId(orderId),
         },
         {
           transaction_status: { $gte: 0, $lte: 2 },
           seller: mongoose.Types.ObjectId(userId),
+          order: mongoose.Types.ObjectId(orderId),
         },
       ],
     };
 
-    console.log("pending query ", pendingOrderQuery);
     const transaction = await Transaction.findOne(pendingOrderQuery)
       .populate("buyer")
       .populate({ path: "seller", populate: { path: "payment_options" } })

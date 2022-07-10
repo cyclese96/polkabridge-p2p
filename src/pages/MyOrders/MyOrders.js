@@ -3,10 +3,6 @@ import {
   Button,
   CircularProgress,
   Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Tab,
   Tabs,
   Typography,
@@ -19,6 +15,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { fromWei } from "../../utils/helper";
 import { getUserTrades } from "../../actions/tradeActions";
 import { useNavigate } from "react-router-dom";
+import { getLatestOrders } from "../../actions/orderActions";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -132,15 +130,31 @@ function MyOrders() {
   const loading = useSelector((state) => state?.userTrade?.fetchTradeLoading);
   const pendingTrades = useSelector((state) => state?.userTrade?.trades);
 
+  const userAds = useSelector((state) => state?.order?.userOrders);
+
+  useEffect(() => {
+    console.log("user ads", userAds);
+  }, [userAds]);
   useEffect(() => {
     if (!authenticatedUser) {
       return;
     }
 
+    //: add filters
+    if (tabValue === 2) {
+      dispatch(
+        getLatestOrders(
+          1,
+          { ...{}, user: authenticatedUser?._id },
+          authenticatedUser?.jwtToken
+        )
+      );
+    }
+
     dispatch(
       getUserTrades(authenticatedUser?.jwtToken, orderType, orderStatus)
     );
-  }, [authenticatedUser, orderType, orderStatus]);
+  }, [authenticatedUser, orderType, orderStatus, tabValue]);
 
   const selectedToken = useMemo(() => {
     const tokenObject = tokens?.find((item) => item?.symbol === token);
@@ -196,6 +210,7 @@ function MyOrders() {
             >
               <Tab value={0} label="Processing" />
               <Tab value={1} label="All Orders" />
+              <Tab value={2} label="My Ads" />
             </Tabs>
           </Box>
 
@@ -214,18 +229,20 @@ function MyOrders() {
                       Type/Coin
                     </Typography>
                   </th>
-                  <th>
-                    {" "}
-                    <Typography
-                      textAlign="left"
-                      variant="body2"
-                      color={"#616161"}
-                      fontSize={12}
-                      style={{ fontWeight: 500 }}
-                    >
-                      Fiat Amount
-                    </Typography>
-                  </th>
+                  {tabValue !== 2 && (
+                    <th>
+                      {" "}
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        color={"#616161"}
+                        fontSize={12}
+                        style={{ fontWeight: 500 }}
+                      >
+                        Fiat Amount
+                      </Typography>
+                    </th>
+                  )}
                   <th>
                     {" "}
                     <Typography
@@ -302,121 +319,234 @@ function MyOrders() {
                   </th>
                 </tr>
 
-                {pendingTrades?.map((item) => (
-                  <tr className={classes.tr}>
-                    <td style={{ width: "12%" }}>
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
-                        className={classes.userText}
-                      >
-                        {item?.order?.token?.symbol}
-                      </Typography>
-                    </td>
-                    <td style={{ width: "12%" }}>
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
-                        className={classes.otherText}
-                      >
-                        {item?.fiat_amount}{" "}
-                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                          {item?.order?.fiat?.fiat}
-                        </span>
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText} style={{ width: "10%" }}>
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
-                        className={classes.otherText}
-                      >
-                        {item?.order?.order_unit_price}
-                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
-                          {item?.order?.fiat?.fiat}
-                        </span>
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText}>
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
-                        className={classes.otherText}
-                      >
-                        {fromWei(
-                          item?.token_amount,
-                          item?.order?.token?.decimals
-                        )}
-                        <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                {[0, 1].includes(tabValue) &&
+                  pendingTrades?.map((item) => (
+                    <tr className={classes.tr}>
+                      <td style={{ width: "12%" }}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.userText}
+                        >
                           {item?.order?.token?.symbol}
-                        </span>
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText}>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
+                        </Typography>
+                      </td>
+                      <td style={{ width: "12%" }}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {item?.fiat_amount}{" "}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {item?.order?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </td>
+                      <td
                         className={classes.otherText}
+                        style={{ width: "10%" }}
                       >
-                        {item?.buyer?._id?.toString() === authenticatedUser?.id
-                          ? "Buy"
-                          : "Sell"}
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText}>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {item?.order?.order_unit_price}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {item?.order?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {fromWei(
+                            item?.token_amount,
+                            item?.order?.token?.decimals
+                          )}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {item?.order?.token?.symbol}
+                          </span>
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {item?.buyer?._id?.toString() ===
+                          authenticatedUser?.id?.toString()
+                            ? "Buy"
+                            : "Sell"}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                          color={"#313131"}
+                        >
+                          {item?.transaction_status < 3 && "Pending"}
+                          {item?.transaction_status === 3 && "Completed"}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {moment(item?.created_at).format(
+                            "hh:mm A MM-DD-YYYY"
+                          )}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        <Button
+                          style={{
+                            borderRadius: 10,
+                            backgroundColor: theme.palette.primary.main,
+                            padding: "5px 20px 5px 20px",
+                            color: "white",
+                          }}
+                          onClick={() =>
+                            navigate(`/order-waiting/${item?.order?._id}`)
+                          }
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                {/* my ads */}
+                {[2].includes(tabValue) &&
+                  userAds?.map((orderAd) => (
+                    <tr className={classes.tr}>
+                      <td style={{ width: "12%" }}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.userText}
+                        >
+                          {orderAd?.token?.symbol}
+                        </Typography>
+                      </td>
+
+                      <td
                         className={classes.otherText}
-                        color={"#313131"}
+                        style={{ width: "10%" }}
                       >
-                        {item?.transaction_status < 3 && "Pending"}
-                        {item?.transaction_status === 3 && "Completed"}
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText}>
-                      {" "}
-                      <Typography
-                        textAlign="left"
-                        variant="body2"
-                        fontSize={15}
-                        style={{ fontWeight: 500 }}
-                        className={classes.otherText}
-                      >
-                        11:30PM
-                      </Typography>
-                    </td>
-                    <td className={classes.otherText}>
-                      <Button
-                        style={{
-                          borderRadius: 10,
-                          backgroundColor: theme.palette.primary.main,
-                          padding: "5px 20px 5px 20px",
-                          color: "white",
-                        }}
-                        onClick={() =>
-                          navigate(`/order-waiting/${item?.order?._id}`)
-                        }
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {orderAd?.order_unit_price}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {orderAd?.fiat?.fiat}
+                          </span>
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {fromWei(
+                            orderAd?.pending_amount,
+                            orderAd?.token?.decimals
+                          )}
+                          <span style={{ fontSize: 10, paddingLeft: 4 }}>
+                            {orderAd?.token?.symbol}
+                          </span>
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {orderAd?.order_type?.toUpperCase()}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                          color={"#313131"}
+                        >
+                          {orderAd?.order_status}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        {" "}
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={15}
+                          style={{ fontWeight: 500 }}
+                          className={classes.otherText}
+                        >
+                          {moment(orderAd?.created_at).format(
+                            "hh:mm A MM-DD-YYYY"
+                          )}
+                        </Typography>
+                      </td>
+                      <td className={classes.otherText}>
+                        <Button
+                          style={{
+                            borderRadius: 10,
+                            backgroundColor: theme.palette.primary.main,
+                            padding: "5px 20px 5px 20px",
+                            color: "white",
+                          }}
+                          onClick={() =>
+                            navigate(`/order-placed/${orderAd?._id}`)
+                          }
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
               </table>
               <div className="text-center">
                 {loading && <CircularProgress />}
