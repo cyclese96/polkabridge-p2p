@@ -2,12 +2,12 @@ import { Box, Button, Container, Grid, Input, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import HowItWorks from "../../common/HowItWorks";
-import { getOrderDetailsById } from "../../actions/orderActions";
+import HowItWorks from "../../../common/HowItWorks";
+import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../utils/helper";
+import { fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
-import { startOrderTrade } from "../../actions/tradeActions";
+import { startOrderTrade } from "../../../actions/tradeActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -278,7 +278,8 @@ function OrderSummary() {
               fontSize={16}
               fontWeight={500}
             >
-              Buy PBR with {order?.fiat?.fiat}
+              {tradeType?.toUpperCase()} {order?.token?.symbol} with{" "}
+              {order?.fiat?.fiat}
             </Typography>
             {order ? (
               <Grid container spacing={2} p={2}>
@@ -295,9 +296,10 @@ function OrderSummary() {
                           Price:
                           <span
                             style={{
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: 500,
-                              color: "#04A56D",
+                              color:
+                                tradeType === "buy" ? "#04A56D" : "#ef5350",
                               paddingLeft: 5,
                             }}
                           >
@@ -338,7 +340,7 @@ function OrderSummary() {
                           Available:
                           <span
                             style={{
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: 500,
                               paddingLeft: 5,
                               color: "#212121",
@@ -359,19 +361,27 @@ function OrderSummary() {
                           fontSize={13}
                           color={"#778090"}
                         >
-                          Seller’s payment method:
-                          {order?.payment_options?.map((paymentOption) => (
-                            <span
-                              style={{
-                                fontSize: 14,
-                                fontWeight: 500,
-                                paddingLeft: 5,
-                                color: "#212121",
-                              }}
-                            >
-                              {paymentOption?.toString()?.toUpperCase()}
-                            </span>
-                          ))}
+                          <span style={{ paddingRight: 5 }}>
+                            {tradeType === "buy" ? "Seller" : "Buyer"}
+                            ’s payment method:
+                          </span>
+                          {order?.payment_options?.map(
+                            (paymentOption, index) => (
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 500,
+
+                                  color: "#212121",
+                                }}
+                              >
+                                {paymentOption?.toString()?.toUpperCase()}{" "}
+                                {order.payment_options.length === index + 1
+                                  ? ""
+                                  : ","}
+                              </span>
+                            )
+                          )}
                         </Typography>
                       </Box>{" "}
                     </div>
@@ -384,7 +394,7 @@ function OrderSummary() {
                         fontSize={14}
                         fontWeight={500}
                       >
-                        Seller's Message:
+                        {tradeType === "buy" ? "Seller" : "Buyer"}'s Message:
                       </Typography>
                       <Typography
                         textAlign="left"
@@ -436,7 +446,9 @@ function OrderSummary() {
                       fontWeight={500}
                       color={"#76808F"}
                     >
-                      I want to buy for:
+                      {tradeType === "buy"
+                        ? "I want to buy for"
+                        : "I want to sell for:"}
                     </Typography>
                     <Box
                       display={"flex"}
@@ -487,7 +499,7 @@ function OrderSummary() {
                       fontWeight={500}
                       color={"#76808F"}
                     >
-                      I will get:
+                      {tradeType === "buy" ? "I will get:" : "I will send:"}
                     </Typography>
                     <Box
                       display={"flex"}
@@ -507,7 +519,7 @@ function OrderSummary() {
                         fullWidth
                         type="text"
                         error={tokenInputError.status}
-                        // disableUnderline
+                        disableUnderline
                         placeholder="0.00"
                         value={parsedTokenInput}
                         onChange={(e) => onTokenInputChange(e.target.value)}
@@ -522,7 +534,18 @@ function OrderSummary() {
                       </span>
                     </Box>
                     {tokenInputError?.status && (
-                      <div>{tokenInputError.message}</div>
+                      <div>
+                        <Typography
+                          textAlign="left"
+                          variant="body2"
+                          fontSize={13}
+                          fontWeight={500}
+                          color={"#e57373"}
+                          pt={1}
+                        >
+                          * {tokenInputError.message}
+                        </Typography>
+                      </div>
                     )}
                   </Box>
                   <div className="d-flex justify-content-center mt-4">

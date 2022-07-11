@@ -3,6 +3,7 @@ import {
   fetchUserTradeById,
   fetchUserTradeByOrderId,
   fetchUserTrades,
+  updateTransaction,
 } from "../utils/httpCalls/orderTradeCalls";
 import {
   CREATE_TRADE_LOADING,
@@ -102,3 +103,19 @@ export const getUserTradeByOrderId =
       payload: result.data,
     });
   };
+
+export const updateTrade = (trxId, authToken) => async (dispatch) => {
+  const result = await updateTransaction(trxId, authToken);
+
+  if (result?.status !== 200) {
+    dispatch({
+      type: TRADE_ERROR,
+      payload: result.message,
+    });
+    return;
+  }
+  dispatch({
+    type: GET_TRADE,
+    payload: result.data,
+  });
+};

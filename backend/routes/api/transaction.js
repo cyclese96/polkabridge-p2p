@@ -281,6 +281,10 @@ router.post(
   }
 );
 
+// @route GET /transaction-apis/v1/order-transactions"
+// @desc get buy user order transactions: pending, all
+// @access Authenticated
+// @params:  page, trx_status
 router.get("/order-transactions", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -324,7 +328,7 @@ router.get("/order-transactions", auth, async (req, res) => {
       ],
     };
 
-    console.log("final query ", finalQuery);
+    // console.log("final query ", finalQuery);
 
     const transactions = await Transaction.find(finalQuery)
       .populate("buyer")
@@ -344,6 +348,9 @@ router.get("/order-transactions", auth, async (req, res) => {
   }
 });
 
+// @route GET /transaction-apis/v1/order-transaction/:trx_id"
+// @desc get transaction by id
+// @access Authenticated
 router.get("/order-transaction/:trx_id", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -378,6 +385,9 @@ router.get("/order-transaction/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route GET /transaction-apis/v1/order/order-transaction/:order_id"
+// @desc get user pending transaction by order id
+// @access Authenticated
 router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -402,15 +412,16 @@ router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
         {
           transaction_status: { $gte: 0, $lte: 2 },
           buyer: mongoose.Types.ObjectId(userId),
+          order: mongoose.Types.ObjectId(orderId),
         },
         {
           transaction_status: { $gte: 0, $lte: 2 },
           seller: mongoose.Types.ObjectId(userId),
+          order: mongoose.Types.ObjectId(orderId),
         },
       ],
     };
 
-    console.log("pending query ", pendingOrderQuery);
     const transaction = await Transaction.findOne(pendingOrderQuery)
       .populate("buyer")
       .populate({ path: "seller", populate: { path: "payment_options" } })
@@ -432,6 +443,9 @@ router.get("/order/order-transaction/:order_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/update/:trx_id"
+// @desc update transaction status
+// @access Authenticated
 router.patch("/update/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -472,7 +486,13 @@ router.patch("/update/:trx_id", auth, async (req, res) => {
       });
     }
 
-    const finalTrx = await Transaction.findById(transactionId);
+    const finalTrx = await Transaction.findById(transactionId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     return res.status(200).json(finalTrx);
   } catch (error) {
@@ -481,6 +501,9 @@ router.patch("/update/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/raise-issue/:trx_id"
+// @desc Raise transaction issue
+// @access Authenticated
 router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -521,7 +544,13 @@ router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
         .json({ errors: [{ msg: "Unauthorized access of cancel order" }] });
     }
 
-    const finalTrx = await Transaction.findById(transactionId);
+    const finalTrx = await Transaction.findById(transactionId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     return res.status(200).json(finalTrx);
   } catch (error) {
@@ -530,6 +559,9 @@ router.patch("/raise-issue/:trx_id", auth, async (req, res) => {
   }
 });
 
+// @route PATCH /transaction-apis/v1/raise-issue/:trx_id"
+// @desc Raise transaction issue
+// @access Authenticated
 router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
   try {
     const transactionId = req.params.trx_id;
@@ -571,7 +603,13 @@ router.patch("/cancel-order/:trx_id", auth, async (req, res) => {
     // revert deducted pending order amount
     const orderId = transaction?.order;
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId)
+      .populate("buyer")
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     if (!order) {
       return res.status(400).json({

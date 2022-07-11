@@ -24,13 +24,13 @@ export const getUser = async (
   }
 };
 
-export const updateProfile = async (updateData: any) => {
+export const updateProfile = async (updateData: any, authToken: string) => {
   try {
     const result = await axios.put(
       `${BASE_API_ENDPOINT}/auth-apis/v1/user`,
       updateData,
       {
-        headers: { ...globalHeaders, "x-auth-token": localStorage.user },
+        headers: { ...globalHeaders, "x-auth-token": authToken },
       }
     );
 
@@ -44,7 +44,7 @@ export const updateProfile = async (updateData: any) => {
   }
 };
 
-export const updatePayments = async (updateData: any) => {
+export const updatePayments = async (updateData: any, authToken: string) => {
   try {
     let result;
 
@@ -53,14 +53,14 @@ export const updatePayments = async (updateData: any) => {
       result = await axios.put(
         `${BASE_API_ENDPOINT}/auth-apis/v1/user/payment-option`,
         updateData,
-        { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
+        { headers: { ...globalHeaders, "x-auth-token": authToken } }
       );
     } else {
       console.log("updating  existing payment option");
       result = await axios.put(
         `${BASE_API_ENDPOINT}/auth-apis/v1/user/payment-option/${updateData?._id}`,
         updateData,
-        { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
+        { headers: { ...globalHeaders, "x-auth-token": authToken } }
       );
     }
 
@@ -76,12 +76,15 @@ export const updatePayments = async (updateData: any) => {
   }
 };
 
-export const updateDefaultCurrency = async (updateData: any) => {
+export const updateDefaultCurrency = async (
+  updateData: any,
+  authToken: string
+) => {
   try {
     const result = await axios.post(
       `${BASE_API_ENDPOINT}/auth-apis/v1/user/payment-option`,
       updateData,
-      { headers: { ...globalHeaders, "x-auth-token": localStorage.user } }
+      { headers: { ...globalHeaders, "x-auth-token": authToken } }
     );
 
     return { status: result?.status, data: result?.data?.fiat };

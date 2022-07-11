@@ -43,15 +43,18 @@ function ProfilePayments() {
   const paymentOptions = useSelector(
     (state) => state?.profile?.profile?.payment_options
   );
+  const authenticatedUser = useSelector((state) => state?.user);
 
   const handlePaymentUpdate = useCallback(
     (payload) => {
-      dispatch(updateUserPaymentPreferences(payload));
+      dispatch(
+        updateUserPaymentPreferences(payload, authenticatedUser?.jwtToken)
+      );
     },
-    [updateUserPaymentPreferences]
+    [updateUserPaymentPreferences, authenticatedUser]
   );
 
-  const paymentModes = ["imps", "neft", "upi", "paytm"];
+  const paymentModes = ["imps", "neft", "upi"];
 
   const remainingModes = useMemo(() => {
     const existingModes = paymentOptions

@@ -159,3 +159,23 @@ export const verifyDeposit = async (orderId: string, authToken: string) => {
     };
   }
 };
+
+// token deposts used in all sell orders
+export const fetchUserTotalActiveDeposits = async (authToken: string) => {
+  try {
+    let response;
+
+    response = await axios.get(
+      `${BASE_API_ENDPOINT}/order-apis/v1/active-deposits`,
+      { headers: { ...globalHeaders, "x-auth-token": authToken } }
+    );
+
+    return { status: response?.status, data: response?.data };
+  } catch (error: any) {
+    console.log("fetchUserTrades ", { error });
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
+  }
+};

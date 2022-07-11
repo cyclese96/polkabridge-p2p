@@ -580,10 +580,12 @@ router.get("/orders/:page_number", auth, async (req, res) => {
       orderFilter.token = mongoose.Types.ObjectId(req.query.token);
     }
 
-    if (req.query.user) {
-      orderFilter.user = mongoose.Types.ObjectId(req.query.user);
+    if (
+      req.query.user &&
+      req.query.user?.toString() === req.user.id?.toString()
+    ) {
+      orderFilter.user = mongoose.Types.ObjectId(req.user?.id);
     }
-    console.log("orderFilter ", orderFilter);
 
     // prepare sorting
     let sortBy = {};
@@ -624,6 +626,42 @@ router.get("/order/:order_id", auth, async (req, res) => {
     }
 
     return res.status(200).json(order);
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ errors: [{ msg: "Server error" }] });
+  }
+});
+
+// @route GET /order-apis/v1/order/active-deposits"
+// @desc get user active deposits:
+// @access Authenticated
+router.get("/active-deposits", auth, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const filter = {};
+    filter.user = mongoose.Types.ObjectId(req.user?.id);
+    filter.order_status = "active";
+
+    const userActiveOrders = await Order.find(filter);
+
+    let total_active_deposits = new BigNumber(0);
+
+    userActiveOrders?.forEach((item) => {
+      const currDepositAmount = !item?.final_order_amount
+        ? 0
+        : item?.final_order_amount;
+      let curr = new BigNumber(currDepositAmount).plus(total_active_deposits);
+      total_active_deposits = curr;
+    });
+
+    return res
+      .status(200)
+      .json({ total_active_deposits: total_active_deposits?.toString() });
   } catch (error) {
     console.log(error);
     res.status(401).json({ errors: [{ msg: "Server error" }] });

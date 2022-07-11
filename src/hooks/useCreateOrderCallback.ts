@@ -39,7 +39,7 @@ export function useCreateOrderCallback(): [
           ...orderStatus,
           loading: false,
           id: response?.data?._id,
-          status: CreateStatus.SUBMITTED,
+          status: CreateStatus.ACTIVE,
         });
       } else {
         setStatus({
@@ -53,6 +53,7 @@ export function useCreateOrderCallback(): [
     [chainId, userAuth]
   );
 
+  // depricated logic
   const validateSellOrder = useCallback(
     async (id: string) => {
       setStatus({ ...orderStatus, type: "sell", loading: true });

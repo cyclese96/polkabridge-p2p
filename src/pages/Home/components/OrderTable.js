@@ -233,9 +233,7 @@ export default function OrderTable({ orders }) {
                         {" "}
                         {order?.payment_options?.join(", ").toUpperCase()}
                       </td>
-                      <td className={classes.otherText}>
-                        {moment(order?.created_at).format("hh:mm A MM-DD-YYYY")}
-                      </td>
+
                       <td className={classes.otherText}>
                         {order?.order_type === "sell" ? (
                           <Link

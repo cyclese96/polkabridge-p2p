@@ -15,6 +15,7 @@ export function useTokenAllowance(
   const initialState: TransactionStatus = {
     hash: "",
     status: null,
+    state: 0,
   };
   const [data, setData] = useState(initialState);
   const blockNumber = useBlockNumber();
@@ -65,7 +66,7 @@ export function useTokenAllowance(
   );
 
   const transactionStatus = useMemo(() => {
-    return { status: data?.status, hash: data?.hash };
+    return { status: data?.status, hash: data?.hash, state: data.state };
   }, [data]);
 
   return [allowanceStatus, confirmAllowance, transactionStatus];

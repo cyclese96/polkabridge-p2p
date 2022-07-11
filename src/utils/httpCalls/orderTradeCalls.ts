@@ -104,3 +104,27 @@ export const fetchUserTradeByOrderId = async (
     };
   }
 };
+
+export const updateTransaction = async (trxId: string, authToken: string) => {
+  try {
+    if (!trxId) {
+      return { status: false, data: null };
+    }
+
+    const result = await axios.patch(
+      `${BASE_API_ENDPOINT}/transaction-apis/v1/update/${trxId}`,
+      {},
+      {
+        headers: { ...globalHeaders, "x-auth-token": authToken },
+      }
+    );
+
+    return { status: result?.status, data: result?.data };
+  } catch (error: any) {
+    console.log("error ", error);
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
+  }
+};

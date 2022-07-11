@@ -25,7 +25,7 @@ import {
   MoneyOutlined,
   PriceChange,
 } from "@mui/icons-material";
-import HowItWorks from "../../common/HowItWorks";
+import HowItWorks from "../../../common/HowItWorks";
 
 const useStyles = makeStyles((theme) => ({
   background: {
