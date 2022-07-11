@@ -50,7 +50,7 @@ contract P2PExchange is Ownable, ReentrancyGuard {
         uint256 tokenBalanceAfter = IERC20(_token).balanceOf(address(this));
         uint256 tokenRealAmount = tokenBalanceAfter - tokenBalanceBefore;
         // UserInfo storage user = users[msg.sender][_token];
-        users[msg.sender][_token].amount = tokenRealAmount.mul(100-fee).div(100);
+        users[msg.sender][_token].amount += tokenRealAmount.mul(100-fee).div(100);
         users[msg.sender][_token].depositedTime = block.timestamp;
         if (!existTokenInPool(_token))
             tokenList.push(_token);
@@ -93,7 +93,7 @@ contract P2PExchange is Ownable, ReentrancyGuard {
 
     // transfer coin into polkabridge vault
     function depositETH() external payable {        
-        users[msg.sender][WETH].amount = msg.value.mul((100-fee)/100);
+        users[msg.sender][WETH].amount += msg.value.mul((100-fee)/100);
         users[msg.sender][WETH].depositedTime = block.timestamp;
 
         emit DepositETH(msg.sender, msg.value);
