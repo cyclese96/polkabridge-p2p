@@ -3,6 +3,7 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import { fromWei } from "../../../utils/helper";
 import ChatBox from "./ChatBox";
 import PaymentInfo from "./PaymentInfo";
+import ChatSection from "../../../common/ChatSection";
 
 export default function BuyOrderWaiting({ classes, pendingTrade, tradeType }) {
   const isFiatTransferDone = useMemo(() => {
@@ -271,7 +272,7 @@ export default function BuyOrderWaiting({ classes, pendingTrade, tradeType }) {
           </Box>
         </Grid>
         <Grid item md={4}>
-          <ChatBox />
+          <ChatSection />
         </Grid>
       </Grid>
     </div>
