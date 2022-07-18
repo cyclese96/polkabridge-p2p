@@ -16,16 +16,17 @@ import HowItWorks from "../../../common/HowItWorks";
 import TxPopup from "../../../common/popups/TxPopup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../../utils/helper";
+import { depositFee, fromWei, toWei } from "../../../utils/helper";
 import { useDepositCallback } from "../../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../../hooks/useAllowance";
 import { ALLOWANCE_AMOUNT } from "../../../constants/index";
 import { getUserProfile } from "../../../actions/profileActions";
 import useActiveWeb3React from "../../../hooks/useActiveWeb3React";
 import { useCreateOrderCallback } from "../../../hooks/useCreateOrderCallback";
-import { CreateStatus, TransactionState } from "../../../utils/interface";
+import { TransactionState } from "../../../utils/interface";
 import BigNumber from "bignumber.js";
 import { createOrder } from "../../../utils/httpCalls";
+import PopupLayout from "../../../common/popups/PopupLayout";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -200,6 +201,7 @@ function CreateOrder() {
   const [price, setPrice] = useState("");
   const [token, setToken] = useState("PBR");
   const [tokenAmount, setTokenAmount] = useState("");
+  const [remarks, setRemarks] = useState("");
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [error, setError] = useState("");
 
@@ -255,8 +257,12 @@ function CreateOrder() {
     dispatch(getUserProfile());
   }, [chainId]);
 
-  const [allowance, confirmAllowance, allowanceTrxStatus] =
-    useTokenAllowance(selectedToken);
+  const [
+    allowance,
+    confirmAllowance,
+    allowanceTrxStatus,
+    resetAllwanceTrxState,
+  ] = useTokenAllowance(selectedToken);
   const [
     depositTokens,
     withdrawTokens,
@@ -264,20 +270,23 @@ function CreateOrder() {
     depositTrxStatus,
     userDeposit,
   ] = useDepositCallback(selectedToken);
-  const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
-    useCreateOrderCallback();
+  // const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
+  //   useCreateOrderCallback();
 
   const handleModalClose = useCallback(() => {
     setOpen(false);
     resetTrxState();
+    resetAllwanceTrxState();
   }, [isOpen, setOpen, resetTrxState]);
 
   useEffect(() => {
     console.log("user deposits", {
       userDeposit,
+      depositTrxStatus,
+      allowanceTrxStatus,
       // tokenAmount: toWei(tokenAmount, selectedToken?.decimals),
     });
-  }, [userDeposit, tokenAmount]);
+  }, [userDeposit, tokenAmount, depositTrxStatus]);
 
   const isSufficientDeposits = useMemo(() => {
     return new BigNumber(userDeposit).gte(
@@ -286,7 +295,10 @@ function CreateOrder() {
   }, [userDeposit, tokenAmount, selectedToken]);
 
   const depositsNeeded = useMemo(() => {
-    return new BigNumber(toWei(tokenAmount, selectedToken?.decimals))
+    const tokenAmountWei = toWei(tokenAmount, selectedToken?.decimals);
+    const fee = depositFee(tokenAmountWei, selectedToken);
+    return new BigNumber(tokenAmountWei)
+      .plus(fee)
       .minus(userDeposit)
       ?.toString();
   }, [userDeposit, tokenAmount, selectedToken]);
@@ -308,6 +320,7 @@ function CreateOrder() {
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),
         payment_options: paymentMethods,
+        description: remarks,
       };
 
       const response = await createOrder("buy", payload, userAuth?.jwtToken);
@@ -324,6 +337,7 @@ function CreateOrder() {
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),
         payment_options: paymentMethods,
+        description: remarks,
       };
 
       const response = await createOrder("sell", payload, userAuth?.jwtToken);
@@ -342,17 +356,8 @@ function CreateOrder() {
     price,
     paymentMethods,
     userAuth,
+    remarks,
   ]);
-
-  // const handleDeposit = () => {
-  //   setOpen(true);
-  //   console.log("allowance ", allowance);
-  //   if (!allowance) {
-  //     confirmAllowance(ALLOWANCE_AMOUNT);
-  //   } else {
-  //     depositTokens(tokenAmount);
-  //   }
-  // };
 
   const handleDeposit = useCallback(() => {
     if (!allowance) {
@@ -373,11 +378,21 @@ function CreateOrder() {
 
   return (
     <Box className={classes.background}>
-      {/* <TxPopup
-        txCase={depositTrxStatus?.state}
-        hash={depositTrxStatus?.hash}
-        resetPopup={resetTrxState}
-      /> */}
+      <PopupLayout
+        popupActive={
+          depositTrxStatus?.state > 0 || allowanceTrxStatus.state > 0
+        }
+      >
+        <TxPopup
+          txCase={
+            allowanceTrxStatus?.state
+              ? allowanceTrxStatus?.state
+              : depositTrxStatus?.state
+          }
+          hash={depositTrxStatus?.hash}
+          resetPopup={handleModalClose}
+        />
+      </PopupLayout>
       {step === 0 && (
         <Container>
           <Box>
@@ -866,6 +881,8 @@ function CreateOrder() {
                     </Typography>
                     <TextareaAutosize
                       type="text"
+                      value={remarks}
+                      onChange={(e) => setRemarks(e.target.value)}
                       placeholder="Enter your message for seller"
                       style={{
                         width: "80%",
@@ -1246,7 +1263,7 @@ function CreateOrder() {
                       color={"#778090"}
                       lineHeight={1.8}
                     >
-                      {""}
+                      {remarks}
                     </Typography>
                   </Box>
                 </Grid>
@@ -1278,6 +1295,17 @@ function CreateOrder() {
                   </>
                 )}
 
+                <Button
+                  onClick={() => setStep(0)}
+                  style={{
+                    borderRadius: 10,
+                    background: "#F8F8F",
+                    padding: "9px 35px 9px 35px",
+                    color: "black",
+                  }}
+                >
+                  Cancel
+                </Button>
                 <Button
                   onClick={submitOrder}
                   style={{

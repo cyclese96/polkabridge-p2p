@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { CHAIN_IDS } from "../constants/chains";
+import { TOKEN_ADDRESS } from "../constants/index";
 
 export const fromWei = (tokens, decimals = 18) => {
   try {
@@ -145,4 +146,32 @@ export const setupNetwork = async (networkObject) => {
     );
     return false;
   }
+};
+
+function isDeflationary(tokenAddress, chainId = 4) {
+  return (
+    tokenAddress?.toLowerCase() === TOKEN_ADDRESS.PBR[chainId].toLowerCase()
+  );
+}
+
+export const depositFee = (tokenAmountInWei, fee = 1) => {
+  if (!tokenAmountInWei) {
+    return;
+  }
+
+  return new BigNumber(tokenAmountInWei).multipliedBy(fee).div(100).toString();
+};
+
+export const depositNeededWithFee = (tokenAmountInWei, token) => {
+  if (!tokenAmountInWei || !token?.address) {
+    return null;
+  }
+
+  if (isDeflationary(token?.address)) {
+    return new BigNumber(tokenAmountInWei)
+      .plus(depositFee(tokenAmountInWei, 1))
+      .plus(depositFee(tokenAmountInWei));
+  }
+
+  return new BigNumber(tokenAmountInWei).plus(depositFee(tokenAmountInWei, 1));
 };

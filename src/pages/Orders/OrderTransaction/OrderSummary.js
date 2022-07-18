@@ -5,9 +5,9 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import HowItWorks from "../../../common/HowItWorks";
 import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../../utils/helper";
+import { depositFee, fromWei, toWei } from "../../../utils/helper";
 import BigNumber from "bignumber.js";
-import { startOrderTrade } from "../../../actions/tradeActions";
+import { useDepositCallback } from "../../../hooks/useDepositCallback";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -162,6 +162,14 @@ function OrderSummary() {
 
   const currentUserAuth = useSelector((state) => state?.user?.jwtToken);
 
+  const selectedToken = useMemo(() => {
+    if (!order?._id) {
+      return null;
+    }
+
+    return order?.token;
+  }, [order]);
+
   useEffect(() => {
     async function asyncFn() {
       if (order_id && currentUserAuth) {
@@ -238,24 +246,64 @@ function OrderSummary() {
     (state) => state?.userTrade?.createTradeLoading
   );
 
+  const [
+    depositTokens,
+    withdrawTokens,
+    resetTrxState,
+    depositTrxStatus,
+    userDeposit,
+  ] = useDepositCallback(selectedToken);
+
+  const isSufficientDeposits = useMemo(() => {
+    return new BigNumber(userDeposit).gte(
+      toWei(tokenInput, selectedToken?.decimals)
+    );
+  }, [userDeposit, tokenInput, selectedToken]);
+
+  const depositsNeeded = useMemo(() => {
+    const tokenAmountWei = toWei(tokenInput, selectedToken?.decimals);
+    const fee = depositFee(tokenAmountWei, selectedToken);
+    return new BigNumber(tokenAmountWei)
+      .plus(fee)
+      .minus(userDeposit)
+      ?.toString();
+  }, [userDeposit, tokenInput, selectedToken]);
+
+  useEffect(() => {
+    console.log("user deposit ", {
+      userDeposit,
+      depositTrxStatus,
+      selectedToken,
+      isSufficientDeposits,
+      depositsNeeded,
+    });
+  }, [
+    userDeposit,
+    depositTrxStatus,
+    selectedToken,
+    isSufficientDeposits,
+    depositsNeeded,
+  ]);
+
   const handleTrade = useCallback(() => {
     if (!tradeType) {
       return;
     }
 
-    const tradeInput = {
-      orderId: order_id,
-      tokenAmount: toWei(parsedTokenInput, order?.token?.decimals),
-      fiatAmount: parsedFiatInput,
-    };
+    // const tradeInput = {
+    //   orderId: order_id,
+    //   tokenAmount: toWei(parsedTokenInput, order?.token?.decimals),
+    //   fiatAmount: parsedFiatInput,
+    // };
 
-    dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
+    // dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
 
-    navigate(`/order-waiting/${order_id}`);
+    // navigate(`/order-waiting/${order_id}`);
   }, [currentUserAuth, tradeType, order, parsedTokenInput, parsedFiatInput]);
 
   const handleOnCancelTrade = useCallback(() => {
     setFiatInput("");
+    navigate(`/`);
   }, [tradeType, setFiatInput]);
 
   useEffect(() => {
@@ -548,6 +596,28 @@ function OrderSummary() {
                       </div>
                     )}
                   </Box>
+                  <div className="d-flex justify-content-between mt-4">
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      Your deposits
+                    </Typography>
+
+                    <Typography
+                      textAlign="left"
+                      variant="body2"
+                      fontSize={15}
+                      fontWeight={500}
+                      color={"#76808F"}
+                    >
+                      {fromWei(userDeposit, order?.token?.decimals)}{" "}
+                      {order?.token?.symbol}
+                    </Typography>
+                  </div>
                   <div className="d-flex justify-content-center mt-4">
                     <Button
                       style={{
@@ -583,7 +653,6 @@ function OrderSummary() {
                     >
                       {tradeType} {order?.token?.symbol}
                     </Button>
-                    <Link to={`/order-payments/${order?._id}`}></Link>
                   </div>
                 </Grid>
               </Grid>

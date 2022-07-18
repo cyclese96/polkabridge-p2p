@@ -1,33 +1,11 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Container, Typography } from "@mui/material";
+import React, { useEffect } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link, useParams } from "react-router-dom";
-import {
-  AccountBalanceWallet,
-  AccountBalanceWalletOutlined,
-  AttachMoney,
-  CreditCard,
-  History,
-  List,
-  ListOutlined,
-  Money,
-  MoneyOutlined,
-  PriceChange,
-} from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -162,12 +140,10 @@ const useStyles = makeStyles((theme) => ({
 
 function ViewMyOrder() {
   const classes = useStyles();
-  const theme = useTheme();
 
   const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { order_id } = useParams();
-  // const { order } = store.order;
   const order = useSelector((state) => state?.order?.order);
 
   useEffect(async () => {
@@ -204,7 +180,7 @@ function ViewMyOrder() {
                     paddingLeft: 5,
                   }}
                 >
-                  27832332
+                  {order?.order_id}
                 </span>
               </Typography>
               <Typography
@@ -223,14 +199,14 @@ function ViewMyOrder() {
                     paddingLeft: 5,
                   }}
                 >
-                  21 June 2022 11:30PM
+                  {moment(order?.created_at).format("hh:mm A MM-DD-YYYY")}
                 </span>
               </Typography>
             </Box>
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Buy Order: #4734638
+              Buy Order: #{order?.order_id}
             </Typography>
             <Typography
               variant="body2"
@@ -240,7 +216,7 @@ function ViewMyOrder() {
               align="center"
               pt={1}
             >
-              Executed at: 21 June, 2022 2PM UTC
+              Executed at: ---
             </Typography>
             <Box className="text-center">
               <img src="/images/success_icon.png" height="100px" />

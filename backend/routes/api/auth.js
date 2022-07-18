@@ -107,7 +107,7 @@ router.get("/user", auth, async (req, res) => {
 });
 
 // @route PUT /api/auth-apis/v1/user"
-// @desc UPDATE user
+// @desc UPDATE user, phone, email default fiat
 // @access AUTHORIZED
 router.put("/user", auth, async (req, res) => {
   try {
@@ -116,16 +116,67 @@ router.put("/user", auth, async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
     const userId = req.user.id;
 
-    const updateObject = req.body;
+    const { email, phone, fiat } = req.body;
 
-    if (Object.keys(updateObject).length === 0) {
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
         errors: {
           msg: "Request body should contain only atleast one field to update",
         },
       });
+    }
+
+    //1 check email
+    //2 check phone
+    //3 check default fiat
+
+    const updateObject = {};
+
+    const userExistWithEmail = await User.findOne({ email: email });
+    const userExistWithPhone = await User.findOne({ phone: phone });
+
+    if (userExistWithEmail && userExistWithEmail?._id?.toString() !== userId) {
+      // different user found with same email
+      return res.status(400).json({
+        errors: {
+          msg: "different user found with same email",
+          location: "body",
+          param: "email",
+        },
+      });
+    } else {
+      updateObject.email = email;
+    }
+
+    if (userExistWithPhone && userExistWithPhone?._id?.toString() !== userId) {
+      // different user found with same phone
+      return res.status(400).json({
+        errors: {
+          msg: "different user found with same phone",
+          location: "body",
+          param: "email",
+        },
+      });
+    } else {
+      // todo validate email
+      updateObject.phone = phone;
+    }
+
+    // check and validate default fiat update
+
+    if (fiat && !mongoose.isValidObjectId(fiat)) {
+      return res.status(400).json({
+        errors: {
+          msg: "Invalid fiat id to update",
+          location: "body",
+          param: "fiat",
+        },
+      });
+    } else {
+      updateObject.fiat = mongoose.Types.ObjectId(fiat);
     }
 
     await User.findByIdAndUpdate(userId, {

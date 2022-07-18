@@ -84,6 +84,7 @@ function UpiCard({ paymentOption, handleUpdate, paymentMode }) {
     userProfile,
     isNewEntry,
     handleUpdate,
+    paymentMode,
     editMode,
     setEditMode,
   ]);

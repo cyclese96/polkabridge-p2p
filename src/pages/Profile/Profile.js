@@ -2,8 +2,6 @@ import { Box, Container, Grid, Hidden, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
 import React, { useState } from "react";
-import PopupLayout from "../../common/popups/PopupLayout";
-import TxPopup from "../../common/popups/TxPopup";
 import ProfileCurrency from "./ProfileComponents/ProfileCurrency";
 import ProfileInfo from "./ProfileComponents/ProfileInfo";
 import ProfileLogout from "./ProfileComponents/ProfileLogout";

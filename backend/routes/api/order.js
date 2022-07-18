@@ -179,6 +179,8 @@ router.put(
 // @desc Create sell order
 // @access Authenticated
 // :todo add authentication and email and phone verification checks to create order
+// should have verified email and phone number
+// should have added atleast one valid payment method
 router.post(
   "/sell-order",
   [check("order_amount", "Order amount required").not().isEmpty()], // order amount should be minimum 100 USD or 0.01 ETH equivalent
@@ -327,6 +329,8 @@ router.post(
         return res.status(201).json(pendingSellOrder);
       }
 
+      // todo: validate user sufficient  deposits from contract to create final sell order
+
       orderObject = await new Order({
         order_type: "sell",
         order_id: new Date().getTime(),
@@ -339,6 +343,7 @@ router.post(
         token: mongoose.Types.ObjectId(token).toString(),
         fiat: mongoose.Types.ObjectId(fiat).toString(),
         order_unit_price: order_unit_price,
+        order_status: "active",
         payment_options,
         description,
       }).save();

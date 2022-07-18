@@ -1,19 +1,8 @@
-import {
-  createOrder,
-  getFiats,
-  getGlobalPaymentOptions,
-  getOrderById,
-  getOrders,
-  getTokens,
-} from "../utils/httpCalls";
+import { createOrder, getOrderById, getOrders } from "../utils/httpCalls";
 import { createTrade } from "../utils/httpCalls/orderTradeCalls";
 import {
   GET_ORDERS,
   GET_ORDER,
-  GET_FIATS,
-  GET_TOKENS,
-  GET_PAYMENTS,
-  CREATE_NEW_ORDER,
   GET_ERRORS,
   RESET_NEW_ORDER,
   GET_USER_ORDERS,
@@ -58,58 +47,36 @@ export const getLatestOrders =
     }
   };
 
-// export const getAllTokens = () => async (dispatch) => {
-//   const result = await getTokens();
+// Latest orders in the market
+export const getUserOrders =
+  (pageNumber, filters = {}, authToken) =>
+  async (dispatch) => {
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: true,
+    });
 
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
+    const result = await getOrders(pageNumber, filters, authToken);
 
-//   dispatch({
-//     type: GET_TOKENS,
-//     payload: result.data,
-//   });
-// };
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: false,
+    });
 
-// export const getAllFiats = () => async (dispatch) => {
-//   const result = await getFiats();
+    if (result?.status !== 200) {
+      dispatch({
+        type: GET_ERRORS,
+        payload: result.message,
+      });
 
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
+      return;
+    }
 
-//   dispatch({
-//     type: GET_FIATS,
-//     payload: result.data,
-//   });
-// };
-
-// GET
-// All Payment Options
-// export const getAllPaymentOptions = () => async (dispatch) => {
-//   const result = await getGlobalPaymentOptions();
-
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
-
-//   dispatch({
-//     type: GET_PAYMENTS,
-//     payload: result.data,
-//   });
-// };
+    dispatch({
+      type: GET_USER_ORDERS,
+      payload: result.data,
+    });
+  };
 
 // POST
 // CREATE SELL ORDER

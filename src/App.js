@@ -43,7 +43,7 @@ function App() {
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed/:order_id" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/my-orders/1" element={<ViewMyOrder />} />
+              <Route path="/my-orders/:order_id" element={<ViewMyOrder />} />
               <Route path="/order-review" element={<OrderReview />} />
             </Routes>
             <Container>

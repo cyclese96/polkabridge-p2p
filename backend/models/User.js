@@ -13,14 +13,14 @@ const UserSchema = new Schema({
   },
   email_verified: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   phone: {
     type: String,
   },
   phone_verified: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   avatar: {
     type: String,

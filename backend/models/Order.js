@@ -52,7 +52,7 @@ const OrderSchema = new Schema({
   },
   order_status: {
     type: String,
-    default: "submitted", // submitted / active / completed / cancelled
+    required: true,
   },
   payment_options: {
     // payment for buy/sell orders

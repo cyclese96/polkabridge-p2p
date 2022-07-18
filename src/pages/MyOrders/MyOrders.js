@@ -11,11 +11,10 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
-// import { useUserOrders } from "../../hooks/useOrders";
 import { fromWei } from "../../utils/helper";
 import { getUserTrades } from "../../actions/tradeActions";
 import { useNavigate } from "react-router-dom";
-import { getLatestOrders } from "../../actions/orderActions";
+import { getUserOrders } from "../../actions/orderActions";
 import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
@@ -115,8 +114,6 @@ function MyOrders() {
   const classes = useStyles();
   const theme = useTheme();
 
-  const store = useSelector((state) => state);
-  const { fiats, tokens, payments } = store.order;
   const [pageNumber, setPageNumber] = useState(1);
   const [orderType, setOrderType] = useState("all");
   const [token, setToken] = useState("All");
@@ -125,10 +122,10 @@ function MyOrders() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // const profile = useSelector((state) => state?.profile?.profile);
-  const authenticatedUser = useSelector((state) => state?.user);
+  const authState = useSelector((state) => state?.user);
   const loading = useSelector((state) => state?.userTrade?.fetchTradeLoading);
   const pendingTrades = useSelector((state) => state?.userTrade?.trades);
+  const tokens = useSelector((state) => state?.order?.tokens);
 
   const userAds = useSelector((state) => state?.order?.userOrders);
 
@@ -136,25 +133,19 @@ function MyOrders() {
     console.log("user ads", userAds);
   }, [userAds]);
   useEffect(() => {
-    if (!authenticatedUser) {
+    if (!authState?.id) {
       return;
     }
 
     //: add filters
-    if (tabValue === 2) {
+    if (tabValue === 0) {
       dispatch(
-        getLatestOrders(
-          1,
-          { ...{}, user: authenticatedUser?._id },
-          authenticatedUser?.jwtToken
-        )
+        getUserOrders(1, { ...{}, user: authState?.id }, authState?.jwtToken)
       );
     }
 
-    dispatch(
-      getUserTrades(authenticatedUser?.jwtToken, orderType, orderStatus)
-    );
-  }, [authenticatedUser, orderType, orderStatus, tabValue]);
+    dispatch(getUserTrades(authState?.jwtToken, orderType, orderStatus));
+  }, [authState, orderType, orderStatus, tabValue]);
 
   const selectedToken = useMemo(() => {
     const tokenObject = tokens?.find((item) => item?.symbol === token);
@@ -172,21 +163,6 @@ function MyOrders() {
     }
     setTabValue(newValue);
   };
-
-  const handleApplyFilters = () => {
-    // prepare filter object based on current selection
-    // const filter = {
-    //   order_type:
-    //     orderType === "all" ? null : orderType === "sell" ? "buy" : "sell",
-    //   token: selectedToken?._id,
-    //   order_status: orderStatus,
-    // };
-    // updateFilters(filter);
-  };
-
-  useEffect(() => {
-    handleApplyFilters();
-  }, [orderType, selectedToken, orderStatus]);
 
   return (
     <Box className={classes.background}>
@@ -208,9 +184,9 @@ function MyOrders() {
               textColor="primary"
               indicatorColor="primary"
             >
-              <Tab value={0} label="Processing" />
-              <Tab value={1} label="All Orders" />
-              <Tab value={2} label="My Ads" />
+              <Tab value={0} label="My Ads" />
+              <Tab value={1} label="Processing" />
+              <Tab value={2} label="All Orders" />
             </Tabs>
           </Box>
 
@@ -319,7 +295,7 @@ function MyOrders() {
                   </th>
                 </tr>
 
-                {[0, 1].includes(tabValue) &&
+                {[1, 2].includes(tabValue) &&
                   pendingTrades?.map((item) => (
                     <tr className={classes.tr}>
                       <td style={{ width: "12%" }}>
@@ -391,7 +367,7 @@ function MyOrders() {
                           className={classes.otherText}
                         >
                           {item?.buyer?._id?.toString() ===
-                          authenticatedUser?.id?.toString()
+                          authState?.id?.toString()
                             ? "Buy"
                             : "Sell"}
                         </Typography>
@@ -442,7 +418,7 @@ function MyOrders() {
                     </tr>
                   ))}
                 {/* my ads */}
-                {[2].includes(tabValue) &&
+                {[0].includes(tabValue) &&
                   userAds?.map((orderAd) => (
                     <tr className={classes.tr}>
                       <td style={{ width: "12%" }}>
@@ -538,9 +514,7 @@ function MyOrders() {
                             padding: "5px 20px 5px 20px",
                             color: "white",
                           }}
-                          onClick={() =>
-                            navigate(`/order-placed/${orderAd?._id}`)
-                          }
+                          onClick={() => navigate(`/my-orders/${orderAd?._id}`)}
                         >
                           View
                         </Button>

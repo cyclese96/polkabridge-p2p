@@ -5,9 +5,16 @@ export const supportedChains = [
 
 export const ALLOWANCE_AMOUNT = "999999999";
 
+export const TOKEN_ADDRESS = {
+  PBR: {
+    1: "0x298d492e8c1d909D3F63Bc4A36C66c64ACB3d695",
+    4: "0xf6c9FF0543f932178262DF8C81A12A3132129b51",
+  },
+};
+
 export const P2P_ADDRESSES: { [index: number]: string } = {
   1: "",
-  4: "0xC6C4f1f496Fe6Bd584aa876f02AAAcDb0C7dBCe3",
+  4: "0xC76Eebd14F1E5BAe5e70F349d08e54c5E7df6516",
 };
 
 export const CONNECTOR_TYPE = {
@@ -17,6 +24,8 @@ export const CONNECTOR_TYPE = {
 
 export const NETWORK_TYPE = 1; // testing:1, mainnet:0
 export const SUPPORTED_PAYMENT_METHODS = ["upi", "BANK TRANSFER"];
+
+export const TRADE_FEE = 1;
 
 export const TOKENS = {
   4: {

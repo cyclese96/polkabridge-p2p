@@ -58,12 +58,12 @@ const useStyles = makeStyles((theme) => ({
 
 function ProfileCurrency() {
   const classes = useStyles();
-  const theme = useTheme();
 
   const dispatch = useDispatch();
   const [selectedId, setSelectedId] = useState("");
 
   const profile = useSelector((state) => state?.profile?.profile);
+  const authState = useSelector((state) => state?.user);
 
   useEffect(() => {
     if (!profile) {
@@ -79,9 +79,9 @@ function ProfileCurrency() {
       let tempObj = {
         fiat: selectedId,
       };
-      dispatch(updateUserProfile(tempObj));
+      dispatch(updateUserProfile(tempObj, authState?.jwtToken));
     }
-  }, [fiats, selectedId]);
+  }, [fiats, selectedId, authState]);
 
   return (
     <div className={classes.infoCard}>
