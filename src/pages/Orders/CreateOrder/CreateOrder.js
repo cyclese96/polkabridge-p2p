@@ -16,7 +16,13 @@ import HowItWorks from "../../../common/HowItWorks";
 import TxPopup from "../../../common/popups/TxPopup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { depositFee, fromWei, toWei } from "../../../utils/helper";
+import {
+  depositFee,
+  fromWei,
+  tokenAmountAfterFee,
+  tokenAmountWithFee,
+  toWei,
+} from "../../../utils/helper";
 import { useDepositCallback } from "../../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../../hooks/useAllowance";
 import { ALLOWANCE_AMOUNT } from "../../../constants/index";
@@ -268,10 +274,8 @@ function CreateOrder() {
     withdrawTokens,
     resetTrxState,
     depositTrxStatus,
-    userDeposit,
-  ] = useDepositCallback(selectedToken);
-  // const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
-  //   useCreateOrderCallback();
+    userAvailableDeposits,
+  ] = useDepositCallback(selectedToken, selectedToken?._id);
 
   const handleModalClose = useCallback(() => {
     setOpen(false);
@@ -281,27 +285,35 @@ function CreateOrder() {
 
   useEffect(() => {
     console.log("user deposits", {
-      userDeposit,
-      depositTrxStatus,
-      allowanceTrxStatus,
-      // tokenAmount: toWei(tokenAmount, selectedToken?.decimals),
+      userAvailableDeposits,
     });
-  }, [userDeposit, tokenAmount, depositTrxStatus]);
-
-  const isSufficientDeposits = useMemo(() => {
-    return new BigNumber(userDeposit).gte(
-      toWei(tokenAmount, selectedToken?.decimals)
-    );
-  }, [userDeposit, tokenAmount, selectedToken]);
+  }, [userAvailableDeposits]);
 
   const depositsNeeded = useMemo(() => {
-    const tokenAmountWei = toWei(tokenAmount, selectedToken?.decimals);
-    const fee = depositFee(tokenAmountWei, selectedToken);
-    return new BigNumber(tokenAmountWei)
-      .plus(fee)
-      .minus(userDeposit)
+    // deposit needed = tokenAmount - available deposits
+
+    const _tokenAmt = toWei(tokenAmount, selectedToken?.decimals);
+    const _tokenAmtAfterFee = tokenAmountAfterFee(_tokenAmt, selectedToken);
+
+    if (new BigNumber(userAvailableDeposits).gte(_tokenAmtAfterFee)) {
+      return "0";
+    }
+
+    const _depositNeeded = new BigNumber(_tokenAmtAfterFee)
+      .minus(!userAvailableDeposits ? "0" : userAvailableDeposits)
       ?.toString();
-  }, [userDeposit, tokenAmount, selectedToken]);
+
+    const _depositNeededWithFee = tokenAmountWithFee(
+      _depositNeeded,
+      selectedToken
+    );
+
+    return _depositNeededWithFee?.toString();
+  }, [userAvailableDeposits, tokenAmount, selectedToken]);
+
+  const isSufficientDeposits = useMemo(() => {
+    return new BigNumber(depositsNeeded).eq(0);
+  }, [depositsNeeded]);
 
   // sell order states
   const isSubmitOrderDisabled = useMemo(() => {
@@ -339,7 +351,7 @@ function CreateOrder() {
         payment_options: paymentMethods,
         description: remarks,
       };
-
+      console.log("payload", payload);
       const response = await createOrder("sell", payload, userAuth?.jwtToken);
       if (response?.status === 201) {
         navigate(`/order-placed/${response?.data?._id}`);
@@ -1269,63 +1281,72 @@ function CreateOrder() {
                 </Grid>
               </Grid>
 
-              <div className="text-center mt-4 mb-2">
-                {orderType === "sell" && (
-                  <>
-                    <div>
-                      Your deposits:{" "}
-                      {fromWei(userDeposit, selectedToken.decimals)}
-                    </div>
-                    {!isSufficientDeposits && (
-                      <Button
-                        onClick={handleDeposit}
-                        style={{
-                          borderRadius: 10,
-                          background: "#6A55EA",
-                          padding: "9px 35px 9px 35px",
-                          color: "white",
-                          marginRight: 20,
-                        }}
-                      >
-                        {!allowance
-                          ? `Approve ${selectedToken?.symbol}`
-                          : `Deposit ${selectedToken?.symbol}`}
-                      </Button>
-                    )}
-                  </>
-                )}
+              <div className="text-center">
+                {orderType === "sell" &&
+                  " Your deposits: " +
+                    fromWei(userAvailableDeposits, selectedToken.decimals)}
+              </div>
 
+              <div className="text-center mt-4 mb-2">
                 <Button
                   onClick={() => setStep(0)}
                   style={{
                     borderRadius: 10,
-                    background: "#F8F8F",
-                    padding: "9px 35px 9px 35px",
+                    background: "#F5F5F5",
                     color: "black",
+                    width: 180,
+                    // fontWeight: 600,
+
+                    padding: "9px 35px 9px 35px",
+                    marginRight: 20,
                   }}
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={submitOrder}
-                  style={{
-                    borderRadius: 10,
-                    background: isSubmitOrderDisabled ? "#FFFFF" : "#6A55EA",
-                    padding: "9px 35px 9px 35px",
-                    color: isSubmitOrderDisabled ? "black" : "white",
-                  }}
-                  disabled={isSubmitOrderDisabled}
-                >
-                  Submit Order
-                </Button>
+
+                {orderType === "sell" && !isSufficientDeposits ? (
+                  <>
+                    <Button
+                      onClick={handleDeposit}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+
+                        width: 180,
+                      }}
+                    >
+                      {!allowance
+                        ? `Approve ${selectedToken?.symbol}`
+                        : `Deposit ${selectedToken?.symbol}`}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={submitOrder}
+                    style={{
+                      borderRadius: 10,
+                      background: isSubmitOrderDisabled ? "#FFFFF" : "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: isSubmitOrderDisabled ? "black" : "white",
+                    }}
+                    disabled={isSubmitOrderDisabled}
+                  >
+                    Submit Order
+                  </Button>
+                )}
+              </div>
+
+              <div style={{ color: "red", textAlign: "center" }}>
                 {!isSufficientDeposits &&
                   orderType === "sell" &&
                   `Deposit ${fromWei(
                     depositsNeeded,
                     selectedToken?.decimals
-                  )}  ${selectedToken?.symbol}  more   to create sell order`}
+                  )}  ${selectedToken?.symbol}   to create sell order`}
+                {error}
               </div>
-              <div style={{ color: "red", textAlign: "center" }}>{error}</div>
             </div>
 
             <HowItWorks />

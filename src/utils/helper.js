@@ -158,20 +158,44 @@ export const depositFee = (tokenAmountInWei, fee = 1) => {
   if (!tokenAmountInWei) {
     return;
   }
+  const _amt = new BigNumber(tokenAmountInWei);
 
-  return new BigNumber(tokenAmountInWei).multipliedBy(fee).div(100).toString();
+  return _amt.minus(
+    new BigNumber(tokenAmountInWei).multipliedBy(100 - fee).div(100)
+  );
 };
 
-export const depositNeededWithFee = (tokenAmountInWei, token) => {
+export const tokenAmountAfterFee = (tokenAmountInWei, token) => {
   if (!tokenAmountInWei || !token?.address) {
     return null;
   }
 
   if (isDeflationary(token?.address)) {
-    return new BigNumber(tokenAmountInWei)
-      .plus(depositFee(tokenAmountInWei, 1))
-      .plus(depositFee(tokenAmountInWei));
+    const amountAfterDeflFee = new BigNumber(tokenAmountInWei).minus(
+      depositFee(tokenAmountInWei, 0.5)
+    );
+    return amountAfterDeflFee.minus(depositFee(amountAfterDeflFee, 1));
   }
 
-  return new BigNumber(tokenAmountInWei).plus(depositFee(tokenAmountInWei, 1));
+  return new BigNumber(tokenAmountInWei).minus(depositFee(tokenAmountInWei, 1));
+};
+export const tokenAmountWithFee = (tokenAmountInWei, token) => {
+  if (!tokenAmountInWei || !token?.address) {
+    return null;
+  }
+
+  if (isDeflationary(token?.address)) {
+    const amountWithDeflFee = new BigNumber(tokenAmountInWei)
+      .multipliedBy(100)
+      .div(100 - 0.5);
+    const amountWithFee = new BigNumber(amountWithDeflFee)
+      .multipliedBy(100)
+      .div(100 - 1);
+    return amountWithFee?.toFixed(0)?.toString();
+  }
+
+  const amountWithFee = new BigNumber(tokenAmountInWei)
+    .multipliedBy(100)
+    .div(100 - 1);
+  return amountWithFee?.toFixed(0).toString();
 };

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSingleCallResult } from "../state/multicall/hooks";
-import { toWei } from "../utils/helper";
 import { fetchUserTotalActiveDeposits } from "../utils/httpCalls";
 import { TransactionStatus, Token, TransactionState } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
@@ -10,7 +9,8 @@ import { useP2pContract } from "./useContract";
 import BigNumber from "bignumber.js";
 
 export function useDepositCallback(
-  token?: Token
+  token?: Token,
+  token_id?: string
 ): [() => {}, () => {}, () => void, TransactionStatus, string] {
   const { library, account } = useActiveWeb3React();
   const p2pContract = useP2pContract();
@@ -96,15 +96,19 @@ export function useDepositCallback(
 
   useEffect(() => {
     async function fechData() {
-      if (userAuth?.jwtToken) {
-        const res = await fetchUserTotalActiveDeposits(userAuth?.jwtToken);
+      if (userAuth?.jwtToken || !token_id) {
+        const res = await fetchUserTotalActiveDeposits(
+          token_id,
+          userAuth?.jwtToken
+        );
+        // console.log("fetched deposits", res);
 
         setActiveDeposits(res.data?.total_active_deposits);
       }
     }
 
     fechData();
-  }, [userAuth, blockNumber]);
+  }, [userAuth, blockNumber, token_id]);
 
   useEffect(() => {
     if (!data?.hash) {

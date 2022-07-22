@@ -119,7 +119,7 @@ router.put("/user", auth, async (req, res) => {
 
     const userId = req.user.id;
 
-    const { email, phone, fiat } = req.body;
+    const { email, phone, fiat, name } = req.body;
 
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
@@ -177,6 +177,10 @@ router.put("/user", auth, async (req, res) => {
       });
     } else {
       updateObject.fiat = mongoose.Types.ObjectId(fiat);
+    }
+
+    if (name) {
+      updateObject.name = name;
     }
 
     await User.findByIdAndUpdate(userId, {

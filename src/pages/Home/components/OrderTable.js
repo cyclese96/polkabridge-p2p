@@ -2,7 +2,11 @@ import React from "react";
 import { makeStyles } from "@mui/styles";
 import { Box, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import { formattedAddress, fromWei } from "../../../utils/helper";
+import {
+  formatCurrency,
+  formattedAddress,
+  fromWei,
+} from "../../../utils/helper";
 import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
@@ -202,9 +206,11 @@ export default function OrderTable({ orders }) {
                           color={"#212121"}
                           style={{ fontWeight: 500 }}
                         >
-                          {fromWei(
-                            order?.pending_amount,
-                            order?.token?.decimals
+                          {formatCurrency(
+                            fromWei(
+                              order?.pending_amount,
+                              order?.token?.decimals
+                            )
                           )}
                           <span style={{ paddingLeft: 5 }}>
                             {order?.token?.symbol}
@@ -219,11 +225,13 @@ export default function OrderTable({ orders }) {
                           color={"#212121"}
                           style={{ fontWeight: 500, paddingTop: 7 }}
                         >
-                          {order?.order_unit_price *
-                            fromWei(
-                              order?.pending_amount,
-                              order?.token?.decimals
-                            )}
+                          {formatCurrency(
+                            order?.order_unit_price *
+                              fromWei(
+                                order?.pending_amount,
+                                order?.token?.decimals
+                              )
+                          )}
                           <span style={{ paddingLeft: 5 }}>
                             {order?.fiat?.fiat}
                           </span>

@@ -20,6 +20,8 @@ import {
 import HowItWorks from "../../../common/HowItWorks";
 import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
+import { fromWei } from "../../../utils/helper";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -243,7 +245,7 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order?.order_unit_price}
+                            {order?.order_unit_price} {order?.fiat?.fiat}
                           </Typography>
                         </Box>
                       </Grid>
@@ -270,7 +272,11 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order?.order_amount} {order?.token?.symbol}
+                            {fromWei(
+                              order?.pending_amount,
+                              order?.token?.decimals
+                            )}{" "}
+                            {order?.token?.symbol}
                           </Typography>
                         </Box>
                       </Grid>
@@ -297,7 +303,14 @@ function OrderPlaced() {
                             align="left"
                             style={{ fontWeight: 600 }}
                           >
-                            {order?.order_unit_price * order?.order_unit_price}{" "}
+                            {new BigNumber(
+                              fromWei(
+                                order?.pending_amount,
+                                order?.token?.decimals
+                              )
+                            )
+                              .multipliedBy(order?.order_unit_price)
+                              ?.toString()}{" "}
                             {order?.fiat?.fiat}
                           </Typography>
                         </Box>

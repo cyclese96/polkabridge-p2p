@@ -28,8 +28,11 @@ export const createTrade = async (
       return {};
     }
 
-    return { status: result?.status, data: result?.data };
+    const _data = await result?.data;
+
+    return { status: result?.status, data: _data };
   } catch (error: any) {
+    console.log("createTrade error", error);
     return {
       status: error?.response?.status,
       message: error?.response?.data?.message,

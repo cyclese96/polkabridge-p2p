@@ -6,6 +6,8 @@ import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
+import { fromWei } from "../../utils/helper";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -141,14 +143,18 @@ const useStyles = makeStyles((theme) => ({
 function ViewMyOrder() {
   const classes = useStyles();
 
-  const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { order_id } = useParams();
   const order = useSelector((state) => state?.order?.order);
+  const userAuth = useSelector((state) => state?.user);
 
   useEffect(async () => {
-    dispatch(getOrderDetailsById(order_id));
-  }, [order_id]);
+    if (!order_id || !userAuth?.jwtToken) {
+      return;
+    }
+
+    dispatch(getOrderDetailsById(order_id, userAuth?.jwtToken));
+  }, [order_id, userAuth]);
 
   return (
     <Box className={classes.background}>
@@ -246,8 +252,15 @@ function ViewMyOrder() {
                       style={{ fontWeight: 600 }}
                       color={"#212121"}
                     >
-                      33,434
-                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                      {new BigNumber(
+                        fromWei(order?.pending_amount, order?.token?.decimals)
+                      )
+                        .multipliedBy(order?.order_unit_price)
+                        ?.toString()}{" "}
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                        {" "}
+                        {order?.fiat?.fiat}
+                      </span>
                     </Typography>
                   </Box>
                 </div>
@@ -270,8 +283,10 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    21
-                    <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                    {order?.order_unit_price}
+                    <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                      {order?.fiat?.fiat}
+                    </span>
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-3">
@@ -293,8 +308,11 @@ function ViewMyOrder() {
                       style={{ fontWeight: 600 }}
                       color={"#212121"}
                     >
-                      210
-                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                      {fromWei(order?.pending_amount, order?.token?.decimals)}{" "}
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                        {" "}
+                        {order?.token?.symbol}
+                      </span>
                     </Typography>
                   </Box>
                 </div>
@@ -316,7 +334,7 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    PBR - INR
+                    {order?.token?.symbol} - {order?.fiat?.fiat}
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-4">
@@ -337,7 +355,21 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    IMPS, UPI
+                    {order?.payment_options?.map((value) => (
+                      <Box
+                        style={{
+                          backgroundColor: "#E1DCFF",
+                          width: "fit-content",
+                          padding: "5px 14px 5px 14px",
+
+                          borderRadius: 7,
+                          marginRight: 5,
+                          fontSize: 14,
+                        }}
+                      >
+                        {value.toUpperCase()}
+                      </Box>
+                    ))}
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-4">
@@ -358,7 +390,7 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    Completed
+                    {order?.order_status}
                   </Typography>
                 </div>
               </div>

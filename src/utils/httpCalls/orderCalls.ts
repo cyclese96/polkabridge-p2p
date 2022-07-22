@@ -161,12 +161,15 @@ export const verifyDeposit = async (orderId: string, authToken: string) => {
 };
 
 // token deposts used in all sell orders
-export const fetchUserTotalActiveDeposits = async (authToken: string) => {
+export const fetchUserTotalActiveDeposits = async (
+  token_id: string | undefined,
+  authToken: string
+) => {
   try {
     let response;
-
+    console.log("token address", token_id);
     response = await axios.get(
-      `${BASE_API_ENDPOINT}/order-apis/v1/active-deposits`,
+      `${BASE_API_ENDPOINT}/order-apis/v1/active-deposits/${token_id}`,
       { headers: { ...globalHeaders, "x-auth-token": authToken } }
     );
 
