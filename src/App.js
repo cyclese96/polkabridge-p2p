@@ -36,7 +36,7 @@ function App() {
                 element={<OrderPayments />}
               /> */}
               <Route
-                path="/order-waiting/:order_id"
+                path="/order-waiting/:trade_id"
                 element={<OrderWaiting />}
               />
 

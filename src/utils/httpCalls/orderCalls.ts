@@ -175,7 +175,7 @@ export const fetchUserTotalActiveDeposits = async (
 
     return { status: response?.status, data: response?.data };
   } catch (error: any) {
-    console.log("fetchUserTrades ", { error });
+    console.log("fetchUserTotalActiveDeposits ", { error });
     return {
       status: error?.response?.status,
       message: error?.response?.data?.message,

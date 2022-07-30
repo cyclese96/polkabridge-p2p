@@ -16,6 +16,7 @@ import { getUserTrades } from "../../actions/tradeActions";
 import { useNavigate } from "react-router-dom";
 import { getUserOrders } from "../../actions/orderActions";
 import moment from "moment";
+import useParsedQueryString from "../../hooks/useParsedQueryString";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -118,7 +119,6 @@ function MyOrders() {
   const [orderType, setOrderType] = useState("all");
   const [token, setToken] = useState("All");
   const [orderStatus, setorderStatus] = useState("pending");
-  const [tabValue, setTabValue] = React.useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -129,6 +129,21 @@ function MyOrders() {
 
   const userAds = useSelector((state) => state?.order?.userOrders);
 
+  const parsedQuery = useParsedQueryString();
+
+  const currentTab = useMemo(() => {
+    const page = parsedQuery.page;
+    if (page === "ads") {
+      return 0;
+    } else if (page === "pending-orders") {
+      return 1;
+    } else if (page === "all-orders") {
+      return 2;
+    } else {
+      return 0;
+    }
+  }, [parsedQuery]);
+
   useEffect(() => {
     console.log("user ads", userAds);
   }, [userAds]);
@@ -138,30 +153,23 @@ function MyOrders() {
     }
 
     //: add filters
-    if (tabValue === 0) {
+    if (currentTab === 0) {
       dispatch(
         getUserOrders(1, { ...{}, user: authState?.id }, authState?.jwtToken)
       );
     }
 
     dispatch(getUserTrades(authState?.jwtToken, orderType, orderStatus));
-  }, [authState, orderType, orderStatus, tabValue]);
-
-  const selectedToken = useMemo(() => {
-    const tokenObject = tokens?.find((item) => item?.symbol === token);
-    if (!tokenObject) {
-      return { _id: null };
-    }
-    return tokenObject;
-  }, [tokens, token]);
+  }, [authState, orderType, orderStatus, currentTab]);
 
   const handleTabChange = (event, newValue) => {
-    if (newValue === 1) {
-      setorderStatus("all");
+    if (newValue === 0) {
+      navigate("/my-orders?page=ads");
+    } else if (newValue === 1) {
+      navigate("/my-orders?page=pending-orders");
     } else {
-      setorderStatus("pending");
+      navigate("/my-orders?page=all-orders");
     }
-    setTabValue(newValue);
   };
 
   return (
@@ -179,7 +187,7 @@ function MyOrders() {
         <Box mt={2}>
           <Box sx={{ width: "100%", marginBottom: 1 }}>
             <Tabs
-              value={tabValue}
+              value={currentTab}
               onChange={handleTabChange}
               textColor="primary"
               indicatorColor="primary"
@@ -205,7 +213,7 @@ function MyOrders() {
                       Type/Coin
                     </Typography>
                   </th>
-                  {tabValue !== 2 && (
+                  {currentTab !== 2 && (
                     <th>
                       {" "}
                       <Typography
@@ -295,7 +303,7 @@ function MyOrders() {
                   </th>
                 </tr>
 
-                {[1, 2].includes(tabValue) &&
+                {[1, 2].includes(currentTab) &&
                   pendingTrades?.map((item) => (
                     <tr className={classes.tr}>
                       <td style={{ width: "12%" }}>
@@ -409,7 +417,7 @@ function MyOrders() {
                             color: "white",
                           }}
                           onClick={() =>
-                            navigate(`/order-waiting/${item?.order?._id}`)
+                            navigate(`/order-waiting/${item?._id}`)
                           }
                         >
                           View
@@ -418,7 +426,7 @@ function MyOrders() {
                     </tr>
                   ))}
                 {/* my ads */}
-                {[0].includes(tabValue) &&
+                {[0].includes(currentTab) &&
                   userAds?.map((orderAd) => (
                     <tr className={classes.tr}>
                       <td style={{ width: "12%" }}>

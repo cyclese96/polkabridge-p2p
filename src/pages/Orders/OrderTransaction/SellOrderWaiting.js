@@ -39,10 +39,6 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
     return true;
   }, [pendingTrade]);
 
-  useEffect(() => {
-    console.log("sell trade", { pendingTrade, tradeType });
-  }, [pendingTrade]);
-
   const tokens = useSelector((state) => state?.order?.tokens);
 
   const selectedToken = useMemo(() => {
@@ -56,15 +52,6 @@ export default function SellOrderWaiting({ classes, pendingTrade, tradeType }) {
     useTokenAllowance(selectedToken);
   const [depositTokens, withdrawTokens, depositTrxStatus] =
     useDepositCallback(selectedToken);
-
-  // const handleDeposit = () => {
-  //   console.log("allowance ", allowance);
-  //   if (!allowance) {
-  //     confirmAllowance(ALLOWANCE_AMOUNT);
-  //   } else {
-  //     depositTokens(tokenAmount);
-  //   }
-  // };
 
   const handleDeposit = useCallback(() => {
     const tokenAmount = fromWei(
