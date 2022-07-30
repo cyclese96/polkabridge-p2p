@@ -1,4 +1,9 @@
-import { createOrder, getOrderById, getOrders } from "../utils/httpCalls";
+import {
+  createOrder,
+  fetchMarketPrice,
+  getOrderById,
+  getOrders,
+} from "../utils/httpCalls";
 import { createTrade } from "../utils/httpCalls/orderTradeCalls";
 import {
   GET_ORDERS,
@@ -7,6 +12,8 @@ import {
   RESET_NEW_ORDER,
   GET_USER_ORDERS,
   SET_ORDER_LOADING,
+  SET_BUY_MARKET_PRICE,
+  SET_SELL_MARKET_PRICE,
 } from "./types";
 
 // Latest orders in the market
@@ -140,3 +147,31 @@ export const getOrderDetailsById = (id, authToken) => async (dispatch) => {
     payload: result.data,
   });
 };
+
+export const getCurrenctMarketPrice =
+  (tokenId, fiatId, authToken) => async (dispatch) => {
+    const [buyOrderRes, sellOrderRes] = await Promise.all([
+      fetchMarketPrice("buy", tokenId, fiatId, authToken),
+      fetchMarketPrice("sell", tokenId, fiatId, authToken),
+    ]);
+
+    if (buyOrderRes?.status === 200) {
+      dispatch({
+        type: SET_BUY_MARKET_PRICE,
+        payload: {
+          current: buyOrderRes?.data?.current_price,
+          allTime: buyOrderRes?.data?.all_time_price,
+        },
+      });
+    }
+
+    if (sellOrderRes?.status === 200) {
+      dispatch({
+        type: SET_SELL_MARKET_PRICE,
+        payload: {
+          current: sellOrderRes?.data?.current_price,
+          allTime: sellOrderRes?.data?.all_time_price,
+        },
+      });
+    }
+  };

@@ -10,6 +10,8 @@ export const RESET_NEW_ORDER = "RESET_NEW_ORDER";
 export const GET_FIATS = "GET_FIATS";
 export const GET_TOKENS = "GET_TOKENS";
 export const GET_PAYMENTS = "GET_PAYMENTS";
+export const SET_BUY_MARKET_PRICE = "SET_BUY_MARKET_PRICE";
+export const SET_SELL_MARKET_PRICE = "SET_SELL_MARKET_PRICE";
 
 // Profile reducers
 

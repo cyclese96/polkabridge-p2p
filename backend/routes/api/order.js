@@ -640,6 +640,69 @@ router.get("/order/:order_id", auth, async (req, res) => {
   }
 });
 
+router.get(
+  "/current-market-price/:order_type/:token_id/:fiat_id",
+  auth,
+  async (req, res) => {
+    try {
+      if (!mongoose.isValidObjectId(req.params.token_id)) {
+        return res.status(400).json({ errors: [{ msg: "Invalid token" }] });
+      }
+
+      if (!mongoose.isValidObjectId(req.params.fiat_id)) {
+        return res.status(400).json({ errors: [{ msg: "Invalid fiat" }] });
+      }
+
+      const orderType = req.params.order_type;
+
+      if (!["buy", "sell"].includes(orderType)) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: "Invalid order type" }] });
+      }
+
+      const tokenId = mongoose.Types.ObjectId(req.params.token_id);
+      const fiatId = mongoose.Types.ObjectId(req.params.fiat_id);
+
+      // fetch current market price
+      const order = await Order.find({
+        order_status: "active",
+        order_type: orderType === "buy" ? "sell" : "buy",
+        token: tokenId,
+        fiat: fiatId,
+      })
+        .sort({ order_unit_price: orderType === "sell" ? -1 : 1 })
+        .limit(1)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+
+      // fetch all time high market price
+      const allTimeOrder = await Order.find({
+        order_type: orderType === "buy" ? "sell" : "buy",
+        token: tokenId,
+        fiat: fiatId,
+      })
+        .sort({ order_unit_price: orderType === "sell" ? -1 : 1 })
+        .limit(1)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+
+      if (!order) {
+        return res.status(400).json({ errors: [{ msg: "Order not found" }] });
+      }
+
+      return res
+        .status(200)
+        .json({ current_order: order?.[0], all_time_order: allTimeOrder?.[0] });
+    } catch (error) {
+      console.log(error);
+      res.status(401).json({ errors: [{ msg: "Server error" }] });
+    }
+  }
+);
+
 // @route GET /order-apis/v1/order/active-deposits"
 // @desc get user active deposits:
 // @access Authenticated

@@ -33,6 +33,7 @@ import { TransactionState } from "../../../utils/interface";
 import BigNumber from "bignumber.js";
 import { createOrder } from "../../../utils/httpCalls";
 import PopupLayout from "../../../common/popups/PopupLayout";
+import { getCurrenctMarketPrice } from "../../../actions/orderActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -197,7 +198,7 @@ function CreateOrder() {
   const classes = useStyles();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { chainId } = useActiveWeb3React();
+  const { chainId, account } = useActiveWeb3React();
 
   //States
   const [step, setStep] = useState(0);
@@ -218,6 +219,9 @@ function CreateOrder() {
     (state) => state?.profile?.profile?.payment_options
   );
   const userAuth = useSelector((state) => state?.user);
+
+  const buyMarketPrice = useSelector((state) => state?.order?.buyMarketPrice);
+  const sellMarketPrice = useSelector((state) => state?.order?.sellMarketPrice);
 
   // const updateTotalAmount = (inputValue) => {};
   const updatePaymentMethods = (selectedValue) => {
@@ -257,11 +261,30 @@ function CreateOrder() {
   }, [tokens, token]);
 
   useEffect(() => {
-    if (!chainId) {
+    if (!chainId || !userAuth?.jwtToken || !account) {
       return;
     }
-    dispatch(getUserProfile());
-  }, [chainId]);
+    dispatch(getUserProfile(account, userAuth?.jwtToken));
+  }, [chainId, account, userAuth]);
+
+  useEffect(() => {
+    if (
+      !chainId ||
+      !userAuth?.jwtToken ||
+      !selectedFiat?._id ||
+      !selectedToken?._id
+    ) {
+      return;
+    }
+
+    dispatch(
+      getCurrenctMarketPrice(
+        selectedToken?._id,
+        selectedFiat?._id,
+        userAuth?.jwtToken
+      )
+    );
+  }, [chainId, selectedFiat, selectedToken, userAuth]);
 
   const [
     allowance,
@@ -845,9 +868,11 @@ function CreateOrder() {
                           style={{ fontWeight: 600 }}
                           color={"#04A56D"}
                         >
-                          82.21{" "}
+                          {orderType === "buy"
+                            ? buyMarketPrice?.current
+                            : sellMarketPrice?.current}
                           <span style={{ fontSize: 14, paddingLeft: 2 }}>
-                            INR
+                            {selectedFiat?.fiat}
                           </span>
                         </Typography>
                       </Box>
@@ -862,7 +887,9 @@ function CreateOrder() {
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
                         >
-                          Highest Market Price
+                          {orderType === "sell"
+                            ? "Highest Market Price"
+                            : "Lowest Market Price"}
                         </Typography>
                         <Typography
                           variant="body1"
@@ -870,9 +897,11 @@ function CreateOrder() {
                           fontSize={22}
                           style={{ fontWeight: 600 }}
                         >
-                          89.21{" "}
+                          {orderType === "buy"
+                            ? buyMarketPrice?.allTime
+                            : sellMarketPrice?.allTime}
                           <span style={{ fontSize: 14, paddingLeft: 2 }}>
-                            INR
+                            {selectedFiat?.fiat}
                           </span>
                         </Typography>
                       </Box>

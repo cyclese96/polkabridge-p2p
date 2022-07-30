@@ -182,3 +182,34 @@ export const fetchUserTotalActiveDeposits = async (
     };
   }
 };
+
+//  fetch current buy / sell order highest market price
+export const fetchMarketPrice = async (
+  orderType: string,
+  tokenId: string,
+  fiatId: string,
+  authToken: string
+) => {
+  try {
+    const response = await axios.get(
+      `${BASE_API_ENDPOINT}/order-apis/v1/current-market-price/${orderType}/${tokenId}/${fiatId}`,
+      { headers: { ...globalHeaders, "x-auth-token": authToken } }
+    );
+
+    const data = await response.data;
+
+    return {
+      status: response?.status,
+      data: {
+        current_price: data?.current_order?.order_unit_price,
+        all_time_price: data?.all_time_order?.order_unit_price,
+      },
+    };
+  } catch (error: any) {
+    console.log("fetchUserTrades ", { error });
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
+  }
+};

@@ -51,6 +51,7 @@ const OrderSchema = new Schema({
     required: true,
   },
   order_status: {
+    // active, fullfilled, cancelled
     type: String,
     required: true,
   },
