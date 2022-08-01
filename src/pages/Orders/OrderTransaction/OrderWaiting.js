@@ -3,11 +3,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserTradeByOrderId } from "../../../actions/tradeActions";
+import {
+  getUserTradeById,
+  getUserTradeByOrderId,
+} from "../../../actions/tradeActions";
 
 import OrderProgress from "./OrderProgress";
 import BuyOrderWaiting from "./BuyOrderWaiting";
 import SellOrderWaiting from "./SellOrderWaiting";
+import useBlockNumber from "../../../hooks/useBlockNumber";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -171,7 +175,7 @@ const useStyles = makeStyles((theme) => ({
 
 function OrderWaiting() {
   const classes = useStyles();
-  const { order_id } = useParams();
+  const { trade_id } = useParams();
   const dispatch = useDispatch();
 
   const createLoading = useSelector(
@@ -182,20 +186,25 @@ function OrderWaiting() {
   );
   const authenticatedUser = useSelector((state) => state?.user);
 
-  const order = useSelector((state) => state?.order?.order);
-  const pendingTrade = useSelector((state) => state?.userTrade?.trade); // current order trade
+  // const order = useSelector((state) => state?.order?.order);
+  const trade = useSelector((state) => state?.userTrade?.trade); // current order trade
 
+  const pendingTrade = useMemo(() => {
+    return trade;
+  }, [trade]);
+
+  const blockNumber = useBlockNumber();
   // load current order transaction with orderId and userId
   // if userId is buyer: load buy order waiting page
   // if userId is seller: load sell order waiting page
   useEffect(() => {
     async function asyncFn() {
-      if (order_id && !order?._id && authenticatedUser?.jwtToken) {
-        dispatch(getUserTradeByOrderId(authenticatedUser?.jwtToken, order_id));
+      if (trade_id && authenticatedUser?.jwtToken) {
+        dispatch(getUserTradeById(trade_id, authenticatedUser?.jwtToken));
       }
     }
     asyncFn();
-  }, [order_id, order, authenticatedUser]);
+  }, [trade_id, authenticatedUser, blockNumber]);
 
   const tradeType = useMemo(() => {
     if (
@@ -224,14 +233,14 @@ function OrderWaiting() {
             fetchLoading={fetchLoading}
           />
 
-          {!(createLoading || fetchLoading) && tradeType === "buy" && (
+          {tradeType === "buy" && (
             <BuyOrderWaiting
               tradeType={tradeType}
               pendingTrade={pendingTrade}
               classes={classes}
             />
           )}
-          {!(createLoading || fetchLoading) && tradeType === "sell" && (
+          {tradeType === "sell" && (
             <SellOrderWaiting
               tradeType={tradeType}
               pendingTrade={pendingTrade}

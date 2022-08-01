@@ -375,8 +375,11 @@ router.get("/order-transaction/:trx_id", auth, async (req, res) => {
 
     const finalTrx = await Transaction.findById(transactionId)
       .populate("buyer")
-      .populate("seller")
-      .populate("order");
+      .populate({ path: "seller", populate: { path: "payment_options" } })
+      .populate({
+        path: "order",
+        populate: [{ path: "token" }, { path: "fiat" }],
+      });
 
     return res.status(200).json(finalTrx);
   } catch (error) {

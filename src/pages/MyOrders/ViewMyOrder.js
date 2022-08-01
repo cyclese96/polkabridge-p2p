@@ -1,33 +1,13 @@
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Input,
-  MenuItem,
-  Select,
-  TextareaAutosize,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Container, Typography } from "@mui/material";
+import React, { useEffect } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Link, useParams } from "react-router-dom";
-import {
-  AccountBalanceWallet,
-  AccountBalanceWalletOutlined,
-  AttachMoney,
-  CreditCard,
-  History,
-  List,
-  ListOutlined,
-  Money,
-  MoneyOutlined,
-  PriceChange,
-} from "@mui/icons-material";
 import HowItWorks from "../../common/HowItWorks";
 import { getOrderDetailsById } from "../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+import { fromWei } from "../../utils/helper";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -162,17 +142,19 @@ const useStyles = makeStyles((theme) => ({
 
 function ViewMyOrder() {
   const classes = useStyles();
-  const theme = useTheme();
 
-  const store = useSelector((state) => state);
   const dispatch = useDispatch();
   const { order_id } = useParams();
-  // const { order } = store.order;
   const order = useSelector((state) => state?.order?.order);
+  const userAuth = useSelector((state) => state?.user);
 
   useEffect(async () => {
-    dispatch(getOrderDetailsById(order_id));
-  }, [order_id]);
+    if (!order_id || !userAuth?.jwtToken) {
+      return;
+    }
+
+    dispatch(getOrderDetailsById(order_id, userAuth?.jwtToken));
+  }, [order_id, userAuth]);
 
   return (
     <Box className={classes.background}>
@@ -204,7 +186,7 @@ function ViewMyOrder() {
                     paddingLeft: 5,
                   }}
                 >
-                  27832332
+                  {order?.order_id}
                 </span>
               </Typography>
               <Typography
@@ -223,14 +205,14 @@ function ViewMyOrder() {
                     paddingLeft: 5,
                   }}
                 >
-                  21 June 2022 11:30PM
+                  {moment(order?.created_at).format("hh:mm A MM-DD-YYYY")}
                 </span>
               </Typography>
             </Box>
           </Box>
           <div className={classes.infoCard}>
             <Typography variant="h4" classes={classes.cardTitle} align="center">
-              Buy Order: #4734638
+              Buy Order: #{order?.order_id}
             </Typography>
             <Typography
               variant="body2"
@@ -240,7 +222,7 @@ function ViewMyOrder() {
               align="center"
               pt={1}
             >
-              Executed at: 21 June, 2022 2PM UTC
+              Executed at: ---
             </Typography>
             <Box className="text-center">
               <img src="/images/success_icon.png" height="100px" />
@@ -270,8 +252,15 @@ function ViewMyOrder() {
                       style={{ fontWeight: 600 }}
                       color={"#212121"}
                     >
-                      33,434
-                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                      {new BigNumber(
+                        fromWei(order?.pending_amount, order?.token?.decimals)
+                      )
+                        .multipliedBy(order?.order_unit_price)
+                        ?.toString()}{" "}
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                        {" "}
+                        {order?.fiat?.fiat}
+                      </span>
                     </Typography>
                   </Box>
                 </div>
@@ -294,8 +283,10 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    21
-                    <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                    {order?.order_unit_price}
+                    <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                      {order?.fiat?.fiat}
+                    </span>
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-3">
@@ -317,8 +308,11 @@ function ViewMyOrder() {
                       style={{ fontWeight: 600 }}
                       color={"#212121"}
                     >
-                      210
-                      <span style={{ fontSize: 14, paddingLeft: 2 }}>INR</span>
+                      {fromWei(order?.pending_amount, order?.token?.decimals)}{" "}
+                      <span style={{ fontSize: 14, paddingLeft: 2 }}>
+                        {" "}
+                        {order?.token?.symbol}
+                      </span>
                     </Typography>
                   </Box>
                 </div>
@@ -340,7 +334,7 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    PBR - INR
+                    {order?.token?.symbol} - {order?.fiat?.fiat}
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-4">
@@ -361,7 +355,21 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    IMPS, UPI
+                    {order?.payment_options?.map((value) => (
+                      <Box
+                        style={{
+                          backgroundColor: "#E1DCFF",
+                          width: "fit-content",
+                          padding: "5px 14px 5px 14px",
+
+                          borderRadius: 7,
+                          marginRight: 5,
+                          fontSize: 14,
+                        }}
+                      >
+                        {value.toUpperCase()}
+                      </Box>
+                    ))}
                   </Typography>
                 </div>
                 <div className="col-md-4 mt-4">
@@ -382,7 +390,7 @@ function ViewMyOrder() {
                     style={{ fontWeight: 600 }}
                     color={"#212121"}
                   >
-                    Completed
+                    {order?.order_status}
                   </Typography>
                 </div>
               </div>

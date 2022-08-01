@@ -8,11 +8,21 @@ import {
   RESET_NEW_ORDER,
   GET_USER_ORDERS,
   SET_ORDER_LOADING,
+  SET_BUY_MARKET_PRICE,
+  SET_SELL_MARKET_PRICE,
 } from "../actions/types";
 
 const initalState = {
   orders: [],
   order: {},
+  buyMarketPrice: {
+    current: 0,
+    allTime: 0,
+  },
+  sellMarketPrice: {
+    current: 0,
+    allTime: 0,
+  },
   userOrders: [],
   orderLoading: false,
   fiats: [],
@@ -67,6 +77,24 @@ export default function (state = initalState, action) {
       return {
         ...state,
         order: {},
+      };
+    case SET_BUY_MARKET_PRICE:
+      return {
+        ...state,
+        buyMarketPrice: {
+          ...state.buyMarketPrice,
+          current: action.payload?.current,
+          allTime: action.payload?.allTime,
+        },
+      };
+    case SET_SELL_MARKET_PRICE:
+      return {
+        ...state,
+        sellMarketPrice: {
+          ...state.sellMarketPrice,
+          current: action.payload?.current,
+          allTime: action.payload?.allTime,
+        },
       };
     default:
       return state;

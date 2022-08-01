@@ -36,14 +36,14 @@ function App() {
                 element={<OrderPayments />}
               /> */}
               <Route
-                path="/order-waiting/:order_id"
+                path="/order-waiting/:trade_id"
                 element={<OrderWaiting />}
               />
 
               <Route path="/create-order" element={<CreateOrder />} />
               <Route path="/order-placed/:order_id" element={<OrderPlaced />} />
               <Route path="/my-orders" element={<MyOrders />} />
-              <Route path="/my-orders/1" element={<ViewMyOrder />} />
+              <Route path="/my-orders/:order_id" element={<ViewMyOrder />} />
               <Route path="/order-review" element={<OrderReview />} />
             </Routes>
             <Container>

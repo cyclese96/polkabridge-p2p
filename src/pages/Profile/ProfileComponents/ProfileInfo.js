@@ -49,12 +49,13 @@ function ProfileInfo() {
   const [formFields, setFormField] = useState({});
 
   const profile = useSelector((state) => state?.profile?.profile);
+  const authState = useSelector((state) => state?.user);
 
   const submitProfile = useCallback(() => {
     setEditMode(false);
 
-    dispatch(updateUserProfile(formFields));
-  }, [formFields, editMode, setEditMode]);
+    dispatch(updateUserProfile(formFields, authState?.jwtToken));
+  }, [formFields, editMode, setEditMode, authState]);
 
   const onEdit = useCallback(() => {
     setFormField({

@@ -179,6 +179,8 @@ router.put(
 // @desc Create sell order
 // @access Authenticated
 // :todo add authentication and email and phone verification checks to create order
+// should have verified email and phone number
+// should have added atleast one valid payment method
 router.post(
   "/sell-order",
   [check("order_amount", "Order amount required").not().isEmpty()], // order amount should be minimum 100 USD or 0.01 ETH equivalent
@@ -235,7 +237,10 @@ router.post(
 
       if (
         new BigNumber(order_amount).lt(
-          toWei(MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol])
+          toWei(
+            MINUMUN_SELL_ORDER_AMOUNT?.[orderToken.symbol],
+            orderToken.decimals
+          )
         )
       ) {
         console.log(
@@ -284,48 +289,50 @@ router.post(
       // order amount fee deduction computations end
 
       // check if there is any existing pending sell order without token deposit
-      let pendingSellOrder = await Order.findOne({
-        order_status: "submitted",
-        order_type: "sell",
-        user: mongoose.Types.ObjectId(user).toString(),
-      });
+      // let pendingSellOrder = await Order.findOne({
+      //   order_status: "submitted",
+      //   order_type: "sell",
+      //   user: mongoose.Types.ObjectId(user).toString(),
+      // });
 
-      if (pendingSellOrder) {
-        // update existing pending order
-        await Order.updateOne(
-          {
-            order_status: "submitted",
-            order_type: "sell",
-            user: mongoose.Types.ObjectId(user).toString(),
-          },
-          {
-            $set: {
-              order_status: "submitted",
-              order_type: "sell",
-              order_id: new Date().getTime(),
-              user: mongoose.Types.ObjectId(user),
-              order_amount: order_amount?.toString(),
-              deflationary_deduction: deflationaryDeducted,
-              fee_deduction: feeDeducted,
-              final_order_amount: remainingAfterDeduction,
-              pending_amount: remainingAfterDeduction,
-              token: mongoose.Types.ObjectId(token),
-              fiat: mongoose.Types.ObjectId(fiat),
-              order_unit_price: order_unit_price,
-              created_at: Date.now(),
-              payment_options,
-              description,
-            },
-          }
-        );
+      // if (pendingSellOrder) {
+      //   // update existing pending order
+      //   await Order.updateOne(
+      //     {
+      //       order_status: "submitted",
+      //       order_type: "sell",
+      //       user: mongoose.Types.ObjectId(user).toString(),
+      //     },
+      //     {
+      //       $set: {
+      //         order_status: "submitted",
+      //         order_type: "sell",
+      //         order_id: new Date().getTime(),
+      //         user: mongoose.Types.ObjectId(user),
+      //         order_amount: order_amount?.toString(),
+      //         deflationary_deduction: deflationaryDeducted,
+      //         fee_deduction: feeDeducted,
+      //         final_order_amount: remainingAfterDeduction,
+      //         pending_amount: remainingAfterDeduction,
+      //         token: mongoose.Types.ObjectId(token),
+      //         fiat: mongoose.Types.ObjectId(fiat),
+      //         order_unit_price: order_unit_price,
+      //         created_at: Date.now(),
+      //         payment_options,
+      //         description,
+      //       },
+      //     }
+      //   );
 
-        pendingSellOrder = await Order.findById(pendingSellOrder.id)
-          .populate("user")
-          .populate("token")
-          .populate("fiat");
+      //   pendingSellOrder = await Order.findById(pendingSellOrder.id)
+      //     .populate("user")
+      //     .populate("token")
+      //     .populate("fiat");
 
-        return res.status(201).json(pendingSellOrder);
-      }
+      //   return res.status(201).json(pendingSellOrder);
+      // }
+
+      // todo: validate user sufficient  deposits from contract to create final sell order
 
       orderObject = await new Order({
         order_type: "sell",
@@ -339,6 +346,7 @@ router.post(
         token: mongoose.Types.ObjectId(token).toString(),
         fiat: mongoose.Types.ObjectId(fiat).toString(),
         order_unit_price: order_unit_price,
+        order_status: "active",
         payment_options,
         description,
       }).save();
@@ -632,10 +640,73 @@ router.get("/order/:order_id", auth, async (req, res) => {
   }
 });
 
+router.get(
+  "/current-market-price/:order_type/:token_id/:fiat_id",
+  auth,
+  async (req, res) => {
+    try {
+      if (!mongoose.isValidObjectId(req.params.token_id)) {
+        return res.status(400).json({ errors: [{ msg: "Invalid token" }] });
+      }
+
+      if (!mongoose.isValidObjectId(req.params.fiat_id)) {
+        return res.status(400).json({ errors: [{ msg: "Invalid fiat" }] });
+      }
+
+      const orderType = req.params.order_type;
+
+      if (!["buy", "sell"].includes(orderType)) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: "Invalid order type" }] });
+      }
+
+      const tokenId = mongoose.Types.ObjectId(req.params.token_id);
+      const fiatId = mongoose.Types.ObjectId(req.params.fiat_id);
+
+      // fetch current market price
+      const order = await Order.find({
+        order_status: "active",
+        order_type: orderType === "buy" ? "sell" : "buy",
+        token: tokenId,
+        fiat: fiatId,
+      })
+        .sort({ order_unit_price: orderType === "sell" ? -1 : 1 })
+        .limit(1)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+
+      // fetch all time high market price
+      const allTimeOrder = await Order.find({
+        order_type: orderType === "buy" ? "sell" : "buy",
+        token: tokenId,
+        fiat: fiatId,
+      })
+        .sort({ order_unit_price: orderType === "sell" ? -1 : 1 })
+        .limit(1)
+        .populate("user")
+        .populate("token")
+        .populate("fiat");
+
+      if (!order) {
+        return res.status(400).json({ errors: [{ msg: "Order not found" }] });
+      }
+
+      return res
+        .status(200)
+        .json({ current_order: order?.[0], all_time_order: allTimeOrder?.[0] });
+    } catch (error) {
+      console.log(error);
+      res.status(401).json({ errors: [{ msg: "Server error" }] });
+    }
+  }
+);
+
 // @route GET /order-apis/v1/order/active-deposits"
 // @desc get user active deposits:
 // @access Authenticated
-router.get("/active-deposits", auth, async (req, res) => {
+router.get("/active-deposits/:token_id", auth, async (req, res) => {
   try {
     const errors = validationResult(req);
 
@@ -643,9 +714,18 @@ router.get("/active-deposits", auth, async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    const token_id = req.params.token_id;
+
+    if (!mongoose.isValidObjectId(token_id)) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Invalid token address" }] });
+    }
+
     const filter = {};
     filter.user = mongoose.Types.ObjectId(req.user?.id);
     filter.order_status = "active";
+    filter.token = mongoose.Types.ObjectId(token_id);
 
     const userActiveOrders = await Order.find(filter);
 

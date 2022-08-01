@@ -1,23 +1,19 @@
 import {
   createOrder,
-  getFiats,
-  getGlobalPaymentOptions,
+  fetchMarketPrice,
   getOrderById,
   getOrders,
-  getTokens,
 } from "../utils/httpCalls";
 import { createTrade } from "../utils/httpCalls/orderTradeCalls";
 import {
   GET_ORDERS,
   GET_ORDER,
-  GET_FIATS,
-  GET_TOKENS,
-  GET_PAYMENTS,
-  CREATE_NEW_ORDER,
   GET_ERRORS,
   RESET_NEW_ORDER,
   GET_USER_ORDERS,
   SET_ORDER_LOADING,
+  SET_BUY_MARKET_PRICE,
+  SET_SELL_MARKET_PRICE,
 } from "./types";
 
 // Latest orders in the market
@@ -58,58 +54,36 @@ export const getLatestOrders =
     }
   };
 
-// export const getAllTokens = () => async (dispatch) => {
-//   const result = await getTokens();
+// Latest orders in the market
+export const getUserOrders =
+  (pageNumber, filters = {}, authToken) =>
+  async (dispatch) => {
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: true,
+    });
 
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
+    const result = await getOrders(pageNumber, filters, authToken);
 
-//   dispatch({
-//     type: GET_TOKENS,
-//     payload: result.data,
-//   });
-// };
+    dispatch({
+      type: SET_ORDER_LOADING,
+      payload: false,
+    });
 
-// export const getAllFiats = () => async (dispatch) => {
-//   const result = await getFiats();
+    if (result?.status !== 200) {
+      dispatch({
+        type: GET_ERRORS,
+        payload: result.message,
+      });
 
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
+      return;
+    }
 
-//   dispatch({
-//     type: GET_FIATS,
-//     payload: result.data,
-//   });
-// };
-
-// GET
-// All Payment Options
-// export const getAllPaymentOptions = () => async (dispatch) => {
-//   const result = await getGlobalPaymentOptions();
-
-//   if (result?.status !== 200) {
-//     dispatch({
-//       type: GET_ERRORS,
-//       payload: result.message,
-//     });
-//     return;
-//   }
-
-//   dispatch({
-//     type: GET_PAYMENTS,
-//     payload: result.data,
-//   });
-// };
+    dispatch({
+      type: GET_USER_ORDERS,
+      payload: result.data,
+    });
+  };
 
 // POST
 // CREATE SELL ORDER
@@ -173,3 +147,31 @@ export const getOrderDetailsById = (id, authToken) => async (dispatch) => {
     payload: result.data,
   });
 };
+
+export const getCurrenctMarketPrice =
+  (tokenId, fiatId, authToken) => async (dispatch) => {
+    const [buyOrderRes, sellOrderRes] = await Promise.all([
+      fetchMarketPrice("buy", tokenId, fiatId, authToken),
+      fetchMarketPrice("sell", tokenId, fiatId, authToken),
+    ]);
+
+    if (buyOrderRes?.status === 200) {
+      dispatch({
+        type: SET_BUY_MARKET_PRICE,
+        payload: {
+          current: buyOrderRes?.data?.current_price,
+          allTime: buyOrderRes?.data?.all_time_price,
+        },
+      });
+    }
+
+    if (sellOrderRes?.status === 200) {
+      dispatch({
+        type: SET_SELL_MARKET_PRICE,
+        payload: {
+          current: sellOrderRes?.data?.current_price,
+          allTime: sellOrderRes?.data?.all_time_price,
+        },
+      });
+    }
+  };

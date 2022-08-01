@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { CHAIN_IDS } from "../constants/chains";
+import { TOKEN_ADDRESS } from "../constants/index";
 
 export const fromWei = (tokens, decimals = 18) => {
   try {
@@ -145,4 +146,56 @@ export const setupNetwork = async (networkObject) => {
     );
     return false;
   }
+};
+
+function isDeflationary(tokenAddress, chainId = 4) {
+  return (
+    tokenAddress?.toLowerCase() === TOKEN_ADDRESS.PBR[chainId].toLowerCase()
+  );
+}
+
+export const depositFee = (tokenAmountInWei, fee = 1) => {
+  if (!tokenAmountInWei) {
+    return;
+  }
+  const _amt = new BigNumber(tokenAmountInWei);
+
+  return _amt.minus(
+    new BigNumber(tokenAmountInWei).multipliedBy(100 - fee).div(100)
+  );
+};
+
+export const tokenAmountAfterFee = (tokenAmountInWei, token) => {
+  if (!tokenAmountInWei || !token?.address) {
+    return null;
+  }
+
+  if (isDeflationary(token?.address)) {
+    const amountAfterDeflFee = new BigNumber(tokenAmountInWei).minus(
+      depositFee(tokenAmountInWei, 0.5)
+    );
+    return amountAfterDeflFee.minus(depositFee(amountAfterDeflFee, 1));
+  }
+
+  return new BigNumber(tokenAmountInWei).minus(depositFee(tokenAmountInWei, 1));
+};
+export const tokenAmountWithFee = (tokenAmountInWei, token) => {
+  if (!tokenAmountInWei || !token?.address) {
+    return null;
+  }
+
+  if (isDeflationary(token?.address)) {
+    const amountWithDeflFee = new BigNumber(tokenAmountInWei)
+      .multipliedBy(100)
+      .div(100 - 0.5);
+    const amountWithFee = new BigNumber(amountWithDeflFee)
+      .multipliedBy(100)
+      .div(100 - 1);
+    return amountWithFee?.toFixed(0)?.toString();
+  }
+
+  const amountWithFee = new BigNumber(tokenAmountInWei)
+    .multipliedBy(100)
+    .div(100 - 1);
+  return amountWithFee?.toFixed(0).toString();
 };

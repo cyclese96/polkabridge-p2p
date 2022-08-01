@@ -16,16 +16,24 @@ import HowItWorks from "../../../common/HowItWorks";
 import TxPopup from "../../../common/popups/TxPopup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../../utils/helper";
+import {
+  depositFee,
+  fromWei,
+  tokenAmountAfterFee,
+  tokenAmountWithFee,
+  toWei,
+} from "../../../utils/helper";
 import { useDepositCallback } from "../../../hooks/useDepositCallback";
 import { useTokenAllowance } from "../../../hooks/useAllowance";
 import { ALLOWANCE_AMOUNT } from "../../../constants/index";
 import { getUserProfile } from "../../../actions/profileActions";
 import useActiveWeb3React from "../../../hooks/useActiveWeb3React";
 import { useCreateOrderCallback } from "../../../hooks/useCreateOrderCallback";
-import { CreateStatus, TransactionState } from "../../../utils/interface";
+import { TransactionState } from "../../../utils/interface";
 import BigNumber from "bignumber.js";
 import { createOrder } from "../../../utils/httpCalls";
+import PopupLayout from "../../../common/popups/PopupLayout";
+import { getCurrenctMarketPrice } from "../../../actions/orderActions";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -190,7 +198,7 @@ function CreateOrder() {
   const classes = useStyles();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { chainId } = useActiveWeb3React();
+  const { chainId, account } = useActiveWeb3React();
 
   //States
   const [step, setStep] = useState(0);
@@ -200,6 +208,7 @@ function CreateOrder() {
   const [price, setPrice] = useState("");
   const [token, setToken] = useState("PBR");
   const [tokenAmount, setTokenAmount] = useState("");
+  const [remarks, setRemarks] = useState("");
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [error, setError] = useState("");
 
@@ -210,6 +219,9 @@ function CreateOrder() {
     (state) => state?.profile?.profile?.payment_options
   );
   const userAuth = useSelector((state) => state?.user);
+
+  const buyMarketPrice = useSelector((state) => state?.order?.buyMarketPrice);
+  const sellMarketPrice = useSelector((state) => state?.order?.sellMarketPrice);
 
   // const updateTotalAmount = (inputValue) => {};
   const updatePaymentMethods = (selectedValue) => {
@@ -249,47 +261,82 @@ function CreateOrder() {
   }, [tokens, token]);
 
   useEffect(() => {
-    if (!chainId) {
+    if (!chainId || !userAuth?.jwtToken || !account) {
       return;
     }
-    dispatch(getUserProfile());
-  }, [chainId]);
+    dispatch(getUserProfile(account, userAuth?.jwtToken));
+  }, [chainId, account, userAuth]);
 
-  const [allowance, confirmAllowance, allowanceTrxStatus] =
-    useTokenAllowance(selectedToken);
+  useEffect(() => {
+    if (
+      !chainId ||
+      !userAuth?.jwtToken ||
+      !selectedFiat?._id ||
+      !selectedToken?._id
+    ) {
+      return;
+    }
+
+    dispatch(
+      getCurrenctMarketPrice(
+        selectedToken?._id,
+        selectedFiat?._id,
+        userAuth?.jwtToken
+      )
+    );
+  }, [chainId, selectedFiat, selectedToken, userAuth]);
+
+  const [
+    allowance,
+    confirmAllowance,
+    allowanceTrxStatus,
+    resetAllwanceTrxState,
+  ] = useTokenAllowance(selectedToken);
   const [
     depositTokens,
     withdrawTokens,
     resetTrxState,
     depositTrxStatus,
-    userDeposit,
-  ] = useDepositCallback(selectedToken);
-  const [orderStatus, createBuyOrder, createSellOrder, validateSellOrder] =
-    useCreateOrderCallback();
+    userAvailableDeposits,
+  ] = useDepositCallback(selectedToken, selectedToken?._id);
 
   const handleModalClose = useCallback(() => {
     setOpen(false);
     resetTrxState();
+    resetAllwanceTrxState();
   }, [isOpen, setOpen, resetTrxState]);
 
   useEffect(() => {
     console.log("user deposits", {
-      userDeposit,
-      // tokenAmount: toWei(tokenAmount, selectedToken?.decimals),
+      userAvailableDeposits,
     });
-  }, [userDeposit, tokenAmount]);
-
-  const isSufficientDeposits = useMemo(() => {
-    return new BigNumber(userDeposit).gte(
-      toWei(tokenAmount, selectedToken?.decimals)
-    );
-  }, [userDeposit, tokenAmount, selectedToken]);
+  }, [userAvailableDeposits]);
 
   const depositsNeeded = useMemo(() => {
-    return new BigNumber(toWei(tokenAmount, selectedToken?.decimals))
-      .minus(userDeposit)
+    // deposit needed = tokenAmount - available deposits
+
+    const _tokenAmt = toWei(tokenAmount, selectedToken?.decimals);
+    const _tokenAmtAfterFee = tokenAmountAfterFee(_tokenAmt, selectedToken);
+
+    if (new BigNumber(userAvailableDeposits).gte(_tokenAmtAfterFee)) {
+      return "0";
+    }
+
+    const _depositNeeded = new BigNumber(_tokenAmtAfterFee)
+      .minus(!userAvailableDeposits ? "0" : userAvailableDeposits)
       ?.toString();
-  }, [userDeposit, tokenAmount, selectedToken]);
+
+    const _depositNeededWithFee = tokenAmountWithFee(
+      _depositNeeded,
+      selectedToken
+    );
+
+    return _depositNeededWithFee?.toString();
+  }, [userAvailableDeposits, tokenAmount, selectedToken]);
+
+  const isSufficientDeposits = useMemo(() => {
+    return new BigNumber(depositsNeeded).eq(0);
+  }, [depositsNeeded]);
 
   // sell order states
   const isSubmitOrderDisabled = useMemo(() => {
@@ -308,6 +355,7 @@ function CreateOrder() {
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),
         payment_options: paymentMethods,
+        description: remarks,
       };
 
       const response = await createOrder("buy", payload, userAuth?.jwtToken);
@@ -324,8 +372,9 @@ function CreateOrder() {
         fiat: selectedFiat?._id,
         order_unit_price: parseFloat(price),
         payment_options: paymentMethods,
+        description: remarks,
       };
-
+      console.log("payload", payload);
       const response = await createOrder("sell", payload, userAuth?.jwtToken);
       if (response?.status === 201) {
         navigate(`/order-placed/${response?.data?._id}`);
@@ -342,17 +391,8 @@ function CreateOrder() {
     price,
     paymentMethods,
     userAuth,
+    remarks,
   ]);
-
-  // const handleDeposit = () => {
-  //   setOpen(true);
-  //   console.log("allowance ", allowance);
-  //   if (!allowance) {
-  //     confirmAllowance(ALLOWANCE_AMOUNT);
-  //   } else {
-  //     depositTokens(tokenAmount);
-  //   }
-  // };
 
   const handleDeposit = useCallback(() => {
     if (!allowance) {
@@ -373,11 +413,21 @@ function CreateOrder() {
 
   return (
     <Box className={classes.background}>
-      {/* <TxPopup
-        txCase={depositTrxStatus?.state}
-        hash={depositTrxStatus?.hash}
-        resetPopup={resetTrxState}
-      /> */}
+      <PopupLayout
+        popupActive={
+          depositTrxStatus?.state > 0 || allowanceTrxStatus.state > 0
+        }
+      >
+        <TxPopup
+          txCase={
+            allowanceTrxStatus?.state
+              ? allowanceTrxStatus?.state
+              : depositTrxStatus?.state
+          }
+          hash={depositTrxStatus?.hash}
+          resetPopup={handleModalClose}
+        />
+      </PopupLayout>
       {step === 0 && (
         <Container>
           <Box>
@@ -818,9 +868,11 @@ function CreateOrder() {
                           style={{ fontWeight: 600 }}
                           color={"#04A56D"}
                         >
-                          82.21{" "}
+                          {orderType === "buy"
+                            ? buyMarketPrice?.current
+                            : sellMarketPrice?.current}
                           <span style={{ fontSize: 14, paddingLeft: 2 }}>
-                            INR
+                            {selectedFiat?.fiat}
                           </span>
                         </Typography>
                       </Box>
@@ -835,7 +887,9 @@ function CreateOrder() {
                           color={"#757575"}
                           style={{ fontWeight: 500 }}
                         >
-                          Highest Market Price
+                          {orderType === "sell"
+                            ? "Highest Market Price"
+                            : "Lowest Market Price"}
                         </Typography>
                         <Typography
                           variant="body1"
@@ -843,9 +897,11 @@ function CreateOrder() {
                           fontSize={22}
                           style={{ fontWeight: 600 }}
                         >
-                          89.21{" "}
+                          {orderType === "buy"
+                            ? buyMarketPrice?.allTime
+                            : sellMarketPrice?.allTime}
                           <span style={{ fontSize: 14, paddingLeft: 2 }}>
-                            INR
+                            {selectedFiat?.fiat}
                           </span>
                         </Typography>
                       </Box>
@@ -866,6 +922,8 @@ function CreateOrder() {
                     </Typography>
                     <TextareaAutosize
                       type="text"
+                      value={remarks}
+                      onChange={(e) => setRemarks(e.target.value)}
                       placeholder="Enter your message for seller"
                       style={{
                         width: "80%",
@@ -1246,58 +1304,78 @@ function CreateOrder() {
                       color={"#778090"}
                       lineHeight={1.8}
                     >
-                      {""}
+                      {remarks}
                     </Typography>
                   </Box>
                 </Grid>
               </Grid>
 
-              <div className="text-center mt-4 mb-2">
-                {orderType === "sell" && (
-                  <>
-                    <div>
-                      Your deposits:{" "}
-                      {fromWei(userDeposit, selectedToken.decimals)}
-                    </div>
-                    {!isSufficientDeposits && (
-                      <Button
-                        onClick={handleDeposit}
-                        style={{
-                          borderRadius: 10,
-                          background: "#6A55EA",
-                          padding: "9px 35px 9px 35px",
-                          color: "white",
-                          marginRight: 20,
-                        }}
-                      >
-                        {!allowance
-                          ? `Approve ${selectedToken?.symbol}`
-                          : `Deposit ${selectedToken?.symbol}`}
-                      </Button>
-                    )}
-                  </>
-                )}
+              <div className="text-center">
+                {orderType === "sell" &&
+                  " Your deposits: " +
+                    fromWei(userAvailableDeposits, selectedToken.decimals)}
+              </div>
 
+              <div className="text-center mt-4 mb-2">
                 <Button
-                  onClick={submitOrder}
+                  onClick={() => setStep(0)}
                   style={{
                     borderRadius: 10,
-                    background: isSubmitOrderDisabled ? "#FFFFF" : "#6A55EA",
+                    background: "#F5F5F5",
+                    color: "black",
+                    width: 180,
+                    // fontWeight: 600,
+
                     padding: "9px 35px 9px 35px",
-                    color: isSubmitOrderDisabled ? "black" : "white",
+                    marginRight: 20,
                   }}
-                  disabled={isSubmitOrderDisabled}
                 >
-                  Submit Order
+                  Cancel
                 </Button>
+
+                {orderType === "sell" && !isSufficientDeposits ? (
+                  <>
+                    <Button
+                      onClick={handleDeposit}
+                      style={{
+                        borderRadius: 10,
+                        background: "#6A55EA",
+                        padding: "9px 35px 9px 35px",
+                        color: "white",
+
+                        width: 180,
+                      }}
+                    >
+                      {!allowance
+                        ? `Approve ${selectedToken?.symbol}`
+                        : `Deposit ${selectedToken?.symbol}`}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={submitOrder}
+                    style={{
+                      borderRadius: 10,
+                      background: isSubmitOrderDisabled ? "#FFFFF" : "#6A55EA",
+                      padding: "9px 35px 9px 35px",
+                      color: isSubmitOrderDisabled ? "black" : "white",
+                    }}
+                    disabled={isSubmitOrderDisabled}
+                  >
+                    Submit Order
+                  </Button>
+                )}
+              </div>
+
+              <div style={{ color: "red", textAlign: "center" }}>
                 {!isSufficientDeposits &&
                   orderType === "sell" &&
                   `Deposit ${fromWei(
                     depositsNeeded,
                     selectedToken?.decimals
-                  )}  ${selectedToken?.symbol}  more   to create sell order`}
+                  )}  ${selectedToken?.symbol}   to create sell order`}
+                {error}
               </div>
-              <div style={{ color: "red", textAlign: "center" }}>{error}</div>
             </div>
 
             <HowItWorks />

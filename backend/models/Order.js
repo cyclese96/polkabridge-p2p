@@ -51,8 +51,9 @@ const OrderSchema = new Schema({
     required: true,
   },
   order_status: {
+    // active, fullfilled, cancelled
     type: String,
-    default: "submitted", // submitted / active / completed / cancelled
+    required: true,
   },
   payment_options: {
     // payment for buy/sell orders

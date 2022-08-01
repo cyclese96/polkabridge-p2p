@@ -161,16 +161,50 @@ export const verifyDeposit = async (orderId: string, authToken: string) => {
 };
 
 // token deposts used in all sell orders
-export const fetchUserTotalActiveDeposits = async (authToken: string) => {
+export const fetchUserTotalActiveDeposits = async (
+  token_id: string | undefined,
+  authToken: string
+) => {
   try {
     let response;
-
+    console.log("token address", token_id);
     response = await axios.get(
-      `${BASE_API_ENDPOINT}/order-apis/v1/active-deposits`,
+      `${BASE_API_ENDPOINT}/order-apis/v1/active-deposits/${token_id}`,
       { headers: { ...globalHeaders, "x-auth-token": authToken } }
     );
 
     return { status: response?.status, data: response?.data };
+  } catch (error: any) {
+    console.log("fetchUserTotalActiveDeposits ", { error });
+    return {
+      status: error?.response?.status,
+      message: error?.response?.data?.message,
+    };
+  }
+};
+
+//  fetch current buy / sell order highest market price
+export const fetchMarketPrice = async (
+  orderType: string,
+  tokenId: string,
+  fiatId: string,
+  authToken: string
+) => {
+  try {
+    const response = await axios.get(
+      `${BASE_API_ENDPOINT}/order-apis/v1/current-market-price/${orderType}/${tokenId}/${fiatId}`,
+      { headers: { ...globalHeaders, "x-auth-token": authToken } }
+    );
+
+    const data = await response.data;
+
+    return {
+      status: response?.status,
+      data: {
+        current_price: data?.current_order?.order_unit_price,
+        all_time_price: data?.all_time_order?.order_unit_price,
+      },
+    };
   } catch (error: any) {
     console.log("fetchUserTrades ", { error });
     return {

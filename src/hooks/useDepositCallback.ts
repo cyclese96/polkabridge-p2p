@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSingleCallResult } from "../state/multicall/hooks";
-import { toWei } from "../utils/helper";
 import { fetchUserTotalActiveDeposits } from "../utils/httpCalls";
 import { TransactionStatus, Token, TransactionState } from "../utils/interface";
 import useActiveWeb3React from "./useActiveWeb3React";
-import useBlockNumber from "./useBlockNumber";
+import useBlockNumber, { useFastForwardBlockNumber } from "./useBlockNumber";
 import { useP2pContract } from "./useContract";
 import BigNumber from "bignumber.js";
 
 export function useDepositCallback(
-  token?: Token
+  token?: Token,
+  token_id?: string
 ): [() => {}, () => {}, () => void, TransactionStatus, string] {
   const { library, account } = useActiveWeb3React();
   const p2pContract = useP2pContract();
@@ -22,6 +22,7 @@ export function useDepositCallback(
   const [data, setData] = useState<TransactionStatus>(initialState);
   const [activeDeposits, setActiveDeposits] = useState("0");
   const blockNumber = useBlockNumber();
+  const fastFarwardBlockNumber = useFastForwardBlockNumber();
   const userAuth = useSelector((state: any) => state?.user);
   const [loading, setLoading] = useState(false);
 
@@ -95,16 +96,21 @@ export function useDepositCallback(
   }, []);
 
   useEffect(() => {
-    async function fechData() {
-      if (userAuth?.jwtToken) {
-        const res = await fetchUserTotalActiveDeposits(userAuth?.jwtToken);
+    if (!token_id || !userAuth?.jwtToken) {
+      return;
+    }
 
-        setActiveDeposits(res.data?.total_active_deposits);
-      }
+    async function fechData() {
+      const res = await fetchUserTotalActiveDeposits(
+        token_id,
+        userAuth?.jwtToken
+      );
+
+      setActiveDeposits(res.data?.total_active_deposits);
     }
 
     fechData();
-  }, [userAuth, blockNumber]);
+  }, [userAuth, blockNumber, token_id]);
 
   useEffect(() => {
     if (!data?.hash) {
@@ -123,6 +129,7 @@ export function useDepositCallback(
       .then((res) => {
         if (res?.blockHash && res?.blockNumber) {
           setData({ ...data, status: TransactionState.COMPLETED, state: 3 });
+          fastFarwardBlockNumber(res?.blockNumber);
         }
       })
       .catch((err) => {

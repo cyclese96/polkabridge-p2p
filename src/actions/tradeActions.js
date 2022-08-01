@@ -65,7 +65,7 @@ export const getUserTrades =
     });
   };
 
-export const getUserTradeById = (authToken, tradeId) => async (dispatch) => {
+export const getUserTradeById = (tradeId, authToken) => async (dispatch) => {
   dispatch({ type: FETCH_TRADE_LOADING, payload: true });
 
   const result = await fetchUserTradeById(tradeId, authToken);

@@ -5,9 +5,21 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import HowItWorks from "../../../common/HowItWorks";
 import { getOrderDetailsById } from "../../../actions/orderActions";
 import { useDispatch, useSelector } from "react-redux";
-import { fromWei, toWei } from "../../../utils/helper";
+import {
+  depositFee,
+  formatCurrency,
+  fromWei,
+  tokenAmountAfterFee,
+  tokenAmountWithFee,
+  toWei,
+} from "../../../utils/helper";
 import BigNumber from "bignumber.js";
-import { startOrderTrade } from "../../../actions/tradeActions";
+import { useDepositCallback } from "../../../hooks/useDepositCallback";
+import { ALLOWANCE_AMOUNT } from "../../../constants";
+import { useTokenAllowance } from "../../../hooks/useAllowance";
+import TxPopup from "../../../common/popups/TxPopup";
+import PopupLayout from "../../../common/popups/PopupLayout";
+import { createTrade } from "../../../utils/httpCalls/orderTradeCalls";
 
 const useStyles = makeStyles((theme) => ({
   background: {
@@ -162,6 +174,14 @@ function OrderSummary() {
 
   const currentUserAuth = useSelector((state) => state?.user?.jwtToken);
 
+  const selectedToken = useMemo(() => {
+    if (!order?._id) {
+      return null;
+    }
+
+    return order?.token;
+  }, [order]);
+
   useEffect(() => {
     async function asyncFn() {
       if (order_id && currentUserAuth) {
@@ -238,32 +258,122 @@ function OrderSummary() {
     (state) => state?.userTrade?.createTradeLoading
   );
 
-  const handleTrade = useCallback(() => {
-    if (!tradeType) {
+  const [
+    allowance,
+    confirmAllowance,
+    allowanceTrxStatus,
+    resetAllwanceTrxState,
+  ] = useTokenAllowance(selectedToken);
+
+  const [
+    depositTokens,
+    withdrawTokens,
+    resetTrxState,
+    depositTrxStatus,
+    userAvailableDeposits,
+  ] = useDepositCallback(selectedToken, order?.token?._id);
+
+  const depositsNeeded = useMemo(() => {
+    // deposit needed = tokenAmount - available deposits
+
+    const _tokenAmt = toWei(tokenInput, selectedToken?.decimals);
+    const _tokenAmtAfterFee = tokenAmountAfterFee(_tokenAmt, selectedToken);
+
+    if (new BigNumber(userAvailableDeposits).gte(_tokenAmt)) {
+      return "0";
+    }
+
+    const _depositNeeded = new BigNumber(_tokenAmt)
+      .minus(!userAvailableDeposits ? "0" : userAvailableDeposits)
+      ?.toString();
+
+    const _depositNeededWithFee = tokenAmountWithFee(
+      _depositNeeded,
+      selectedToken
+    );
+
+    return _depositNeededWithFee?.toString();
+  }, [userAvailableDeposits, tokenInput, selectedToken]);
+
+  const isSufficientDeposits = useMemo(() => {
+    return new BigNumber(depositsNeeded).eq(0);
+  }, [depositsNeeded]);
+
+  const handleTrade = useCallback(async () => {
+    if (
+      !tradeType ||
+      !currentUserAuth ||
+      !parsedTokenInput ||
+      !parsedFiatInput
+    ) {
+      alert("missing input");
       return;
     }
 
     const tradeInput = {
-      orderId: order_id,
+      orderId: order?._id,
       tokenAmount: toWei(parsedTokenInput, order?.token?.decimals),
       fiatAmount: parsedFiatInput,
     };
 
-    dispatch(startOrderTrade(currentUserAuth, tradeType, tradeInput));
+    const requestBody = {
+      order_id: tradeInput?.orderId,
+      token_amount: tradeInput?.tokenAmount,
+      fiat_amount: tradeInput?.fiatAmount,
+    };
 
-    navigate(`/order-waiting/${order_id}`);
+    const result = await createTrade(tradeType, requestBody, currentUserAuth);
+    console.log("result", result);
+    if (result?.status !== 201) {
+      // todo handle error
+      alert("something went wrong while creating trade");
+      return;
+    }
+
+    const tradeTrxId = result?.data?._id;
+
+    navigate(`/order-waiting/${tradeTrxId}`);
   }, [currentUserAuth, tradeType, order, parsedTokenInput, parsedFiatInput]);
+
+  const handleDeposit = useCallback(() => {
+    if (!allowance) {
+      confirmAllowance(ALLOWANCE_AMOUNT);
+    } else {
+      depositTokens(depositsNeeded);
+    }
+  }, [depositsNeeded, depositTokens, confirmAllowance, allowance]);
 
   const handleOnCancelTrade = useCallback(() => {
     setFiatInput("");
+    navigate(`/`);
   }, [tradeType, setFiatInput]);
 
   useEffect(() => {
     console.log("tradetype", tradeType);
   }, [tradeType]);
 
+  const handleModalClose = useCallback(() => {
+    resetTrxState();
+    resetAllwanceTrxState();
+  }, [resetTrxState]);
+
   return (
     <Box className={classes.background}>
+      <PopupLayout
+        popupActive={
+          depositTrxStatus?.state > 0 || allowanceTrxStatus.state > 0
+        }
+      >
+        <TxPopup
+          txCase={
+            allowanceTrxStatus?.state
+              ? allowanceTrxStatus?.state
+              : depositTrxStatus?.state
+          }
+          hash={depositTrxStatus?.hash}
+          resetPopup={handleModalClose}
+        />
+      </PopupLayout>
       <Container>
         <Box>
           <Box>
@@ -548,6 +658,43 @@ function OrderSummary() {
                       </div>
                     )}
                   </Box>
+                  {tradeType === "sell" && (
+                    <div className="d-flex justify-content-between mt-4">
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        fontWeight={500}
+                        color={"#76808F"}
+                      >
+                        Your deposits
+                      </Typography>
+
+                      <Typography
+                        textAlign="left"
+                        variant="body2"
+                        fontSize={15}
+                        fontWeight={500}
+                        color={"#76808F"}
+                      >
+                        {formatCurrency(
+                          fromWei(userAvailableDeposits, order?.token?.decimals)
+                        )}{" "}
+                        {order?.token?.symbol}
+                      </Typography>
+                    </div>
+                  )}
+
+                  <div style={{ color: "red", textAlign: "center" }}>
+                    {!isSufficientDeposits &&
+                      tradeType === "sell" &&
+                      `Deposit ${formatCurrency(
+                        fromWei(depositsNeeded, selectedToken?.decimals),
+                        false,
+                        6
+                      )}  ${selectedToken?.symbol}   to start trade`}
+                  </div>
+
                   <div className="d-flex justify-content-center mt-4">
                     <Button
                       style={{
@@ -563,7 +710,7 @@ function OrderSummary() {
                     >
                       Cancel
                     </Button>
-                    <Button
+                    {/* <Button
                       style={{
                         borderRadius: 7,
                         background: "#6A55EA",
@@ -582,8 +729,55 @@ function OrderSummary() {
                       onClick={handleTrade}
                     >
                       {tradeType} {order?.token?.symbol}
-                    </Button>
-                    <Link to={`/order-payments/${order?._id}`}></Link>
+                    </Button> */}
+
+                    {tradeType === "sell" && !isSufficientDeposits ? (
+                      <>
+                        <Button
+                          onClick={handleDeposit}
+                          style={{
+                            borderRadius: 7,
+                            background: "#6A55EA",
+
+                            color: "white",
+                            minWidth: 200,
+                            fontWeight: 600,
+                            width: "100%",
+                            marginLeft: 5,
+                          }}
+                          disabled={
+                            tokenInputError?.status ||
+                            createTradeLoading ||
+                            !order?._id
+                          }
+                        >
+                          {!allowance
+                            ? `Approve ${selectedToken?.symbol}`
+                            : `Deposit ${selectedToken?.symbol}`}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        onClick={handleTrade}
+                        style={{
+                          borderRadius: 7,
+                          background: "#6A55EA",
+
+                          color: "white",
+                          minWidth: 200,
+                          fontWeight: 600,
+                          width: "100%",
+                          marginLeft: 5,
+                        }}
+                        disabled={
+                          tokenInputError?.status ||
+                          createTradeLoading ||
+                          !order?._id
+                        }
+                      >
+                        {tradeType} {order?.token?.symbol}
+                      </Button>
+                    )}
                   </div>
                 </Grid>
               </Grid>

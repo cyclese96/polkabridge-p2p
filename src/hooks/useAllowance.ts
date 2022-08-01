@@ -10,7 +10,7 @@ import useActiveWeb3React from "./useActiveWeb3React";
 
 export function useTokenAllowance(
   token?: Token
-): [boolean, () => {}, TransactionStatus] {
+): [boolean, () => {}, TransactionStatus, () => void] {
   const tokenContract = useTokenContract(token?.address);
   const initialState: TransactionStatus = {
     hash: "",
@@ -19,7 +19,7 @@ export function useTokenAllowance(
   };
   const [data, setData] = useState(initialState);
   const blockNumber = useBlockNumber();
-  const { account, chainId } = useActiveWeb3React();
+  const { account, chainId, library } = useActiveWeb3React();
 
   const owner = account;
   const spender = P2P_ADDRESSES?.[chainId || 4];
@@ -39,21 +39,55 @@ export function useTokenAllowance(
       try {
         const _amount = toWei(tokenAmount, token?.decimals);
         console.log("allowance ", _amount);
-        setData({ ...data, status: TransactionState.WAITING });
+        setData({ ...data, status: TransactionState.WAITING, state: 1 });
         const tx = await tokenContract?.approve(spender, _amount);
 
-        setData({ ...data, hash: tx?.hash, status: TransactionState.PENDING });
+        setData({
+          ...data,
+          hash: tx?.hash,
+          status: TransactionState.PENDING,
+          state: 2,
+        });
       } catch (error) {
         console.log("confirmAllowance  ", error);
-        setData({ ...data, status: TransactionState.FAILED });
+        setData({ ...data, status: TransactionState.FAILED, state: 4 });
       }
     },
     [tokenContract, setData]
   );
 
+  const resetTrxState = useCallback(() => {
+    setData(initialState);
+  }, [setData, data]);
+
   useEffect(() => {
     setData(initialState);
   }, []);
+
+  useEffect(() => {
+    if (!data?.hash) {
+      return;
+    }
+
+    if (
+      data?.status === TransactionState.COMPLETED ||
+      data?.status === TransactionState.FAILED
+    ) {
+      return;
+    }
+
+    library
+      ?.getTransactionReceipt(data?.hash)
+      .then((res) => {
+        if (res?.blockHash && res?.blockNumber) {
+          setData({ ...data, status: TransactionState.COMPLETED, state: 3 });
+        }
+      })
+      .catch((err) => {
+        console.log("transaction failed ", err);
+        setData({ ...data, status: TransactionState.FAILED, state: 4 });
+      });
+  }, [blockNumber]);
 
   const allowanceStatus = useMemo(
     () =>
@@ -69,5 +103,5 @@ export function useTokenAllowance(
     return { status: data?.status, hash: data?.hash, state: data.state };
   }, [data]);
 
-  return [allowanceStatus, confirmAllowance, transactionStatus];
+  return [allowanceStatus, confirmAllowance, transactionStatus, resetTrxState];
 }
