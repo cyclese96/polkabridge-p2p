@@ -1,12 +1,9 @@
 import { Box, Container } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getUserTradeById,
-  getUserTradeByOrderId,
-} from "../../../actions/tradeActions";
+import { getUserTradeById } from "../../../actions/tradeActions";
 
 import OrderProgress from "./OrderProgress";
 import BuyOrderWaiting from "./BuyOrderWaiting";
@@ -186,7 +183,6 @@ function OrderWaiting() {
   );
   const authenticatedUser = useSelector((state) => state?.user);
 
-  // const order = useSelector((state) => state?.order?.order);
   const trade = useSelector((state) => state?.userTrade?.trade); // current order trade
 
   const pendingTrade = useMemo(() => {

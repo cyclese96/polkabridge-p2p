@@ -755,7 +755,7 @@ function CreateOrder() {
                           >
                             {tokenAmount * price}
                             <span style={{ fontSize: 14, paddingLeft: 4 }}>
-                              INR
+                              {selectedFiat?.fiat}
                             </span>
                           </Typography>
                         </Box>

@@ -48,11 +48,16 @@ export function useDepositCallback(
       try {
         const depositTokens = tokenAmount;
         setData({ ...data, status: TransactionState.WAITING, state: 1 });
+        console.log("deposit  token", token);
+        if (token?.symbol === "ETH") {
+          stakeRes = await p2pContract?.depositETH({ value: depositTokens });
+        } else {
+          stakeRes = await p2pContract?.depositToken(
+            token?.address,
+            depositTokens
+          );
+        }
 
-        stakeRes = await p2pContract?.depositToken(
-          token?.address,
-          depositTokens
-        );
         setData({
           ...data,
           hash: stakeRes?.hash,

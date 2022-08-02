@@ -373,6 +373,17 @@ router.get("/order-transaction/:trx_id", auth, async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Order not found" }] });
     }
 
+    // check transaction access to user
+    if (
+      ![transaction.seller?.toString(), transaction.buyer?.toString()].includes(
+        req.user.id?.toString()
+      )
+    ) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Can not access other user transactions" }] });
+    }
+
     const finalTrx = await Transaction.findById(transactionId)
       .populate("buyer")
       .populate({ path: "seller", populate: { path: "payment_options" } })
